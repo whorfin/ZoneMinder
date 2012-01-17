@@ -139,7 +139,14 @@ int main( int argc, char *argv[] )
 
     // Only do registered devices
     static char sql[ZM_SQL_SML_BUFSIZ];
+	if ( staticConfig.SERVER_HOST.empty() )
+    {
     snprintf( sql, sizeof(sql), "select distinct Device from Monitors where not isnull(Device) and Type = 'Local'" );
+	}
+	else
+    {
+    snprintf( sql, sizeof(sql), "select distinct Device from Monitors where not isnull(Device) and Type = 'Local' and serverhost='%s'", staticConfig.SERVER_HOST.c_str() );
+    }
     if ( mysql_query( &dbconn, sql ) )
     {
         Error( "Can't run query: %s", mysql_error( &dbconn ) );
@@ -166,7 +173,14 @@ int main( int argc, char *argv[] )
     // Yadda yadda
     mysql_free_result( result );
 
+	if ( staticConfig.SERVER_HOST.empty() )
+    {
     snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isnull(ControlDevice)" );
+    }
+    else
+    {
+    snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isnull(ControlDevice) AND serverhost='%s'", staticConfig.SERVER_HOST.c_str() );
+    }
     if ( mysql_query( &dbconn, sql ) )
     {
         Error( "Can't run query: %s", mysql_error( &dbconn ) );

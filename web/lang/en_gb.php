@@ -583,6 +583,7 @@ $SLANG = array(
     'SelectFormat'          => 'Select Format',
     'SelectLog'             => 'Select Log',
     'SelfIntersecting'      => 'Polygon edges must not intersect',
+    'ServerHost'            => 'Server Host',
     'SetNewBandwidth'       => 'Set New Bandwidth',
     'SetPreset'             => 'Set Preset',
     'Set'                   => 'Set',

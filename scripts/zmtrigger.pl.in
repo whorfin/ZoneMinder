@@ -299,9 +299,9 @@ sub loadMonitors
 
 	my %new_monitors = ();
 
-	my $sql = "select * from Monitors where find_in_set( Function, 'Modect,Mocord,Nodect' )";
+	my $sql = "select * from Monitors where " . ( (ZM_SERVER_HOST) ? 'ServerHost=? AND ' : '' ) . "find_in_set( Function, 'Modect,Mocord,Nodect' )";
 	my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
-	my $res = $sth->execute() or Fatal( "Can't execute: ".$sth->errstr() );
+	my $res = $sth->execute((ZM_SERVER_HOST) ? ZM_SERVER_HOST : ()) or Fatal( "Can't execute: ".$sth->errstr() );
 	while( my $monitor = $sth->fetchrow_hashref() )
 	{
 		next if ( !zmMemVerify( $monitor ) ); # Check shared memory ok
