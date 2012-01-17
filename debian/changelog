@@ -1,0 +1,291 @@
+zoneminder (1.25.0-1ubuntu7) oneiric; urgency=high
+
+  * fix build problems
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 9 Jan 2012 17:39:15 -0500
+
+zoneminder (1.25.0-1ubuntu6) oneiric; urgency=high
+
+  * use isset on the record array lookup to remove error complaint in apache logs
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 9 Jan 2012 16:34:15 -0500
+
+zoneminder (1.25.0-1ubuntu5) oneiric; urgency=low
+
+  * Add the readloop patch
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 19 Dec 2011 17:11:15 -0500
+
+zoneminder (1.25.0-1ubuntu4) oneiric; urgency=low
+
+  * Fix various things
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 19 Dec 2011 16:16:15 -0500
+
+zoneminder (1.25.0-1ubuntu3) oneiric; urgency=low
+
+  * update debian stuff to build on oneiric
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 19 Dec 2011 13:55:15 -0500
+
+zoneminder (1.24.4-9ubuntu6) oneiric; urgency=low
+
+  * update debian stuff to build on oneiric
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Sun, 13 Nov 2011 13:55:15 -0500
+
+zoneminder (1.24.4-9ubuntu5) natty; urgency=low
+
+  * Comment out the serial port line in zmtrigger.pl.  If you can't open ttyS0 then it dies.
+
+ -- Isaac Connor <iconnor@www6.internal.point-one.com>  Mon, 25 Jul 2011 12:39:15 -0400
+
+zoneminder (1.24.4-9ubuntu4) natty; urgency=low
+
+  * Add loading ServerHost in Monitor object
+
+ -- Isaac Connor <iconnor@www6.internal.point-one.com>  Mon, 25 Jul 2011 12:25:30 -0400
+
+zoneminder (1.24.4-9ubuntu3) natty; urgency=low
+
+  * Make zmc die when ServerHost changes
+  * Give an error when can't open serial port in zmtrigger.
+
+ -- Isaac Connor <iconnor@www6.internal.point-one.com>  Thu, 14 Jul 2011 13:10:37 -0400
+
+zoneminder (1.24.4-9ubuntu2) natty; urgency=low
+
+  * More ServerHost development.  zmfix and zmtrigger
+
+ -- Isaac Connor <iconnor@www6.internal.point-one.com>  Thu, 14 Jul 2011 10:06:28 -0400
+
+zoneminder (1.24.4-9ubuntu1) natty; urgency=low
+
+  * Update zmfix.cpp to only fix devices on the configured ServerHost
+
+ -- Isaac Connor <iconnor@www6.internal.point-one.com>  Wed, 13 Jul 2011 12:52:07 -0400
+
+zoneminder (1.24.4-9) natty; urgency=high
+
+  * Make Config.pm deal with ServerHost= empty config line
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 11 Jul 2011 12:11:50 -0500
+
+zoneminder (1.24.4-8) natty; urgency=high
+
+  * Alter the database to include ServerHost
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 7 Jul 2011 20:47:50 -0500
+
+zoneminder (1.24.4-7) natty; urgency=high
+
+  * Delete the line that tries to create /var/log/zm.  It breaks the build process.
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 27 Jun 2011 13:42:50 -0500
+
+zoneminder (1.24.4-6) natty; urgency=high
+
+  * Remark out the line that tries to create /var/log/zm.  It breaks the build process.
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 27 Jun 2011 13:06:50 -0500
+
+zoneminder (1.24.4-5) natty; urgency=high
+
+  * Add more build depends from depends.
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 27 Jun 2011 12:10:50 -0500
+
+zoneminder (1.24.4-4) natty; urgency=high
+
+  * Fixes.  
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 21 Jun 2011 15:06:50 -0500
+
+zoneminder (1.24.4-3) natty; urgency=high
+
+  * require Sys::Mmap, which is also now in this ppa
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 21 Jun 2011 14:06:50 -0500
+
+zoneminder (1.24.4-2) natty; urgency=high
+
+  * Fixes
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 21 Jun 2011 13:49:50 -0500
+
+zoneminder (1.24.4-1) natty; urgency=high
+
+  * Initial release of zoneminder 1.24.4
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 21 Jun 2011 09:02:50 -0500
+
+zoneminder (1.24.2-2build3) lucid; urgency=low
+
+  * Update depends we dont support php4. 
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 12 Apr 2010 09:59:30 -0400
+
+zoneminder (1.24.2-2build2) lucid; urgency=low
+
+  * Transition for libmysqlclient16. 
+
+ -- Chuck Short <zulcss@ubuntu.com>  Mon, 05 Apr 2010 20:43:59 -0400
+
+zoneminder (1.24.2-2build1) lucid; urgency=low
+
+  * rebuild for ffmpeg versioned symbols
+
+ -- Reinhard Tartler <siretart@tauware.de>  Tue, 19 Jan 2010 21:43:04 +0100
+
+zoneminder (1.24.2-2) unstable; urgency=high
+
+  * Remove custom perl parth from zmpkg.pl, fix location of manpages.
+  (closes: #551746, #553092)
+  * Fix GCC4.4 bug
+  (closes: #531717)
+  * Fix potential bug in postinst script
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Sat, 14 Nov 2009 15:02:10 +1000
+
+zoneminder (1.24.2-1) unstable; urgency=high
+
+  * Initial release of zoneminder 1.24.2
+ -- Peter Howard <pjh@northern-ridge.com.au>  Fri, 11 Sep 2009 07:02:50 +1000
+
+zoneminder (1.24.1-1) unstable; urgency=high
+
+  * Initial release of zoneminder 1.24.1, closing CVE-2008-3882,
+    CVE-2008-3881, CVE-2008-3880
+    (closes: #497640)
+  * Change syslog dependency to rsyslog.
+    (closes: #526918)
+  * Add missing perl depenency.
+  * Restore patch to disable "check for updates" by default.
+  * Removed spurious '$' in init script.
+    (closes: #486064)
+  * Change permission of zm.conf from 0600 to 0400 for CVE-2008-6755
+    (closes: #528252)
+ -- Peter Howard <pjh@northern-ridge.com.au>  Sat, 16 May 2009 07:02:50 +1000
+
+zoneminder (1.23.3-4) unstable; urgency=high
+
+  * update to get it building with latest unstable. Thanks to waldi@debian.org
+    (closes: #517569)
+ -- Peter Howard <pjh@northern-ridge.com.au>  Thu, 16 Apr 2009 01:02:50 +1000
+
+zoneminder (1.23.3-3) unstable; urgency=high
+
+  * ffmpeg confirmed  working
+    (closes: #475145)
+  * Fix upgrade problem intrudouced in 1.23.3-1
+    (closes: #481637)
+  * Include libmime-lite-perl in dependencies
+    (closes: #486312)
+ -- Peter Howard <pjh@northern-ridge.com.au>  Thu, 18 Sep 2008 01:02:50 +1000
+
+zoneminder (1.23.3-2) unstable; urgency=high
+
+  * ffmpeg finally working?
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Wed, 13 Aug 2008 01:02:50 +1000
+
+zoneminder (1.23.3-1) unstable; urgency=high
+
+  * Initial version for 1.23.3 - security fix.
+    (closes: #479034)
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Wed, 19 Mar 2008 01:02:50 +1000
+
+zoneminder (1.23.2-2) unstable; urgency=low
+
+  * Update to init.d
+    (closes: #468856)
+  * Add dependency on logging daemon
+    (closes: #471277)
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Wed, 19 Mar 2008 01:02:50 +1000
+
+zoneminder (1.23.2-1) unstable; urgency=low
+
+  * Initial version for 1.23.2
+    (closes: #464152)
+  * Zoneminder 1.23.2 upstream includes fix for GCC 4.3
+    (closes: #454980)
+  * Includes ffmpeg patch by Alexander Kushnirenko <kushnir@uni-protvino.ru>
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Sat, 01 Mar 2008 16:02:50 +1000
+
+zoneminder (1.22.3-10) unstable; urgency=low
+
+  * Fix bug introduced in -9 where perl is put under /usr/local
+    (closes: #457507)
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Mon, 24 Dec 2007 16:02:50 +1000
+
+zoneminder (1.22.3-9) unstable; urgency=low
+
+  * Starting zoneminder via init script now  invokes "zmfix -a"
+    (closes: #481637)
+  * Change apache2-mpm-prefork dependency to apache2
+  * Temp dir for export under /var/cache/zoneminder (but linked back to 
+    /usr/share/zoneminder for now)
+  * Redo use of gnutls rather than openssl for md5 hashes
+ 
+ -- Peter Howard <pjh@northern-ridge.com.au>  Mon, 10 Dec 2007 16:02:50 +1000
+
+zoneminder (1.22.3-8) unstable; urgency=low
+
+  * Build now includes libpcre3
+    (closes: #437533)
+  * "Monitor Presets" patch now applied to package during build.
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Sat, 18 Aug 2007 14:35:23 +1000
+
+zoneminder (1.22.3-7) unstable; urgency=low
+
+  * Turn off debug trace and crash dump on build
+    (closes:#414857,#414891)
+  * Additional perl libraries added in dependencies
+    (closes:#416291)
+  * Change preferred PHP version from 4 to 5
+ -- Peter Howard <pjh@northern-ridge.com.au>  Sun, 29 Jul 2007 15:11:13 +1000
+
+zoneminder (1.22.3-6) unstable; urgency=low
+
+  * Removed a similar bash only statment from zmpkg.pl
+    (closes:414882)
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Sat, 14 Apr 2007 11:46:56 +1000
+
+zoneminder (1.22.3-5) unstable; urgency=low
+
+  * Installs with "phone home" feature turned off by default, and permissions
+    on /etc/zm/zm.conf fixed (now the 0600 it s hould be)
+    (closes:415349)
+  * Removed "stupid bash-ism" on mysqld check in postinst file.
+  
+ -- Peter Howard <pjh@northern-ridge.com.au>  Fri,  6 Apr 2007 15:50:00 +1000
+
+zoneminder (1.22.3-4) unstable; urgency=low
+
+  * Put libmysqlclient-15-dev in front of -14-dev so sbuild works
+    (closes: #414410)
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Mon, 12 Mar 2007 11:38:56 +1100
+
+zoneminder (1.22.3-3) unstable; urgency=low
+
+  * Clean up of postinstall, postrm ; user "zm" definitely was a mistake
+  * Also in postinstall: check and start MySQL if it's not running.
+  * init.d script now checks if zoneminder isn't running and still returns 0
+    (which helps uninstalling)
+  * Addition of php5 dependency options as well as php4.
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Mon, 26 Feb 2007 10:40:52 +1100
+
+zoneminder (1.22.3-2) unstable; urgency=low
+
+  * Added zmuser in the mysql creation; this should fix the install problem
+    for people, but needs to be cleaned up (in -3)
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Fri, 16 Feb 2007 14:16:03 +1100
+
+zoneminder (1.22.3-1) unstable; urgency=low
+
+  * Initial Version. (closes: #248393)
+  * Patched out use of openssl; uses gnutls instead for MD5 hashes.
+  * Removed MakeMaker-inserted Perl licensing (with authors permission) in
+    various scripts; replaced with GPL.
+
+ -- Peter Howard <pjh@northern-ridge.com.au>  Wed,  7 Feb 2007 14:09:01 +1100

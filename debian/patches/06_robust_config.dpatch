@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 06_robust_config.dpatch by  <iconnor@www6.internal.point-one.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad '--exclude=CVS' '--exclude=.svn' '--exclude=.git' '--exclude=.arch' '--exclude=.hg' '--exclude=_darcs' '--exclude=.bzr' zm~/scripts/ZoneMinder/lib/ZoneMinder/Config.pm.in zm/scripts/ZoneMinder/lib/ZoneMinder/Config.pm.in
+--- zm~/scripts/ZoneMinder/lib/ZoneMinder/Config.pm.in	2011-12-19 15:21:30.000000000 -0500
++++ zm/scripts/ZoneMinder/lib/ZoneMinder/Config.pm.in	2011-12-19 15:52:47.403721469 -0500
+@@ -78,7 +78,8 @@
+ 	{
+ 		next if ( $str =~ /^\s*$/ );
+ 		next if ( $str =~ /^\s*#/ );
+-        my ( $name, $value ) = $str =~ /^\s*([^=\s]+)\s*=\s*(.+?)\s*$/;
++        my ( $name, $value ) = $str =~ /^\s*([^=\s]+)\s*=\s*(.*?)\s*$/;
++		next if ! $name;
+ 		$name =~ tr/a-z/A-Z/;
+ 		*{$name} = sub { $value };
+ 		push( @EXPORT_CONFIG, $name );

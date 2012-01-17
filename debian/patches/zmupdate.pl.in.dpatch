@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## zmupdate.pl.in.dpatch by Isaac Connor <iconnor@connortechnology.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad '--exclude=CVS' '--exclude=.svn' '--exclude=.git' '--exclude=.arch' '--exclude=.hg' '--exclude=_darcs' '--exclude=.bzr' zm~/scripts/zmupdate.pl.in zm/scripts/zmupdate.pl.in
+--- zm~/scripts/zmupdate.pl.in	2011-12-19 16:12:05.000000000 -0500
++++ zm/scripts/zmupdate.pl.in	2011-12-19 16:14:22.925060096 -0500
+@@ -338,7 +338,7 @@
+     if ( ZM_VERSION eq $version )
+     {
+         print( "\nDatabase already at version $version, update aborted.\n\n" );
+-        exit( -1 );
++        exit( 0 );
+     }
+ 
+     print( "\nInitiating database upgrade to version ".ZM_VERSION." from version $version\n" );

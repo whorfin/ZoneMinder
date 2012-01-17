@@ -1,0 +1,30 @@
+This package was originally debianized by matrix <matrix@cecilia> on
+Mon,  7 Mar 2005 02:07:57 -0500.
+
+It was re-done for submission to the Debian project by Peter Howard
+<pjh@northern-ridge.com.au> on Fri, 8 Dec 2006 10:19:43 +1100
+
+It was downloaded from http://www.zoneminder.com/downloads
+
+Copyright:
+
+Copyright 2002 Philip Coombes <philip.coombes@zoneminder.com>
+
+License:
+
+This package is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This package is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this package; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+On Debian GNU/Linux systems, the text of the GPL can be found in
+/usr/share/common-licenses/GPL.

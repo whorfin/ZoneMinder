@@ -1,0 +1,202 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 01_vendor_perl.dpatch by  <iconnor@security2.internal.point-one.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad '--exclude=CVS' '--exclude=.svn' '--exclude=.git' '--exclude=.arch' '--exclude=.hg' '--exclude=_darcs' '--exclude=.bzr' zoneminder-1.24.4~/src/zm_monitor.cpp zoneminder-1.24.4/src/zm_monitor.cpp
+--- zoneminder-1.24.4~/src/zm_monitor.cpp	2011-03-02 07:23:10.000000000 -0500
++++ zoneminder-1.24.4/src/zm_monitor.cpp	2011-07-25 12:13:20.595259022 -0400
+@@ -239,6 +239,7 @@
+ Monitor::Monitor(
+     int p_id,
+     const char *p_name,
++    const char *p_serverhost,
+     int p_function,
+     bool p_enabled,
+     const char *p_linked_monitors,
+@@ -293,6 +294,7 @@
+     zones( p_zones )
+ {
+     strncpy( name, p_name, sizeof(name) );
++    strncpy( serverhost, p_serverhost, sizeof(serverhost) );
+ 
+     strncpy( event_prefix, p_event_prefix, sizeof(event_prefix) );
+     strncpy( label_format, p_label_format, sizeof(label_format) );
+@@ -1733,11 +1735,11 @@
+     static char sql[ZM_SQL_MED_BUFSIZ];
+     if ( !device[0] )
+     {
+-        strncpy( sql, "select Id, Name, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, Method, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion, SignalCheckColour from Monitors where Function != 'None' and Type = 'Local' order by Device, Channel", sizeof(sql) );
++        strncpy( sql, "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, Method, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion, SignalCheckColour from Monitors where Function != 'None' and Type = 'Local' order by Device, Channel", sizeof(sql) );
+     }
+     else
+     {
+-        snprintf( sql, sizeof(sql), "select Id, Name, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, Method, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion, SignalCheckColour from Monitors where Function != 'None' and Type = 'Local' and Device = '%s' order by Channel", device );
++        snprintf( sql, sizeof(sql), "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, Method, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion, SignalCheckColour from Monitors where Function != 'None' and Type = 'Local' and Device = '%s' order by Channel", device );
+     }
+     if ( mysql_query( &dbconn, sql ) )
+     {
+@@ -1761,6 +1763,7 @@
+ 
+         int id = atoi(dbrow[col]); col++;
+         const char *name = dbrow[col]; col++;
++		const char *serverhost = dbrow[col]; col++;
+         int function = atoi(dbrow[col]); col++;
+         int enabled = atoi(dbrow[col]); col++;
+         const char *linked_monitors = dbrow[col]; col++;
+@@ -1827,6 +1830,7 @@
+         monitors[i] = new Monitor(
+             id,
+             name,
++			serverhost,
+             function,
+             enabled,
+             linked_monitors,
+@@ -1873,11 +1877,11 @@
+     static char sql[ZM_SQL_MED_BUFSIZ];
+     if ( !protocol )
+     {
+-        strncpy( sql, "select Id, Name, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Remote'", sizeof(sql) );
++        strncpy( sql, "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Remote'", sizeof(sql) );
+     }
+     else
+     {
+-        snprintf( sql, sizeof(sql), "select Id, Name, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Remote' and Protocol = '%s' and Host = '%s' and Port = '%s' and Path = '%s'", protocol, host, port, path );
++        snprintf( sql, sizeof(sql), "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Remote' and Protocol = '%s' and Host = '%s' and Port = '%s' and Path = '%s'", protocol, host, port, path );
+     }
+     if ( mysql_query( &dbconn, sql ) )
+     {
+@@ -1901,6 +1905,7 @@
+ 
+         int id = atoi(dbrow[col]); col++;
+         std::string name = dbrow[col]; col++;
++		std::string serverhost = dbrow[col]; col++;
+         int function = atoi(dbrow[col]); col++;
+         int enabled = atoi(dbrow[col]); col++;
+         const char *linked_monitors = dbrow[col]; col++;
+@@ -1990,6 +1995,7 @@
+         monitors[i] = new Monitor(
+             id,
+             name.c_str(),
++			serverhost.c_str(),
+             function,
+             enabled,
+             linked_monitors,
+@@ -2035,11 +2041,11 @@
+     static char sql[ZM_SQL_MED_BUFSIZ];
+     if ( !file[0] )
+     {
+-        strncpy( sql, "select Id, Name, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'File'", sizeof(sql) );
++        strncpy( sql, "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'File'", sizeof(sql) );
+     }
+     else
+     {
+-        snprintf( sql, sizeof(sql), "select Id, Name, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'File' and Path = '%s'", file );
++        snprintf( sql, sizeof(sql), "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'File' and Path = '%s'", file );
+     }
+     if ( mysql_query( &dbconn, sql ) )
+     {
+@@ -2063,6 +2069,7 @@
+ 
+         int id = atoi(dbrow[col]); col++;
+         const char *name = dbrow[col]; col++;
++        const char *serverhost = dbrow[col]; col++;
+         int function = atoi(dbrow[col]); col++;
+         int enabled = atoi(dbrow[col]); col++;
+         const char *linked_monitors = dbrow[col]; col++;
+@@ -2117,6 +2124,7 @@
+         monitors[i] = new Monitor(
+             id,
+             name,
++			serverhost,
+             function,
+             enabled,
+             linked_monitors,
+@@ -2163,11 +2171,11 @@
+     static char sql[ZM_SQL_MED_BUFSIZ];
+     if ( !file[0] )
+     {
+-        strncpy( sql, "select Id, Name, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Ffmpeg'", sizeof(sql) );
++        strncpy( sql, "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Ffmpeg'", sizeof(sql) );
+     }
+     else
+     {
+-        snprintf( sql, sizeof(sql), "select Id, Name, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Ffmpeg' and Path = '%s'", file );
++        snprintf( sql, sizeof(sql), "select Id, Name, ServerHost, Function+0, Enabled, LinkedMonitors, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion from Monitors where Function != 'None' and Type = 'Ffmpeg' and Path = '%s'", file );
+     }
+     if ( mysql_query( &dbconn, sql ) )
+     {
+@@ -2191,6 +2199,7 @@
+ 
+         int id = atoi(dbrow[col]); col++;
+         const char *name = dbrow[col]; col++;
++		const char *serverhost = dbrow[col]; col++;
+         int function = atoi(dbrow[col]); col++;
+         int enabled = atoi(dbrow[col]); col++;
+         const char *linked_monitors = dbrow[col]; col++;
+@@ -2245,6 +2254,7 @@
+         monitors[i] = new Monitor(
+             id,
+             name,
++            serverhost,
+             function,
+             enabled,
+             linked_monitors,
+@@ -2289,7 +2299,7 @@
+ Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
+ {
+     static char sql[ZM_SQL_MED_BUFSIZ];
+-    snprintf( sql, sizeof(sql), "select Id, Name, Type, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, Protocol, Method, Host, Port, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion, SignalCheckColour from Monitors where Id = %d", id );
++    snprintf( sql, sizeof(sql), "select Id, Name, ServerHost, Type, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, Protocol, Method, Host, Port, Path, Width, Height, Palette, Orientation+0, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion, SignalCheckColour from Monitors where Id = %d", id );
+     if ( mysql_query( &dbconn, sql ) )
+     {
+         Error( "Can't run query: %s", mysql_error( &dbconn ) );
+@@ -2311,6 +2321,7 @@
+ 
+         int id = atoi(dbrow[col]); col++;
+         std::string name = dbrow[col]; col++;
++        std::string serverhost = dbrow[col]; col++;
+         std::string type = dbrow[col]; col++;
+         int function = atoi(dbrow[col]); col++;
+         int enabled = atoi(dbrow[col]); col++;
+@@ -2474,6 +2485,7 @@
+         monitor = new Monitor(
+             id,
+             name.c_str(),
++            serverhost.c_str(),
+             function,
+             enabled,
+             linked_monitors.c_str(),
+diff -urNad '--exclude=CVS' '--exclude=.svn' '--exclude=.git' '--exclude=.arch' '--exclude=.hg' '--exclude=_darcs' '--exclude=.bzr' zoneminder-1.24.4~/src/zm_monitor.h zoneminder-1.24.4/src/zm_monitor.h
+--- zoneminder-1.24.4~/src/zm_monitor.h	2011-02-15 16:59:06.000000000 -0500
++++ zoneminder-1.24.4/src/zm_monitor.h	2011-07-25 12:13:20.595259022 -0400
+@@ -182,6 +182,7 @@
+ 	// These are read from the DB and thereafter remain unchanged
+ 	unsigned int	id;
+ 	char			name[64];
++    char            serverhost[64];         // Hostname of the server that will be capturing for this monitor
+ 	Function		function;			    // What the monitor is doing
+ 	bool			enabled;			    // Whether the monitor is enabled or asleep
+ 	unsigned int    width;				    // Normally the same as the camera, but not if partly rotated
+@@ -253,7 +254,7 @@
+ 	MonitorLink		**linked_monitors;
+ 
+ public:
+-	Monitor( int p_id, const char *p_name, int p_function, bool p_enabled, const char *p_linked_monitors, Camera *p_camera, int p_orientation, const char *p_event_prefix, const char *p_label_format, const Coord &p_label_coord, int p_image_buffer_count, int p_warmup_count, int p_pre_event_count, int p_post_event_count, int p_stream_replay_buffer, int p_alarm_frame_count, int p_section_length, int p_frame_skip, int p_capture_delay, int p_alarm_capture_delay, int p_fps_report_interval, int p_ref_blend_perc, bool p_track_motion, Rgb p_signal_check_colour, Purpose p_purpose, int p_n_zones=0, Zone *p_zones[]=0 );
++	Monitor( int p_id, const char *p_name, const char *p_serverhost, int p_function, bool p_enabled, const char *p_linked_monitors, Camera *p_camera, int p_orientation, const char *p_event_prefix, const char *p_label_format, const Coord &p_label_coord, int p_image_buffer_count, int p_warmup_count, int p_pre_event_count, int p_post_event_count, int p_stream_replay_buffer, int p_alarm_frame_count, int p_section_length, int p_frame_skip, int p_capture_delay, int p_alarm_capture_delay, int p_fps_report_interval, int p_ref_blend_perc, bool p_track_motion, Rgb p_signal_check_colour, Purpose p_purpose, int p_n_zones=0, Zone *p_zones[]=0 );
+ 	~Monitor();
+ 
+ 	void AddZones( int p_n_zones, Zone *p_zones[] );
+@@ -271,6 +272,10 @@
+ 	{
+ 		return( name );
+ 	}
++	inline const char *ServerHost() const
++	{
++		return( serverhost );
++	}
+ 	inline Function GetFunction() const
+ 	{
+ 		return( function );
