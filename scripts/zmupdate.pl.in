@@ -967,9 +967,16 @@ if ( $version )
     }
     if ( $cascade || $version eq "1.25.0" )
     {
-        # Patch the database
-        patchDB( $dbh, "1.25.0" );
-        $cascade = !undef;
+        my $sth = $dbh->prepare_cached( 'select * from Monitors LIMIT 0,1' );
+        die "Error: " . $dbh->errstr . "\n" unless ($sth);
+        die "Error: " . $sth->errstr . "\n" unless ($sth->execute);
+
+        my $columns = $sth->{'NAME'};
+        if ( ! grep 'Colours', @$columns ) {
+            $dbh->do(q{alter table Monitors add column `Colours` tinyint(3) unsigned NOT NULL default '1' after `Height`;});
+        } # end if
+
+        $cascade = !undef if ! $dbh->errstr;
     }
     if ( $cascade )
     {
