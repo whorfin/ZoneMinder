@@ -1,3 +1,9 @@
+zoneminder (1.25.0-1ubuntu9) oneiric; urgency=high
+
+  * add db updates
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 17 Jan 2012 12:22:15 -0500
+
 zoneminder (1.25.0-1ubuntu8) oneiric; urgency=high
 
   * merge in mastertheknife performance stuff, plus mitches stuf
