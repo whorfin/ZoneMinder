@@ -78,7 +78,8 @@ BEGIN
 	{
 		next if ( $str =~ /^\s*$/ );
 		next if ( $str =~ /^\s*#/ );
-        my ( $name, $value ) = $str =~ /^\s*([^=\s]+)\s*=\s*(.+?)\s*$/;
+        my ( $name, $value ) = $str =~ /^\s*([^=\s]+)\s*=\s*(.*?)\s*$/;
+		next if ! $name;
 		$name =~ tr/a-z/A-Z/;
 		*{$name} = sub { $value };
 		push( @EXPORT_CONFIG, $name );
