@@ -68,6 +68,7 @@ protected:
     int scale;
     int zoom;
     double maxfps;
+	double original_maxfps;
     int bitrate;
     unsigned short x, y;
 
@@ -118,6 +119,7 @@ public:
         scale = DEFAULT_SCALE;
         zoom = DEFAULT_ZOOM;
         maxfps = DEFAULT_MAXFPS;
+		original_maxfps = maxfps;
         bitrate = DEFAULT_BITRATE;
 
         paused = false;
@@ -161,6 +163,7 @@ public:
 	void setStreamMaxFPS( double p_maxfps )
     {
         maxfps = p_maxfps;
+		original_maxfps = maxfps;
     }
 	void setStreamBitrate( int p_bitrate )
     {
