@@ -236,6 +236,10 @@ int FfmpegCamera::Capture( Image &image )
         av_free_packet( &packet );
     }
     return (0);
+	if (frameComplete)
+		return ( 0 );
+	else
+	    return( -1 );
 }
 
 int FfmpegCamera::PostCapture()

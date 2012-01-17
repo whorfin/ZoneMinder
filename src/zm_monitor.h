@@ -417,6 +417,7 @@ private:
     int temp_image_buffer_count;
     int temp_read_index;
     int temp_write_index;
+	double last_reduction_time;
 
 protected:
     time_t ttl;

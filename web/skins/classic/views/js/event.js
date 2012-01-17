@@ -663,7 +663,7 @@ function showStills()
 
 function showFrameStats()
 {
-    var fid = $('eventImageNo').get('text');
+    var fid = $('eventImageNo').innerHTML;
     createPopup( '?view=stats&eid='+eventData.Id+'&fid='+fid, 'zmStats', 'stats', eventData.Width, eventData.Height );
 }
 

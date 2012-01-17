@@ -209,9 +209,10 @@
 #define ZM_EYEZM_H264_DEFAULT_EVBR 205
 #define ZM_EYEZM_H264_TIMEOUT 206
 #define ZM_EYEZM_SEG_DURATION 207
+#define ZM_REDUCTION_FPS_RESET_TIME 208
 
 
-#define ZM_MAX_CFG_ID 207
+#define ZM_MAX_CFG_ID 208
 
 #define ZM_CFG_DECLARE_LIST \
 	const char *lang_default;\
@@ -422,6 +423,7 @@
 	const char *eyezm_h264_default_evbr;\
 	const char *eyezm_h264_timeout;\
 	const char *eyezm_seg_duration;\
+	int reduction_fps_reset_time;\
 
 
 #define ZM_CFG_ASSIGN_LIST \
@@ -633,5 +635,6 @@
 	eyezm_h264_default_evbr = (const char *)config.Item( ZM_EYEZM_H264_DEFAULT_EVBR );\
 	eyezm_h264_timeout = (const char *)config.Item( ZM_EYEZM_H264_TIMEOUT );\
 	eyezm_seg_duration = (const char *)config.Item( ZM_EYEZM_SEG_DURATION );\
+	reduction_fps_reset_time = (int)config.Item( ZM_REDUCTION_FPS_RESET_TIME );
 
 

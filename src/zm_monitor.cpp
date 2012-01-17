@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <arpa/inet.h>
 #include <glob.h>
 
@@ -3349,6 +3350,7 @@ bool MonitorStream::sendFrame( const char *filepath, struct timeval *timestamp )
         int frameSendTime = tvDiffMsec( frameStartTime, frameEndTime );
         if ( frameSendTime > 1000/maxfps )
         {
+			last_reduction_time = TV_2_FLOAT(frameEndTime);
             maxfps /= 2;
             Error( "Frame send time %d msec too slow, throttling maxfps to %.2f", frameSendTime, maxfps );
         }
@@ -3432,9 +3434,17 @@ bool MonitorStream::sendFrame( Image *image, struct timeval *timestamp )
         int frameSendTime = tvDiffMsec( frameStartTime, frameEndTime );
         if ( frameSendTime > 1000/maxfps )
         {
+			last_reduction_time = TV_2_FLOAT(frameEndTime);
             maxfps /= 1.5;
             Error( "Frame send time %d msec too slow, throttling maxfps to %.2f", frameSendTime, maxfps );
         }
+	if (config.reduction_fps_reset_time != 0 && last_reduction_time != -1.0 && TV_2_FLOAT(frameEndTime) - last_reduction_time > config.reduction_fps_reset_time)
+		{
+			Debug(2, "Reset FPS to original maxfps of %f from current of %f",original_maxfps, maxfps);
+			maxfps = original_maxfps;
+			last_reduction_time = -1.0;
+
+		}
     }
     last_frame_sent = TV_2_FLOAT( now );
     return( true );
@@ -3473,23 +3483,42 @@ void MonitorStream::runStream()
     char swap_path[PATH_MAX] = "";
     bool buffered_playback = false;
 
-    if ( connkey && playback_buffer > 0 )
-    {
-        Debug( 2, "Checking swap image location" );
-        Debug( 3, "Checking swap image path" );
-        strncpy( swap_path, config.path_swap, sizeof(swap_path) );
-        if ( checkSwapPath( swap_path, false ) )
-        {
-            snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
-            if ( checkSwapPath( swap_path, true ) )
-            {
-                snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
-                if ( checkSwapPath( swap_path, true ) )
-                {
-                    buffered_playback = true;
-                }
-            }
-        }
+	int lock_fd = 0;
+	last_reduction_time = -1;
+
+    if ( connkey ) {
+		if ( playback_buffer > 0 )
+		{
+			Debug( 2, "Checking swap image location" );
+			Debug( 3, "Checking swap image path" );
+			strncpy( swap_path, config.path_swap, sizeof(swap_path) );
+			if ( checkSwapPath( swap_path, false ) )
+			{
+				snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
+				if ( checkSwapPath( swap_path, true ) )
+				{
+					snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
+					if ( checkSwapPath( swap_path, true ) )
+					{
+						buffered_playback = true;
+					}
+				}
+			}
+		}
+
+		char sock_path_lock[PATH_MAX];
+		sock_path_lock[0] = 0;
+
+		snprintf( sock_path_lock, sizeof(sock_path_lock), "%s/zms-%06d.lock", config.path_socks, connkey);
+
+		lock_fd = open(sock_path_lock, O_CREAT|O_WRONLY, S_IRUSR | S_IWUSR);
+		if (lock_fd <= 0 || flock(lock_fd, LOCK_SH|LOCK_NB) != 0)
+		{
+			Error("Unable to lock sock lock file %s: %s", sock_path_lock, strerror(errno) );
+
+			close(lock_fd);
+			lock_fd = 0;
+		}
 
         if ( !buffered_playback )
         {
@@ -3684,7 +3713,31 @@ void MonitorStream::runStream()
             break;
         }
     }
-    if ( buffered_playback )
+	char first_lock_char = loc_sock_path[0];
+	if (lock_fd > 0)
+	{
+		loc_sock_path[0] = '\0';
+		flock(lock_fd,LOCK_UN|LOCK_NB);
+	}
+	closeComms();
+	bool is_in_use = false;
+	if (lock_fd > 0)
+	{
+		sleep(10);//wait 10 seconds for someone else to grab a lock on it
+		if (lock_fd > 0 && flock(lock_fd,LOCK_EX|LOCK_NB) == 0){
+			loc_sock_path[0] = first_lock_char;
+            unlink( loc_sock_path );
+			close(lock_fd);
+			unlink( sock_path_lock );
+		}
+		else
+		{
+			is_in_use = true;
+			Debug(3, "Unable to get lock to delete swap folder/socket, leaving it alone" );
+		}
+	}
+
+    if (! is_in_use && buffered_playback )
     {
         char swap_path[PATH_MAX] = "";
 

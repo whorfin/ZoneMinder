@@ -1862,6 +1862,15 @@ body = "ZM alarm detected - %EL% secs, %EF%/%EFA% frames, t%EST%/m%ESM%/a%ESA% s
 		category => "dynamic",
 	},
 	{
+		name => "ZM_REDUCTION_FPS_RESET_TIME",
+		default => "0",
+		description => "After how many seconds should the maxfps of a stream go back to normal after it has been throttled",
+		help => "When a stream cannot send frames as fast as requested (generally due to too slow of a connection) it will throttle it back, unfortunately if the cause of this was only temporary the FPS will never pickup again.  By setting this to a value greater than 0 it will automatically go back to the original FPS after X seconds from when the last throttle took place.",
+		type => $types{integer},
+		readonly => 0,
+		category => "image",
+	},
+	{
 		name => "ZM_EYEZM_DEBUG",
 		default => "no",
 		description => "Switch additional debugging on for eyeZm Plugin",
