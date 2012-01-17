@@ -1,0 +1,33 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 05_add_serverhost_to_db.dpatch by  <iconnor@www6.internal.point-one.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad '--exclude=CVS' '--exclude=.svn' '--exclude=.git' '--exclude=.arch' '--exclude=.hg' '--exclude=_darcs' '--exclude=.bzr' zm~/db/zm_create.sql.in zm/db/zm_create.sql.in
+--- zm~/db/zm_create.sql.in	2011-12-19 15:49:23.000000000 -0500
++++ zm/db/zm_create.sql.in	2011-12-19 15:49:41.677894205 -0500
+@@ -313,6 +313,7 @@
+ CREATE TABLE `Monitors` (
+   `Id` int(10) unsigned NOT NULL auto_increment,
+   `Name` varchar(64) NOT NULL default '',
++  `ServerHost` varchar(64) NOT NULL default '',
+   `Type` enum('Local','Remote','File','Ffmpeg') NOT NULL default 'Local',
+   `Function` enum('None','Monitor','Modect','Record','Mocord','Nodect') NOT NULL default 'Monitor',
+   `Enabled` tinyint(3) unsigned NOT NULL default '1',
+diff -urNad '--exclude=CVS' '--exclude=.svn' '--exclude=.git' '--exclude=.arch' '--exclude=.hg' '--exclude=_darcs' '--exclude=.bzr' zm~/db/zm_update-1.24.4.sql zm/db/zm_update-1.24.4.sql
+--- zm~/db/zm_update-1.24.4.sql	2011-12-19 15:21:29.000000000 -0500
++++ zm/db/zm_update-1.24.4.sql	2011-12-19 15:51:39.305984835 -0500
+@@ -20,6 +20,11 @@
+ ) ENGINE=MyISAM;
+ 
+ --
++-- This updates a 1.24.4 database to Isaac's version
++--
++alter table Monitors add column `ServerHost` varchar(64) not null default '' after `Name`;
++
++--
+ -- These are optional, but we might as well do it now
+ --
+ optimize table Frames;

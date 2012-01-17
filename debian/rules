@@ -1,0 +1,122 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+CFLAGS = -Wall -g -march=native -pipe
+CXXFLAGS = -DHAVE_LIBCRYPTO -D__STDC_CONSTANT_MACROS
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+config.status: patch configure
+	dh_testdir
+	# Add here commands to configure the package.
+	autoreconf
+	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CXXFLAGS)" ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --sysconfdir=/etc/zm --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --with-mysql=/usr  --with-webdir=/usr/share/zoneminder --with-ffmpeg=/usr --with-cgidir=/usr/lib/cgi-bin --with-webuser=www-data --with-webgroup=www-data --enable-crashtrace=no --enable-mmap=yes
+	#perl zmconfig.pl -noi
+
+build: build-stamp
+
+build-stamp:  config.status
+	dh_testdir
+
+	# Add here commands to compile the package.
+	$(MAKE)
+	#docbook-to-man debian/zm.sgml > zm.1
+
+	touch build-stamp
+
+clean:	clean-patched unpatch
+clean-patched:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp 
+
+	# Add here commands to clean up after the build process.
+	-$(MAKE) distclean
+ifneq "$(wildcard /usr/share/misc/config.sub)" ""
+	cp -f /usr/share/misc/config.sub config.sub
+endif
+ifneq "$(wildcard /usr/share/misc/config.guess)" ""
+	cp -f /usr/share/misc/config.guess config.guess
+endif
+
+	dh_clean 
+
+patch:	patch-stamp
+patch-stamp:
+	dpatch apply-all
+	touch $@
+
+unpatch:
+	dpatch deapply-all
+	rm -rf patch-stamp debian/patched
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+	dh_installdirs
+
+	# Add here commands to install the package into debian/zm.
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/zoneminder RUNDIR=$(CURDIR)/debian/zoneminder/var/run ZM_RUNDIR=$(CURDIR)/debian/zoneminder/var/run
+	install -D -m 0644 db/zm_create.sql        $(CURDIR)/debian/zoneminder/usr/share/zoneminder/db
+	install -D -m 0644 db/zm_update-*.sql $(CURDIR)/debian/zoneminder/usr/share/zoneminder/db
+	install -D -m 0644 debian/apache.conf  $(CURDIR)/debian/zoneminder/etc/zm
+	#
+	# NOTE: This is a short-term kludge; hopefully changes in the next
+	# upstream version will render this unnecessary.
+	rm -rf debian/zoneminder/usr/share/zoneminder/events
+	rm -rf debian/zoneminder/usr/share/zoneminder/images
+	rm -rf debian/zoneminder/usr/share/zoneminder/temp
+	ln -s /var/cache/zoneminder/events debian/zoneminder/usr/share/zoneminder/
+	ln -s /var/cache/zoneminder/images debian/zoneminder/usr/share/zoneminder/
+	ln -s /var/cache/zoneminder/temp debian/zoneminder/usr/share/zoneminder/
+
+	#
+	# This is a slightly lesser kludge; moving the cgi stuff to 
+	# /usr/share/zoneminder/cgi-bin breaks one set of behavior,
+	# having it just in /usr/lib/cgi-bin breaks another bit of 
+	# behavior.
+	#
+	ln -s /usr/lib/cgi-bin debian/zoneminder/usr/share/zoneminder/
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs ChangeLog
+	dh_installdocs
+	dh_installinit
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	chown root:root debian/zoneminder/etc/zm/zm.conf
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install 
