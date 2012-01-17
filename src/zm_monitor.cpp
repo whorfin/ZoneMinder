@@ -3497,6 +3497,8 @@ void MonitorStream::runStream()
 
 	int lock_fd = 0;
 	last_reduction_time = -1;
+	char sock_path_lock[PATH_MAX];
+	sock_path_lock[0] = 0;
 
     if ( connkey ) {
 		if ( playback_buffer > 0 )
@@ -3518,8 +3520,6 @@ void MonitorStream::runStream()
 			}
 		}
 
-		char sock_path_lock[PATH_MAX];
-		sock_path_lock[0] = 0;
 
 		snprintf( sock_path_lock, sizeof(sock_path_lock), "%s/zms-%06d.lock", config.path_socks, connkey);
 
