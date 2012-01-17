@@ -1,10 +1,4 @@
 01_vendor_perl.dpatch
-03_logdir.dpatch
-04_add_SkyIPCam7xx.dpatch
-05_add_serverhost_to_db.dpatch
-06_robust_config.dpatch
-serial_triggers.dpatch
 zm_monitor.dpatch
 zmconfig.h.dpatch
-readloop.dpatch
 zmupdate.pl.in.dpatch
