@@ -975,6 +975,9 @@ if ( $version )
         if ( ! grep 'Colours', @$columns ) {
             $dbh->do(q{alter table Monitors add column `Colours` tinyint(3) unsigned NOT NULL default '1' after `Height`;});
         } # end if
+        if ( ! grep 'ServerHost', @$columns ) {
+            $dbh->do(q{alter table Monitors add column `ServerHost` varchar(64) not null default '' after `Name`;} );
+        } # end if
 
         $cascade = !undef if ! $dbh->errstr;
     }

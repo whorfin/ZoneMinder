@@ -1,7 +1,0 @@
-#! /bin/sh /usr/share/dpatch/dpatch-run
-## zmpkg.dpatch by  <iconnor@www6.internal.point-one.com>
-##
-## All lines beginning with `## DP:' are a description of the patch.
-## DP: No description.
-
-@DPATCH@
