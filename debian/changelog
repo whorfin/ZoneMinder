@@ -1,8 +1,8 @@
-zoneminder (1.25.0-1ubuntu7) oneiric; urgency=high
+zoneminder (1.25.0-1ubuntu8) oneiric; urgency=high
 
-  * fix build problems
+  * merge in mastertheknife performance stuff, plus mitches stuf
 
- -- Isaac Connor <iconnor@connortechnology.com>  Mon, 9 Jan 2012 17:39:15 -0500
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 17 Jan 2012 12:03:15 -0500
 
 zoneminder (1.25.0-1ubuntu6) oneiric; urgency=high
 

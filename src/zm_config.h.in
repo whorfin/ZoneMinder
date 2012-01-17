@@ -64,6 +64,7 @@ struct StaticConfig
     std::string DB_USER;
     std::string DB_PASS;
     std::string PATH_WEB;
+    std::string SERVER_HOST;
 };
 
 extern StaticConfig staticConfig;
