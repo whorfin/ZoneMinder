@@ -1,5 +1,4 @@
 01_vendor_perl.dpatch
-02_server_host.dpatch
 03_logdir.dpatch
 04_add_SkyIPCam7xx.dpatch
 05_add_serverhost_to_db.dpatch

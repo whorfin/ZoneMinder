@@ -153,7 +153,14 @@ function generateAuthHash( $useRemoteAddr )
 
 function getStreamSrc( $args, $querySep='&amp;' )
 {
-    $streamSrc = ZM_BASE_URL.ZM_PATH_ZMS;
+    if ( isset($args["recorder"]) )
+    {
+        $streamSrc = ZM_BASE_PROTOCOL.'://'.$args["recorder"].ZM_PATH_ZMS;
+    } 
+    else
+    {
+        $streamSrc = ZM_BASE_URL.ZM_PATH_ZMS;
+    } 
 
     if ( ZM_OPT_USE_AUTH )
     {

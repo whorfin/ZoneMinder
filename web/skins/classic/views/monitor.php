@@ -101,6 +101,7 @@ else
         'SignalCheckColour' => '#0000c0',
         'WebColour' => 'red',
         'Triggers' => "",
+	'ServerHost' => ZM_SERVER_HOST,
     );
 }
 
@@ -412,6 +413,7 @@ if ( $tab != 'general' )
 {
 ?>
         <input type="hidden" name="newMonitor[Name]" value="<?= validHtmlStr($newMonitor['Name']) ?>"/>
+        <input type="hidden" name="newMonitor[ServerHost]" value="<?= validHtmlStr($newMonitor['ServerHost']) ?>"/>
         <input type="hidden" name="newMonitor[Type]" value="<?= validHtmlStr($newMonitor['Type']) ?>"/>
         <input type="hidden" name="newMonitor[Function]" value="<?= validHtmlStr($newMonitor['Function']) ?>"/>
         <input type="hidden" name="newMonitor[Enabled]" value="<?= validHtmlStr($newMonitor['Enabled']) ?>"/>
@@ -537,6 +539,8 @@ switch ( $tab )
     {
 ?>
             <tr><td><?= $SLANG['Name'] ?></td><td><input type="text" name="newMonitor[Name]" value="<?= validHtmlStr($newMonitor['Name']) ?>" size="16"/></td></tr>
+            <tr><td><?= $SLANG['ServerHost'] ?></td><td><input type="text" name="newMonitor[ServerHost]" value="<?= validHtmlStr($newMonitor['ServerHost']) ?>" size="16"/></td></tr>
+
             <tr><td><?= $SLANG['SourceType'] ?></td><td><?= buildSelect( "newMonitor[Type]", $sourceTypes ); ?></td></tr>
             <tr><td><?= $SLANG['Function'] ?></td><td><select name="newMonitor[Function]">
 <?php
