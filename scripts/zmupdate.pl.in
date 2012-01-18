@@ -972,6 +972,7 @@ if ( $version )
         die "Error: " . $sth->errstr . "\n" unless ($sth->execute);
 
         my $columns = $sth->{'NAME'};
+		$sth->finish();
         if ( ! grep 'Colours', @$columns ) {
             $dbh->do(q{alter table Monitors add column `Colours` tinyint(3) unsigned NOT NULL default '1' after `Height`;});
         } # end if
