@@ -1,3 +1,9 @@
+zoneminder (1.25.0-1ubuntu10) oneiric; urgency=high
+
+  * cleanup db updates
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 17 Jan 2012 13:35:15 -0500
+
 zoneminder (1.25.0-1ubuntu9) oneiric; urgency=high
 
   * add db updates
