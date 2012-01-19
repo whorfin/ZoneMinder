@@ -1,3 +1,9 @@
+zoneminder (1.25.1-1ubuntu15) oneiric; urgency=high
+
+  * Fix for zmfix
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 19 Jan 2012 15:26:15 -0500
+
 zoneminder (1.25.1-1ubuntu14) oneiric; urgency=high
 
   * Add with-ilbjpeg-turbo option to conifugure.  Use it to build
