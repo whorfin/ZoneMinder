@@ -1,3 +1,9 @@
+zoneminder (1.25.0-1ubuntu13) oneiric; urgency=high
+
+  * revert one of kfir's changes in zm_local_camera.cpp.  Improve css.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 19 Jan 2012 13:47:15 -0500
+
 zoneminder (1.25.0-1ubuntu12) oneiric; urgency=high
 
   * add requirment for libjpegturbo62
