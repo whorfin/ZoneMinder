@@ -27,7 +27,7 @@ config.status: patch configure
 	dh_testdir
 	# Add here commands to configure the package.
 	autoreconf
-	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CXXFLAGS)" ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --sysconfdir=/etc/zm --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --with-mysql=/usr  --with-webdir=/usr/share/zoneminder --with-ffmpeg=/usr --with-cgidir=/usr/lib/cgi-bin --with-webuser=www-data --with-webgroup=www-data --enable-crashtrace=no --enable-mmap=yes
+	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CXXFLAGS)" ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --sysconfdir=/etc/zm --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info --with-mysql=/usr  --with-webdir=/usr/share/zoneminder --with-ffmpeg=/usr --with-cgidir=/usr/lib/cgi-bin --with-webuser=www-data --with-webgroup=www-data --enable-crashtrace=no --enable-mmap=yes --with-libjpeg-turbo=/opt/libjpeg-turbo
 	#perl zmconfig.pl -noi
 
 build: build-stamp

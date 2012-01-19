@@ -97,6 +97,25 @@ LDFLAGS="${FFMPEG_LIBS} $LDFLAGS"
 CFLAGS="${FFMPEG_CFLAGS} $CFLAGS"
 CPPFLAGS="${FFMPEG_CFLAGS} $CPPFLAGS"
 
+LIBJPEG_TURBO_PREFIX=/usr
+AC_ARG_WITH(libjpeg-turbo,
+    [  --with-libjpeg-turbo=<path>       prefix of libjpeg-turbo root directory, default /usr],
+    [LIBJPEG_TURBO_PREFIX=$with_libjpeg-turbo],
+    AC_MSG_WARN([You can call configure with the --with-libjpeg-turbo option.
+    This tells configure where to find the libjpeg-turbo root directory.
+    e.g. --with-lbjpeg-turbo=/usr/local])
+)
+AC_SUBST(LIBJPEG_TURBO_PREFIX)
+FFMPEG_LIBS="-L${LIBJPEG_TURBO_PREFIX}/${LIB_ARCH}"
+FFMPEG_CFLAGS="-I${LIBJPEG_TURBO_PREFIX}/include"
+AC_SUBST(LIBJPEG_TURBO_LIBS)
+AC_SUBST(LIBJPEG_TURBO_CFLAGS)
+
+LDFLAGS="${LIBJPEG_TURBO_LIBS} $LDFLAGS"
+CFLAGS="${LIBJPEG_TURBO_CFLAGS} $CFLAGS"
+CPPFLAGS="${LIBJPEG_TURBO_CFLAGS} $CPPFLAGS"
+
+
 EXTRA_LIBS=
 AC_ARG_WITH(extralibs,
     [  --with-extralibs="<libs>"  string containing extra libraries to pass to link, default empty],
