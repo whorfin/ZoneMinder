@@ -40,6 +40,7 @@
 
 #consoleTable {
     width: 100%;
+	table-layout: fixed;
 }
 
 #consoleTable tr.highlight {
@@ -63,6 +64,7 @@
 
 #consoleTable .colOrder {
     text-align: center;
+    width: 50px;
 }
 
 #consoleTable .colMark {
@@ -72,10 +74,12 @@
 
 #consoleTable .colEvents {
     text-align: right;
+    width: 50px;
 }
 
 #consoleTable .colZones {
     text-align: right;
+    width: 50px;
 }
 
 #consoleTable .colLeftButtons {
