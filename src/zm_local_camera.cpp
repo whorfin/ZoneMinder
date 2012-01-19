@@ -2097,7 +2097,7 @@ int LocalCamera::PostCapture()
 {
     Debug( 2, "Post-capturing" );
     // Requeue the buffer unless we need to switch or are a duplicate camera on a channel
-    if ( channel_count > 1 || channel_prime )
+    if ( channel_count == 1 || channel_prime )
     {
 #if ZM_HAS_V4L2
         if ( v4l_version == 2 )
