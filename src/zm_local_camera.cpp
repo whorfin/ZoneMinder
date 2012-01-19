@@ -2013,7 +2013,7 @@ int LocalCamera::Capture( Image &image )
             buffer = (unsigned char *)v4l2_data.buffers[v4l2_data.bufptr->index].start;
             buffer_bytesused = v4l2_data.bufptr->bytesused;
 
-            if(v4l2_data.fmt.fmt.pix.width != width && v4l2_data.fmt.fmt.pix.height != height) {
+            if(v4l2_data.fmt.fmt.pix.width != width || v4l2_data.fmt.fmt.pix.height != height) {
                     Fatal("Captured image dimensions differ: V4L2: %dx%d monitor: %dx%d",v4l2_data.fmt.fmt.pix.width,v4l2_data.fmt.fmt.pix.height,width,height);
             }
             

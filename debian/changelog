@@ -1,3 +1,15 @@
+zoneminder (1.25.0-1ubuntu12) oneiric; urgency=high
+
+  * add requirment for libjpegturbo62
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 18 Jan 2012 11:48:15 -0500
+
+zoneminder (1.25.0-1ubuntu11) oneiric; urgency=high
+
+  * Put back stuff I deleted.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 18 Jan 2012 11:28:15 -0500
+
 zoneminder (1.25.0-1ubuntu10) oneiric; urgency=high
 
   * cleanup db updates
