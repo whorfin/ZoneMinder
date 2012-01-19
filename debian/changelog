@@ -1,3 +1,9 @@
+zoneminder (1.25.1-1ubuntu14) oneiric; urgency=high
+
+  * Add with-ilbjpeg-turbo option to conifugure.  Use it to build
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 19 Jan 2012 14:11:15 -0500
+
 zoneminder (1.25.0-1ubuntu13) oneiric; urgency=high
 
   * revert one of kfir's changes in zm_local_camera.cpp.  Improve css.
