@@ -1,3 +1,9 @@
+zoneminder (1.25.1-1ubuntu16) oneiric; urgency=high
+
+  * Fix for zmfix
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 27 Jan 2012 11:58:15 -0500
+
 zoneminder (1.25.1-1ubuntu15) oneiric; urgency=high
 
   * Fix for zmfix

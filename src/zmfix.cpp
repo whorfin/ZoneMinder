@@ -173,13 +173,13 @@ int main( int argc, char *argv[] )
     // Yadda yadda
     mysql_free_result( result );
 
-	if ( staticConfig.ZM_SERVER_HOST.empty() )
+	if ( staticConfig.SERVER_HOST.empty() )
     {
     snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isnull(ControlDevice)" );
     }
     else
     {
-    snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isnull(ControlDevice) AND serverhost='%s'", staticConfig.ZM_SERVER_HOST.c_str() );
+    snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isnull(ControlDevice) AND serverhost='%s'", staticConfig.SERVER_HOST.c_str() );
     }
     if ( mysql_query( &dbconn, sql ) )
     {
