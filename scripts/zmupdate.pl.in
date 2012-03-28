@@ -972,11 +972,30 @@ if ( $version )
         die "Error: " . $sth->errstr . "\n" unless ($sth->execute);
 
         my $columns = $sth->{'NAME'};
-        if ( ! grep 'Colours', @$columns ) {
+        if ( ! grep(/^Colours$/, @$columns ) ) {
             $dbh->do(q{alter table Monitors add column `Colours` tinyint(3) unsigned NOT NULL default '1' after `Height`;});
         } # end if
-        if ( ! grep 'ServerHost', @$columns ) {
+        if ( ! grep( /^ServerHost$/, @$columns ) ) {
             $dbh->do(q{alter table Monitors add column `ServerHost` varchar(64) not null default '' after `Name`;} );
+        } # end if
+		$sth->finish();
+
+        $cascade = !undef if ! $dbh->errstr;
+    }
+    if ( $cascade || $version eq "1.25.1" )
+    {
+        my $sth = $dbh->prepare_cached( 'select * from Monitors LIMIT 0,1' );
+        die "Error: " . $dbh->errstr . "\n" unless ($sth);
+        die "Error: " . $sth->errstr . "\n" unless ($sth->execute);
+
+        my $columns = $sth->{'NAME'};
+        if ( ! grep(/^JPGPath$/, @$columns ) ) {
+            $dbh->do(q{alter table Monitors add column `JPGPath` VARCHAR(255) NOT NULL default '' after `Path`;});
+            $dbh->do(q{Update Monitors set `JPGPath`=`Path`;});
+        } # end if
+        if ( ! grep(/^MJPGPath$/, @$columns ) ) {
+            $dbh->do(q{alter table Monitors add column `MJPGPath` VARCHAR(255) NOT NULL default '' after `JPGPath`;});
+            $dbh->do(q{Update Monitors set `MJPGPath`=`Path`;});
         } # end if
 		$sth->finish();
 

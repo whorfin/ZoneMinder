@@ -1,3 +1,22 @@
+zoneminder (1.25.2-1ubuntu3) oneiric; urgency=high
+
+  * FIx Add JPGPath & MJPGPath, plus layout tweaks
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 23 Mar 2012 13:53:15 -0400
+
+zoneminder (1.25.2-1ubuntu2) oneiric; urgency=high
+
+  * FIx Add JPGPath & MJPGPath
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 23 Mar 2012 12:32:15 -0400
+
+zoneminder (1.25.2-1ubuntu1) oneiric; urgency=high
+
+  * Add JPGPath & MJPGPath
+  * Adjust monitor window size.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 23 Mar 2012 11:42:15 -0400
+
 zoneminder (1.25.1-1ubuntu16) oneiric; urgency=high
 
   * Fix for zmfix
