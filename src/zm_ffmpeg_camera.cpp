@@ -75,11 +75,11 @@ FfmpegCamera::~FfmpegCamera()
     if ( mCodecContext )
     {
        avcodec_close( mCodecContext );
-       mCodecContext = NULL; // Freed by av_close_input_file
+       mCodecContext = NULL; // Freed by avformat_close_input
     }
     if ( mFormatContext )
     {
-        av_close_input_file( mFormatContext );
+        avformat_close_input( &mFormatContext );
         mFormatContext = NULL;
     }
 
@@ -108,11 +108,11 @@ int FfmpegCamera::PrimeCapture()
     Info( "Priming capture from %s", mPath.c_str() );
 
     // Open the input, not necessarily a file
-    if ( av_open_input_file( &mFormatContext, mPath.c_str(), NULL, 0, NULL ) !=0 )
+    if ( avformat_open_input( &mFormatContext, mPath.c_str(), NULL, NULL ) !=0 )
         Fatal( "Unable to open input %s due to: %s", mPath.c_str(), strerror(errno) );
 
     // Locate stream info from input
-    if ( av_find_stream_info( mFormatContext ) < 0 )
+    if ( avformat_find_stream_info( mFormatContext, NULL ) < 0 )
         Fatal( "Unable to find stream info from %s due to: %s", mPath.c_str(), strerror(errno) );
     
     // Find first video stream present
@@ -139,7 +139,7 @@ int FfmpegCamera::PrimeCapture()
         Fatal( "Can't find codec for video stream from %s", mPath.c_str() );
 
     // Open the codec
-    if ( avcodec_open( mCodecContext, mCodec ) < 0 )
+    if ( avcodec_open2( mCodecContext, mCodec, NULL ) < 0 )
         Fatal( "Unable to open codec for video stream from %s", mPath.c_str() );
 
     // Allocate space for the native video frame
@@ -235,7 +235,10 @@ int FfmpegCamera::Capture( Image &image )
         }
         av_free_packet( &packet );
     }
+	if (frameComplete)
     return (0);
+	else
+	    return( -1 );
 }
 
 int FfmpegCamera::PostCapture()

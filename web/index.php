@@ -55,6 +55,8 @@ else
     $protocol = 'http';
 }
 define( "ZM_BASE_URL", $protocol.'://'.$_SERVER['HTTP_HOST'] );
+if ( isset($_REQUEST['usexml']) && $_REQUEST['usexml'] == '1')
+	$xml_encode_not_json = 1;
 
 if ( isset($_GET['skin']) )
     $skin = $_GET['skin'];

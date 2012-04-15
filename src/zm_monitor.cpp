@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <arpa/inet.h>
 #include <glob.h>
 
@@ -40,6 +41,7 @@
 #if HAVE_LIBAVFORMAT
 #include "zm_ffmpeg_camera.h"
 #endif // HAVE_LIBAVFORMAT
+#include "zm_fifo.h"
 
 #if ZM_MEM_MAPPED
 #include <sys/mman.h>
@@ -224,7 +226,7 @@ bool Monitor::MonitorLink::inAlarm()
 
 bool Monitor::MonitorLink::hasAlarmed()
 {
-    if ( shared_data->state == ALARM )
+    if ( shared_data->state == ALARM || shared_data->state == ALERT )
     {
         return( true );
     }
@@ -348,10 +350,18 @@ Monitor::Monitor(
     Debug( 1, "mem.size=%d", mem_size );
 #if ZM_MEM_MAPPED
     snprintf( mem_file, sizeof(mem_file), "%s/zm.mmap.%d", config.path_map, id );
-    map_fd = open( mem_file, O_RDWR|O_CREAT, (mode_t)0600 );
+	struct stat map_stat;
+	int flags = O_RDWR;
+	if (purpose != QUERY)
+		flags |= O_CREAT;
+	else if ( stat( mem_file, &map_stat ) != 0)
+	{
+		Error( "bailing out application, cannot run in query mode when monitor's shared mem doesn't exist");
+		exit( 1 );
+	}
+    map_fd = open( mem_file, flags, (mode_t)0600 );
     if ( map_fd < 0 )
         Fatal( "Can't open memory map file %s, probably not enough space free: %s", mem_file, strerror(errno) );
-        struct stat map_stat;
     if ( fstat( map_fd, &map_stat ) < 0 )
         Fatal( "Can't stat memory map file %s: %s", mem_file, strerror(errno) );
     if ( map_stat.st_size != mem_size && purpose == CAPTURE )
@@ -362,6 +372,8 @@ Monitor::Monitor(
     }
     else if ( map_stat.st_size != mem_size )
     {
+		if (map_stat.st_size == 0)
+			Fatal ("Got zero sized memory map file expected %d",mem_size);
         Error( "Got unexpected memory map file size %ld, expected %d", map_stat.st_size, mem_size );
     }
 
@@ -482,7 +494,7 @@ Monitor::Monitor(
         stat( path, &statbuf );
         if ( errno == ENOENT || errno == ENOTDIR )
         {
-            if ( mkdir( path, 0755 ) )
+            if ( mkdir( path, 0755 ) < 0 )
             {
                 Error( "Can't make %s: %s", path, strerror(errno));
             }
@@ -494,7 +506,7 @@ Monitor::Monitor(
         stat( path, &statbuf );
         if ( errno == ENOENT || errno == ENOTDIR )
         {
-            if ( mkdir( path, 0755 ) )
+            if ( mkdir( path, 0755 ) < 0 )
             {
                 Error( "Can't make %s: %s", path, strerror(errno));
             }
@@ -2738,9 +2750,11 @@ unsigned int Monitor::DetectMotion( const Image &comp_image, Event::StringSet &z
         static char diag_path[PATH_MAX] = "";
         if ( !diag_path[0] )
         {
-            snprintf( diag_path, sizeof(diag_path), "%s/%d/diag-r.jpg", config.dir_events, id );
+            snprintf( diag_path, sizeof(diag_path), config.record_diag_images_fifo ? "%s/%d/diagpipe-r.jpg" : "%s/%d/diag-r.jpg", config.dir_events, id );
+			if (config.record_diag_images_fifo)
+				FifoStream::fifo_create_if_missing(diag_path);
         }
-        ref_image.WriteJpeg( diag_path );
+        ref_image.WriteJpeg( diag_path,0,config.record_diag_images_fifo );
     }
 
     ref_image.Delta( comp_image, &delta_image);
@@ -2750,9 +2764,11 @@ unsigned int Monitor::DetectMotion( const Image &comp_image, Event::StringSet &z
         static char diag_path[PATH_MAX] = "";
         if ( !diag_path[0] )
         {
-            snprintf( diag_path, sizeof(diag_path), "%s/%d/diag-d.jpg", config.dir_events, id );
+            snprintf( diag_path, sizeof(diag_path), config.record_diag_images_fifo ? "%s/%d/diagpipe-d.jpg" : "%s/%d/diag-d.jpg", config.dir_events, id );
+			if (config.record_diag_images_fifo)
+				FifoStream::fifo_create_if_missing(diag_path);
         }
-        delta_image.WriteJpeg( diag_path );
+        delta_image.WriteJpeg( diag_path,0,config.record_diag_images_fifo );
     }
 
     // Blank out all exclusion zones
@@ -2975,7 +2991,7 @@ bool MonitorStream::checkSwapPath( const char *path, bool create_path )
         if ( create_path && errno == ENOENT )
         {
             Debug( 3, "Swap path '%s' missing, creating", path );
-            if ( mkdir( path, 0755 ) )
+            if ( mkdir( path, 0755 ) < 0 )
             {
                 Error( "Can't mkdir %s: %s", path, strerror(errno));
                 return( false );
@@ -3351,6 +3367,7 @@ bool MonitorStream::sendFrame( const char *filepath, struct timeval *timestamp )
         int frameSendTime = tvDiffMsec( frameStartTime, frameEndTime );
         if ( frameSendTime > 1000/maxfps )
         {
+			last_reduction_time = TV_2_FLOAT(frameEndTime);
             maxfps /= 2;
             Error( "Frame send time %d msec too slow, throttling maxfps to %.2f", frameSendTime, maxfps );
         }
@@ -3434,9 +3451,16 @@ bool MonitorStream::sendFrame( Image *image, struct timeval *timestamp )
         int frameSendTime = tvDiffMsec( frameStartTime, frameEndTime );
         if ( frameSendTime > 1000/maxfps )
         {
+			last_reduction_time = TV_2_FLOAT(frameEndTime);
             maxfps /= 1.5;
             Error( "Frame send time %d msec too slow, throttling maxfps to %.2f", frameSendTime, maxfps );
         }
+		if (config.reduction_fps_reset_time != 0 && last_reduction_time != -1.0 && TV_2_FLOAT(frameEndTime) - last_reduction_time > config.reduction_fps_reset_time)
+		{
+			Debug(2, "Reset FPS to original maxfps of %f from current of %f",original_maxfps, maxfps);
+			maxfps = original_maxfps;
+			last_reduction_time = -1.0;
+		}
     }
     last_frame_sent = TV_2_FLOAT( now );
     return( true );
@@ -3450,6 +3474,47 @@ void MonitorStream::runStream()
         monitor->SingleImage( scale );
         return;
     }
+	char swap_path[PATH_MAX] = "";
+	int lock_fd = 0;
+	last_reduction_time = -1;
+    bool buffered_playback = false;
+ 
+	if ( connkey && playback_buffer > 0 ) {
+        Debug( 2, "Checking swap image location" );
+        Debug( 3, "Checking swap image path" );
+        strncpy( swap_path, config.path_swap, sizeof(swap_path) );
+        if ( checkSwapPath( swap_path, false ) )
+        {
+            snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
+            if ( checkSwapPath( swap_path, true ) )
+            {
+                snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
+                if ( checkSwapPath( swap_path, true ) )
+                {
+                    buffered_playback = true;
+                }
+            }
+        }
+	}
+	char sock_path_lock[PATH_MAX];
+	sock_path_lock[0] = 0;
+	if (connkey)
+	{
+		snprintf( sock_path_lock, sizeof(sock_path_lock), "%s/zms-%06d.lock", config.path_socks, connkey);
+
+		lock_fd = open(sock_path_lock, O_CREAT|O_WRONLY, S_IRUSR | S_IWUSR);
+		if (lock_fd <= 0 || flock(lock_fd, LOCK_SH|LOCK_NB) != 0)
+		{
+			Error("Unable to lock sock lock file %s: %s", sock_path_lock, strerror(errno) );
+
+			close(lock_fd);
+			lock_fd = 0;
+		}
+		else
+		{
+			Debug( 1, "We have obtained a read lock on %s fd: %d", sock_path_lock, lock_fd);
+		}
+	}
 
     openComms();
 
@@ -3472,27 +3537,8 @@ void MonitorStream::runStream()
     temp_read_index = temp_image_buffer_count;
     temp_write_index = temp_image_buffer_count;
 
-    char swap_path[PATH_MAX] = "";
-    bool buffered_playback = false;
-
     if ( connkey && playback_buffer > 0 )
     {
-        Debug( 2, "Checking swap image location" );
-        Debug( 3, "Checking swap image path" );
-        strncpy( swap_path, config.path_swap, sizeof(swap_path) );
-        if ( checkSwapPath( swap_path, false ) )
-        {
-            snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
-            if ( checkSwapPath( swap_path, true ) )
-            {
-                snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
-                if ( checkSwapPath( swap_path, true ) )
-                {
-                    buffered_playback = true;
-                }
-            }
-        }
-
         if ( !buffered_playback )
         {
             Error( "Unable to validate swap image path, disabling buffered playback" );
@@ -3688,7 +3734,40 @@ void MonitorStream::runStream()
             break;
         }
     }
-    if ( buffered_playback )
+   	char first_lock_char = loc_sock_path[0];
+	bool lock_reopen = false;
+	if (lock_fd > 0)
+	{
+		loc_sock_path[0] = '\0';
+		close(lock_fd); //close it rather than unlock it incase it got deleted.
+		lock_reopen = true;
+	}
+	closeComms();
+	bool is_in_use = false;
+	if (lock_reopen)
+	{
+		sleep(10);//wait 10 seconds for someone else to grab a lock on it
+
+		lock_fd = open(sock_path_lock, O_CREAT|O_WRONLY, S_IRUSR | S_IWUSR);
+		if (lock_fd <= 0 || flock(lock_fd,LOCK_EX|LOCK_NB) != 0)
+		{
+			Error("Unable to get lock to delete swap folder/socket, leaving it alone sock lock file %s: %s", sock_path_lock, strerror(errno) );
+
+			close(lock_fd);
+			lock_fd = 0;
+			is_in_use = true;
+		}
+		else
+		{
+			Debug( 1, "We have obtained an exclusive lock going to do deletion on %s fd: %d", sock_path_lock, lock_fd);
+			loc_sock_path[0] = first_lock_char;
+            unlink( loc_sock_path );
+			close(lock_fd);
+			unlink( sock_path_lock );
+		}
+	}
+
+    if (! is_in_use && buffered_playback )
     {
         char swap_path[PATH_MAX] = "";
 
@@ -3741,7 +3820,6 @@ void MonitorStream::runStream()
             }
         }
     }
-    closeComms();
 }
 
 void Monitor::SingleImage( int scale)

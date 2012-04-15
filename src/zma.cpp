@@ -24,6 +24,7 @@
 #include "zm_db.h"
 #include "zm_signal.h"
 #include "zm_monitor.h"
+#include "zm_fifo.h"
 
 void Usage()
 {
@@ -91,8 +92,9 @@ int main( int argc, char *argv[] )
 	snprintf( log_id_string, sizeof(log_id_string), "zma_m%d", id );
 
 	zmLoadConfig();
-
 	logInit( log_id_string );
+
+	zmFifoDbgInit( id );
 	
 	ssedetect();
 

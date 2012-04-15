@@ -204,6 +204,10 @@ function getStreamCmdResponse( respObj, respText )
             }
             $('enableDisableAlarms').removeClass( 'hidden' );
         }
+        else
+        {
+            $('enableDisableAlarms').addClass( 'hidden' );
+        }
     }
     else
         checkStreamForErrors("getStreamCmdResponse",respObj);//log them

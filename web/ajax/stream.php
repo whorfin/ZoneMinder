@@ -46,11 +46,14 @@ switch ( $_REQUEST['command'] )
 }
 
 $remSockFile = ZM_PATH_SOCKS.'/zms-'.sprintf("%06d",$_REQUEST['connkey']).'s.sock';
-$max_socket_tries = 3;
+$max_socket_tries = 5;
 while ( !file_exists($remSockFile) && $max_socket_tries-- ) //sometimes we are too fast for our own good, if it hasn't been setup yet give it a second.
     sleep(1);
 
-if ( !@socket_sendto( $socket, $msg, strlen($msg), 0, $remSockFile ) )
+$max_socket_refuse_trys = 2;
+while (! ($socket_res = @socket_sendto( $socket, $msg, strlen($msg), 0, $remSockFile )) && socket_last_error() == 111 && $max_socket_refuse_trys--)
+	sleep(1);
+if ( ! $socket_res)
 {
     ajaxError( "socket_sendto( $remSockFile ) failed: ".socket_strerror(socket_last_error()) );
 }
@@ -104,6 +107,9 @@ switch ( $data['type'] )
         $data['rate'] /= RATE_BASE;
         $data['delay'] = sprintf( "%.2f", $data['delay'] );
         $data['zoom'] = sprintf( "%.1f", $data['zoom']/SCALE_BASE );
+		if (isset($_REQUEST['notes']) && $_REQUEST['notes'] == "1" && ($data['state'] == STATE_ALARM ||  $data['state'] == STATE_ALERT) ){
+				$data['notes'] = dbFetchOne("select Notes FROM Events WHERE MonitorId ='" . $data['monitor'] . "' order by id desc LIMIT 1","Notes");
+		}
         ajaxResponse( array( 'status'=>$data ) );
         break;
     }

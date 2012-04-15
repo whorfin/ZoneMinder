@@ -65,6 +65,8 @@ void VideoStream::SetupFormat( const char *p_filename, const char *p_format )
 	{
 		Panic( "Memory error" );
 	}
+	if (! strcmp( format, "asf") )
+		of->video_codec =  CODEC_ID_WMV2;
 	ofc->oformat = of;
 	snprintf( ofc->filename, sizeof(ofc->filename), "%s", filename );
 }
@@ -114,7 +116,8 @@ void VideoStream::SetupCodec( int colours, int subpixelorder, int width, int hei
 	ost = NULL;
 	if (of->video_codec != CODEC_ID_NONE)
 	{
-		ost = av_new_stream(ofc, 0);
+		ost = avformat_new_stream(ofc, NULL);
+		ost->id = 0;
 		if (!ost)
 		{
 			Panic( "Could not alloc stream" );
@@ -158,21 +161,11 @@ void VideoStream::SetupCodec( int colours, int subpixelorder, int width, int hei
 		if ( c->gop_size < 3 )
 			c->gop_size = 3;
 		// some formats want stream headers to be seperate
-		if(!strcmp(ofc->oformat->name, "mp4") || !strcmp(ofc->oformat->name, "mov") || !strcmp(ofc->oformat->name, "3gp"))
+		if(!strcmp(ofc->oformat->name, "mp4") || !strcmp(ofc->oformat->name, "mov") || !strcmp(ofc->oformat->name, "3gp") || !strcmp(ofc->oformat->name, "asf"))
 			c->flags |= CODEC_FLAG_GLOBAL_HEADER;
 	}
 }
 
-void VideoStream::SetParameters()
-{
-	/* set the output parameters (must be done even if no
-	   parameters). */
-	if ( av_set_parameters(ofc, NULL) < 0 )
-	{
-		Panic( "Invalid output format parameters" );
-	}
-	//dump_format(ofc, 0, filename, 1);
-}
 
 const char *VideoStream::MimeType() const
 {
@@ -213,7 +206,7 @@ void VideoStream::OpenStream()
 		}
 
 		/* open the codec */
-		if ( avcodec_open(c, codec) < 0 )
+		if ( avcodec_open2(c, codec, NULL) < 0 )
 		{
 			Panic( "Could not open codec" );
 		}
@@ -259,7 +252,7 @@ void VideoStream::OpenStream()
 	if ( !(of->flags & AVFMT_NOFILE) )
 	{
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51,2,1)
-		if ( avio_open(&ofc->pb, filename, URL_WRONLY) < 0 )
+		if ( avio_open(&ofc->pb, filename, AVIO_FLAG_WRITE) < 0 )
 #else
 		if ( url_fopen(&ofc->pb, filename, URL_WRONLY) < 0 )
 #endif
@@ -278,7 +271,10 @@ void VideoStream::OpenStream()
 	}
 
 	/* write the stream header, if any */
-	av_write_header(ofc);
+	if (avformat_write_header(ofc, NULL) < 0)
+	{
+		Panic( "Invalid output format parameters or unable to write header" );
+	}
 }
 
 VideoStream::VideoStream( const char *filename, const char *format, int bitrate, double frame_rate, int colours, int subpixelorder, int width, int height )
@@ -290,7 +286,6 @@ VideoStream::VideoStream( const char *filename, const char *format, int bitrate,
 
 	SetupFormat( filename, format );
 	SetupCodec( colours, subpixelorder, width, height, bitrate, frame_rate );
-	SetParameters();
 }
 
 VideoStream::~VideoStream()

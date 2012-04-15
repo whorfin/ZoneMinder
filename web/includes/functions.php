@@ -397,7 +397,7 @@ width="<?= $width ?>"
 height="<?= $height ?>"
 title="<?= $title ?>">
 <param name="accessories" value="none"/>
-<param name="url" value="<?= $src ?>"/>
+<param id="liveStream_url" name="url" value="<?= $src ?>"/>
 </applet>
 <?php
 }
@@ -2228,6 +2228,10 @@ function checkJsonError()
 
 function jsonEncode( &$value )
 {
+	global $xml_encode_not_json;
+	if ($xml_encode_not_json)
+		return xmlEncode($value);
+
     if ( function_exists('json_encode') )
     {
         $string = json_encode( $value );
@@ -2266,6 +2270,46 @@ function jsonEncode( &$value )
             return( '"'.addcslashes(gettype($value),'"\\/').'"' );
     }
 }
+function xmlEncode ($mixed,$domElement=null,$DOMDocument=null){
+    if(is_null($DOMDocument)){
+        $DOMDocument=new DOMDocument;
+        $DOMDocument->formatOutput=true;
+		$node=$DOMDocument->createElement("Response");
+		$DOMDocument->appendChild($node);
+        xmlEncode($mixed,$node,$DOMDocument);
+        return $DOMDocument->saveXML();
+    }
+    else{
+        if(is_array($mixed)){
+            foreach($mixed as $index=>$mixedElement){
+                if(is_int($index)){
+                    if($index==0){
+                        $node=$domElement;
+                    }
+                    else{
+                        $node=$DOMDocument->createElement($domElement->tagName);
+                        $domElement->parentNode->appendChild($node);
+                    }
+                }
+                else{
+                    $plural=$DOMDocument->createElement($index);
+                    $domElement->appendChild($plural);
+                    $node=$plural;
+                    if(rtrim($index,'s')!==$index && $index != "status" && $index != "fps"){
+                        $singular=$DOMDocument->createElement(rtrim($index,'s'));
+                        $plural->appendChild($singular);
+                        $node=$singular;
+                    }
+                }
+                xmlEncode($mixedElement,$node,$DOMDocument);
+            }
+        }
+        else{
+            $domElement->appendChild($DOMDocument->createTextNode($mixed));
+        }
+    }
+}
+
 
 function jsonDecode( $value )
 {
@@ -2408,6 +2452,11 @@ function requestVar( $name, $default="" )
 function validInt( $input )
 {
     return( preg_replace( '/\D/', '', $input ) );
+}
+
+function validCol( $input )
+{
+    return( preg_replace( '/[^a-zA-Z0-9\-_\.]/', '', $input ) );
 }
 
 function validNum( $input )

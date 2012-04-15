@@ -167,7 +167,10 @@ $statusData = array(
 function collectData()
 {
     global $statusData;
-
+	if (isset($_REQUEST['MainFrameID']) && $_REQUEST['MainFrameID'] == "1"){
+		$statusData["event"]["elements"]["MainFrameID"] = array( "sql" => "(select FrameID from Frames where EventId=Events.id order by Score desc,FrameId limit 1)"   );
+		$statusData["events"]["elements"]["MainFrameID"] = array( "sql" => "(select FrameID from Frames where EventId=Events.id order by Score desc,FrameId limit 1)"   );
+	}
     $entitySpec = &$statusData[strtolower(validJsStr($_REQUEST['entity']))];
     #print_r( $entitySpec );
     if ( !canView( $entitySpec['permission'] ) )
@@ -249,9 +252,9 @@ function collectData()
                 foreach( $entitySpec['selector'] as $selector )
                 {
                     if ( is_array( $selector ) )
-                        $where[] = $selector['selector']." = ".dbEscape($id[$index]);
+                        $where[] = $selector['selector']." = ".validInt($id[$index]);
                     else
-                        $where[] = $selector." = ".dbEscape($id[$index]);
+                        $where[] = $selector." = ".validInt($id[$index]);
                     $index++;
                 }
                 $sql .= " where ".join( " and ", $where );
@@ -259,13 +262,26 @@ function collectData()
             if ( $groupSql )
                 $sql .= " group by ".join( ",", array_unique( $groupSql ) );
             if ( !empty($_REQUEST['sort']) )
-                $sql .= " order by ".dbEscape($_REQUEST['sort']);
+			{
+				$arr = explode(' ',$_REQUEST['sort']);
+				$col = validCol($arr[0]);
+				$dir = "";
+				if (count($arr) == 2){
+					if ($arr[1] == "desc")
+						$dir = $arr[1];
+				}
+                $sql .= " order by $col $dir";
+			}
+
             if ( !empty($entitySpec['limit']) )
                 $limit = $entitySpec['limit'];
             elseif ( !empty($_REQUEST['count']) )
-                $limit = dbEscape($_REQUEST['count']);
+                $limit = validInt($_REQUEST['count']);
+			$limit_offset="";
+			if ( !empty($_REQUEST['offset']) )
+                $limit_offset = validInt($_REQUEST['offset']) . ", ";
             if ( !empty( $limit ) )
-                $sql .= " limit ".$limit;
+                $sql .= " limit ".$limit_offset . $limit;
             if ( isset($limit) && $limit == 1 )
             {
                 if ( $sqlData = dbFetchOne( $sql ) )
