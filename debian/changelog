@@ -1,3 +1,9 @@
+zoneminder (1.25.2-1ubuntu4) precise; urgency=high
+
+  * Rebase to Kfir's tree, + fixes for ffmpeg compile
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Sat, 12 May 2012 11:38:15 -0400
+
 zoneminder (1.25.2-1ubuntu3) oneiric; urgency=high
 
   * FIx Add JPGPath & MJPGPath, plus layout tweaks

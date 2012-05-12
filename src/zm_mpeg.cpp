@@ -23,6 +23,9 @@
 #include "zm.h"
 #include "zm_rgb.h"
 #include "zm_mpeg.h"
+extern "C" {
+#include <libavutil/mathematics.h>
+}
 
 #if HAVE_LIBAVCODEC
 
