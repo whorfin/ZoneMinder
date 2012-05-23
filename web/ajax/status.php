@@ -260,7 +260,7 @@ function collectData()
                 $sql .= " group by ".join( ",", array_unique( $groupSql ) );
             if ( !empty($_REQUEST['sort']) )
 			{
-				$arr = split(' ',$_REQUEST['sort']);
+				$arr = explode(' ',$_REQUEST['sort']);
 				$col = validCol($arr[0]);
 				$dir = "";
 				if (count($arr) == 2){
