@@ -3515,8 +3515,14 @@ void MonitorStream::runStream()
 					if ( checkSwapPath( swap_path, true ) )
 					{
 						buffered_playback = true;
+					} else {
+						Error( "Unable to validate swap image path at %s, disabling buffered playback", swap_path );
 					}
+				} else {
+					Error( "Unable to validate swap image path at %s, disabling buffered playback", swap_path );
 				}
+			} else {
+				Error( "Unable to validate swap image path at %s, disabling buffered playback", swap_path );
 			}
 		}
 
