@@ -22,6 +22,7 @@ WriteMakefile(
 		'lib/ZoneMinder/Control/PelcoD.pm' => '$(INST_LIBDIR)/ZoneMinder/Control/PelcoD.pm',
 		'lib/ZoneMinder/Control/AxisV2.pm' => '$(INST_LIBDIR)/ZoneMinder/Control/AxisV2.pm',
 		'lib/ZoneMinder/Control/PanasonicIP.pm' => '$(INST_LIBDIR)/ZoneMinder/Control/PanasonicIP.pm',
+		'lib/ZoneMinder/Control/SkyIPCam7xx.pm' => '$(INST_LIBDIR)/ZoneMinder/Control/SkyIPCam7xx.pm',
 		'lib/ZoneMinder/Control/Visca.pm' => '$(INST_LIBDIR)/ZoneMinder/Control/Visca.pm',
 		'lib/ZoneMinder/Control/Ncs370.pm' => '$(INST_LIBDIR)/ZoneMinder/Control/Ncs370.pm',
 		'lib/ZoneMinder/Control/mjpgStreamer.pm' => '$(INST_LIBDIR)/ZoneMinder/Control/mjpgStreamer.pm',

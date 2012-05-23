@@ -1,3 +1,15 @@
+zoneminder (1.25.2-1ubuntu7) precise; urgency=high
+
+  * Update SkyIPCAM control package to use Logger instead of ZoneMinder::Debug;
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 23 May 2012 14:57:15 -0400
+
+zoneminder (1.25.2-1ubuntu5) precise; urgency=high
+
+  * remove deprecated split, improve swap path validation error reporting
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 23 May 2012 10:39:15 -0400
+
 zoneminder (1.25.2-1ubuntu4) precise; urgency=high
 
   * Rebase to Kfir's tree, + fixes for ffmpeg compile
