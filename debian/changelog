@@ -1,3 +1,9 @@
+zoneminder (1.25.2-1ubuntu8) precise; urgency=high
+
+  * Actually load the SERVERHOST config
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 30 May 2012 11:33:15 -0400
+
 zoneminder (1.25.2-1ubuntu7) precise; urgency=high
 
   * Update SkyIPCAM control package to use Logger instead of ZoneMinder::Debug;
