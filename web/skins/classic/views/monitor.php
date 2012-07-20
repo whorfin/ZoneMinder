@@ -71,6 +71,7 @@ else
         'Width' => "320",
         'Height' => "240",
         'Orientation' => "0",
+        'Deinterlacing' => 0,
         'LabelFormat' => '%N - %d/%m/%y %H:%M:%S',
         'LabelX' => 0,
         'LabelY' => 0,
@@ -364,6 +365,33 @@ $orientations = array(
     $SLANG['FlippedVert'] => 'vert'
 );
 
+$deinterlaceopts = array(
+    "Disabled"                                            => 0x00000000,
+    "Four field motion adaptive - Soft"                   => 0x00001E04, /* 30 change */
+    "Four field motion adaptive - Medium"                 => 0x00001404, /* 20 change */
+    "Four field motion adaptive - Hard"                   => 0x00000A04, /* 10 change */
+    "Discard"                                             => 0x00000001,
+    "Linear"                                              => 0x00000002,
+    "Blend"                                               => 0x00000003,
+    "Blend (25%)"                                         => 0x00000205
+);
+
+$deinterlaceopts_v4l2 = array(
+    "Disabled"                                            => 0x00000000,
+    "Four field motion adaptive - Soft"                   => 0x00001E04, /* 30 change */
+    "Four field motion adaptive - Medium"                 => 0x00001404, /* 20 change */
+    "Four field motion adaptive - Hard"                   => 0x00000A04, /* 10 change */
+    "Discard"                                             => 0x00000001,
+    "Linear"                                              => 0x00000002,
+    "Blend"                                               => 0x00000003,
+    "Blend (25%)"                                         => 0x00000205,
+    "V4L2: Capture top field only"                        => 0x02000000,
+    "V4L2: Capture bottom field only"                     => 0x03000000,
+    "V4L2: Alternate fields (Bob)"                        => 0x07000000,
+    "V4L2: Progressive"                                   => 0x01000000,
+    "V4L2: Interlaced"                                    => 0x04000000,
+);
+
 xhtmlHeaders(__FILE__, $SLANG['Monitor']." - ".validHtmlStr($monitor['Name']) );
 ?>
 <body>
@@ -471,6 +499,7 @@ if ( $tab != 'source' )
     <input type="hidden" name="newMonitor[Width]" value="<?= validHtmlStr($newMonitor['Width']) ?>"/>
     <input type="hidden" name="newMonitor[Height]" value="<?= validHtmlStr($newMonitor['Height']) ?>"/>
     <input type="hidden" name="newMonitor[Orientation]" value="<?= validHtmlStr($newMonitor['Orientation']) ?>"/>
+    <input type="hidden" name="newMonitor[Deinterlacing]" value="<?= validHtmlStr($newMonitor['Deinterlacing']) ?>"/>
 <?php
 }
 if ( $tab != 'timestamp' )
@@ -673,6 +702,18 @@ switch ( $tab )
             <tr><td><?= $SLANG['CaptureHeight'] ?> (<?= $SLANG['Pixels'] ?>)</td><td><input type="text" name="newMonitor[Height]" value="<?= validHtmlStr($newMonitor['Height']) ?>" size="4" onkeyup="updateMonitorDimensions(this);"/></td></tr>
             <tr><td><?= $SLANG['PreserveAspect'] ?></td><td><input type="checkbox" name="preserveAspectRatio" value="1"/></td></tr> 
             <tr><td><?= $SLANG['Orientation'] ?></td><td><select name="newMonitor[Orientation]"><?php foreach ( $orientations as $name => $value ) { ?><option value="<?= $value ?>"<?php if ( $value == $newMonitor['Orientation'] ) { ?> selected="selected"<?php } ?>><?= $name ?></option><?php } ?></select></td></tr>
+<?php
+        if ( $newMonitor['Type'] == "Local" )
+        {
+?>
+            <tr><td><?= "Deinterlacing" ?></td><td><select name="newMonitor[Deinterlacing]"><?php foreach ( $deinterlaceopts_v4l2 as $name => $value ) { ?><option value="<?= $value ?>"<?php if ( $value == $newMonitor['Deinterlacing'] ) { ?> selected="selected"<?php } ?>><?= $name ?></option><?php } ?></select></td></tr>
+<?php
+        } else {
+?>
+            <tr><td><?= "Deinterlacing" ?></td><td><select name="newMonitor[Deinterlacing]"><?php foreach ( $deinterlaceopts as $name => $value ) { ?><option value="<?= $value ?>"<?php if ( $value == $newMonitor['Deinterlacing'] ) { ?> selected="selected"<?php } ?>><?= $name ?></option><?php } ?></select></td></tr>
+<?php
+        }
+?>
 <?php
         break;
     }

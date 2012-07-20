@@ -47,8 +47,8 @@ extern "C"
 typedef void (*blend_fptr_t)(const uint8_t*, const uint8_t*, uint8_t*, unsigned long, double);
 typedef void (*delta_fptr_t)(const uint8_t*, const uint8_t*, uint8_t*, unsigned long);
 typedef void (*convert_fptr_t)(const uint8_t*, uint8_t*, unsigned long);
+typedef void (*deinterlace_4field_fptr_t)(uint8_t*, uint8_t*, unsigned int, unsigned int, unsigned int);
 typedef void* (*imgbufcpy_fptr_t)(void*, const void*, size_t);
-
 
 extern imgbufcpy_fptr_t fptr_imgbufcpy;
 
@@ -131,7 +131,7 @@ protected:
 	static unsigned char *y_r_table;
 	static unsigned char *y_g_table;
 	static unsigned char *y_b_table;
-	static jpeg_compress_struct *jpg_ccinfo[100];
+	static jpeg_compress_struct *jpg_ccinfo[101];
 	static jpeg_decompress_struct *jpg_dcinfo;
 	static struct zm_error_mgr jpg_err;
 
@@ -242,6 +242,13 @@ public:
 	void Rotate( int angle );
 	void Flip( bool leftright );
 	void Scale( unsigned int factor );
+
+	void Deinterlace_Discard();
+	void Deinterlace_Linear();
+	void Deinterlace_Blend();
+	void Deinterlace_Blend_CustomRatio(int divider);
+	void Deinterlace_4Field(const Image* next_image, unsigned int threshold);
+	
 };
 
 #endif // ZM_IMAGE_H
@@ -286,4 +293,16 @@ void zm_convert_rgb555_rgba(const uint8_t* col1, uint8_t* result, unsigned long 
 void zm_convert_rgb565_rgb(const uint8_t* col1, uint8_t* result, unsigned long count);
 void zm_convert_rgb565_rgba(const uint8_t* col1, uint8_t* result, unsigned long count);
 
-
+/* Deinterlace_4Field functions */
+void std_deinterlace_4field_gray8(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void std_deinterlace_4field_rgb(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void std_deinterlace_4field_bgr(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void std_deinterlace_4field_rgba(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void std_deinterlace_4field_bgra(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void std_deinterlace_4field_argb(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void std_deinterlace_4field_abgr(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void ssse3_deinterlace_4field_gray8(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void ssse3_deinterlace_4field_rgba(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void ssse3_deinterlace_4field_bgra(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void ssse3_deinterlace_4field_argb(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);
+void ssse3_deinterlace_4field_abgr(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height);

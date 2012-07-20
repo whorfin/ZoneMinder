@@ -149,10 +149,10 @@ our $mem_data =
 		"valid"            => { "type"=>"uint8", "seq"=>$mem_seq++ },
 		"active"           => { "type"=>"uint8", "seq"=>$mem_seq++ },
 		"signal"           => { "type"=>"uint8", "seq"=>$mem_seq++ },
-		"bpadding"         => { "type"=>"uint8", "seq"=>$mem_seq++ },
+		"format"           => { "type"=>"uint8", "seq"=>$mem_seq++ },
+		"imagesize"        => { "type"=>"uint32", "seq"=>$mem_seq++ },
 		"epadding1"        => { "type"=>"uint32", "seq"=>$mem_seq++ },
 		"epadding2"        => { "type"=>"uint32", "seq"=>$mem_seq++ },
-		"epadding3"        => { "type"=>"uint32", "seq"=>$mem_seq++ },
 		"last_write_time"  => { "type"=>"time_t64", "seq"=>$mem_seq++ },
 		"last_read_time"   => { "type"=>"time_t64", "seq"=>$mem_seq++ },
 		"control_state"    => { "type"=>"uint8[256]", "seq"=>$mem_seq++ },
@@ -415,53 +415,55 @@ sub zmMemWrite( $$;$ )
 		my $data;
 		if ( $type eq "long" )
 		{
-			$data = pack( "l!", $data );
+			$data = pack( "l!", $value );
 		}
 		elsif ( $type eq "ulong" || $type eq "size_t" )
 		{
-			$data = pack( "L!", $data );
+			$data = pack( "L!", $value );
 		}
 		elsif ( $type eq "int64" || $type eq "time_t64" )
 		{
 			# The "q" type is only available on 64bit platforms, so use native.
-			$data = pack( "l!", $data );
+			$data = pack( "l!", $value );
 		}
 		elsif ( $type eq "uint64" )
 		{
 			# The "q" type is only available on 64bit platforms, so use native.
-			$data = pack( "L!", $data );
+			$data = pack( "L!", $value );
 		}
 		elsif ( $type eq "int32" )
 		{
-			$data = pack( "l", $data );
+			# The "q" type is only available on 64bit platforms, so use native.
+			$data = pack( "l!", $data );
 		}
 		elsif ( $type eq "uint32" || $type eq "bool4" )
 		{
-			$data = pack( "L", $data );
+			$data = pack( "L", $value );
 		}
 		elsif ( $type eq "int16" )
 		{
-			$data = pack( "s", $data );
+			# The "q" type is only available on 64bit platforms, so use native.
+			$data = pack( "L!", $data );
 		}
 		elsif ( $type eq "uint16" )
 		{
-			$data = pack( "S", $data );
+			$data = pack( "S", $value );
 		}
 		elsif ( $type eq "int8" )
 		{
-			$data = pack( "c", $data );
+			$data = pack( "l", $data );
 		}
 		elsif ( $type eq "uint8" || $type eq "bool1" )
 		{
-			$data = pack( "C", $data );
+			$data = pack( "L", $data );
 		}
 		elsif ( $type =~ /^int8\[\d+\]$/ )
 		{
-			$data = pack( "Z".$size, $data );
+			$data = pack( "Z".$size, $value );
 		} 
 		elsif ( $type =~ /^uint8\[\d+\]$/ )
 		{
-			$data = pack( "C".$size, $data );
+			$data = pack( "C".$size, $value );
 		} 
 		else
 		{

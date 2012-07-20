@@ -281,13 +281,14 @@ AVFrame **LocalCamera::capturePictures = 0;
 
 LocalCamera *LocalCamera::last_camera = NULL;
 
-LocalCamera::LocalCamera( int p_id, const std::string &p_device, int p_channel, int p_standard, const std::string &p_method, int p_width, int p_height, int p_colours, int p_palette, int p_brightness, int p_contrast, int p_hue, int p_colour, bool p_capture ) :
+LocalCamera::LocalCamera( int p_id, const std::string &p_device, int p_channel, int p_standard, const std::string &p_method, int p_width, int p_height, int p_colours, int p_palette, int p_brightness, int p_contrast, int p_hue, int p_colour, bool p_capture, unsigned int p_extras) :
     Camera( p_id, LOCAL_SRC, p_width, p_height, p_colours, ZM_SUBPIX_ORDER_DEFAULT_FOR_COLOUR(p_colours), p_brightness, p_contrast, p_hue, p_colour, p_capture ),
     device( p_device ),
     channel( p_channel ),
     standard( p_standard ),
     palette( p_palette ),
-    channel_index( 0 )
+    channel_index( 0 ),
+    extras ( p_extras )
 {
     // If we are the first, or only, input on this device then
     // do the initial opening etc
@@ -339,7 +340,9 @@ LocalCamera::LocalCamera( int p_id, const std::string &p_device, int p_channel, 
 			Error("Automatic format selection failed. Falling back to YUYV");
 			palette = V4L2_PIX_FMT_YUYV;
 		} else {
-			Debug(2,"Selected capture palette: %s (%c%c%c%c)",palette_desc,palette&0xff, (palette>>8)&0xff, (palette>>16)&0xff, (palette>>24)&0xff );
+			if(capture) {
+				Info("Selected capture palette: %s (%c%c%c%c)", palette_desc, palette&0xff, (palette>>8)&0xff, (palette>>16)&0xff, (palette>>24)&0xff);
+			}
 		}
 	}
 #endif
@@ -419,11 +422,11 @@ LocalCamera::LocalCamera( int p_id, const std::string &p_device, int p_channel, 
 			}
 			if( capture ) {
 				if(!sws_isSupportedInput(capturePixFormat)) {
-					Error("swscale does not support the used capture format");
+					Error("swscale does not support the used capture format: %c%c%c%c",(capturePixFormat)&0xff,((capturePixFormat>>8)&0xff),((capturePixFormat>>16)&0xff),((capturePixFormat>>24)&0xff));
 					conversion_type = 2; /* Try ZM format conversions */
 				}
 				if(!sws_isSupportedOutput(imagePixFormat)) {
-					Error("swscale does not support the target format");
+					Error("swscale does not support the target format: %c%c%c%c",(imagePixFormat)&0xff,((imagePixFormat>>8)&0xff),((imagePixFormat>>16)&0xff),((imagePixFormat>>24)&0xff));
 					conversion_type = 2; /* Try ZM format conversions */
 				}
 			}
@@ -704,13 +707,13 @@ void LocalCamera::Initialise()
         v4l2_data.fmt.fmt.pix.height = height;
         v4l2_data.fmt.fmt.pix.pixelformat = palette;
 
-	if ( config.v4l2_capture_fields )
+	if ( (extras & 0xff) != 0 )
 	{
-		v4l2_data.fmt.fmt.pix.field = (v4l2_field)config.v4l2_capture_fields;
+		v4l2_data.fmt.fmt.pix.field = (v4l2_field)(extras & 0xff);
 		
 		if ( vidioctl( vid_fd, VIDIOC_S_FMT, &v4l2_data.fmt ) < 0 )
 		{
-			Warning( "Failed to set V4L2 field to %d, falling back to auto", config.v4l2_capture_fields );
+			Warning( "Failed to set V4L2 field to %d, falling back to auto", (extras & 0xff) );
 			v4l2_data.fmt.fmt.pix.field = V4L2_FIELD_ANY;
 			if ( vidioctl( vid_fd, VIDIOC_S_FMT, &v4l2_data.fmt ) < 0 ) {
 				Fatal( "Failed to set video format: %s", strerror(errno) );
@@ -2013,7 +2016,7 @@ int LocalCamera::Capture( Image &image )
             buffer = (unsigned char *)v4l2_data.buffers[v4l2_data.bufptr->index].start;
             buffer_bytesused = v4l2_data.bufptr->bytesused;
 
-            if(v4l2_data.fmt.fmt.pix.width != width || v4l2_data.fmt.fmt.pix.height != height) {
+            if((v4l2_data.fmt.fmt.pix.width * v4l2_data.fmt.fmt.pix.height) !=  (width * height)) {
                     Fatal("Captured image dimensions differ: V4L2: %dx%d monitor: %dx%d",v4l2_data.fmt.fmt.pix.width,v4l2_data.fmt.fmt.pix.height,width,height);
             }
             
@@ -2097,7 +2100,7 @@ int LocalCamera::PostCapture()
 {
     Debug( 2, "Post-capturing" );
     // Requeue the buffer unless we need to switch or are a duplicate camera on a channel
-    if ( channel_count == 1 || channel_prime )
+    if ( channel_count > 1 || channel_prime )
     {
 #if ZM_HAS_V4L2
         if ( v4l_version == 2 )

@@ -105,10 +105,10 @@ protected:
 		uint8_t valid;             	/* +48   */
 		uint8_t active;            	/* +49   */
 		uint8_t signal;            	/* +50   */
-		uint8_t bpadding;          	/* +51   */
-		uint32_t epadding1;        	/* +52   */
-		uint32_t epadding2;        	/* +56   */
-		uint32_t epadding3;        	/* +60   */
+		uint8_t format;            	/* +51   */
+		uint32_t imagesize;        	/* +52   */
+		uint32_t epadding1;        	/* +56   */
+		uint32_t epadding2;        	/* +60   */
 		/* 
 		** This keeps 32bit time_t and 64bit time_t identical and compatible as long as time is before 2038.
 		** Shared memory layout should be identical for both 32bit and 64bit and is multiples of 16.
@@ -211,6 +211,7 @@ protected:
 	unsigned int    width;				    // Normally the same as the camera, but not if partly rotated
 	unsigned int    height;				    // Normally the same as the camera, but not if partly rotated
 	Orientation		orientation;		    // Whether the image has to be rotated at all
+	unsigned int	deinterlacing;
 	int				brightness;			    // The statically saved brightness of the camera
 	int				contrast;			    // The statically saved contrast of the camera
 	int				hue;				    // The statically saved hue of the camera
@@ -265,6 +266,7 @@ protected:
 	TriggerData		*trigger_data;
 
 	Snapshot		*image_buffer;
+	Snapshot		next_buffer; /* Used by four field deinterlacing */
 
 	Camera			*camera;
 
@@ -277,7 +279,7 @@ protected:
 	MonitorLink		**linked_monitors;
 
 public:
-	Monitor( int p_id, const char *p_name, const char *p_serverhost, int p_function, bool p_enabled, const char *p_linked_monitors, Camera *p_camera, int p_orientation, const char *p_event_prefix, const char *p_label_format, const Coord &p_label_coord, int p_image_buffer_count, int p_warmup_count, int p_pre_event_count, int p_post_event_count, int p_stream_replay_buffer, int p_alarm_frame_count, int p_section_length, int p_frame_skip, int p_capture_delay, int p_alarm_capture_delay, int p_fps_report_interval, int p_ref_blend_perc, bool p_track_motion, Rgb p_signal_check_colour, Purpose p_purpose, int p_n_zones=0, Zone *p_zones[]=0 );
+	Monitor( int p_id, const char *p_name, const char *p_serverhost, int p_function, bool p_enabled, const char *p_linked_monitors, Camera *p_camera, int p_orientation, unsigned int p_deinterlacing, const char *p_event_prefix, const char *p_label_format, const Coord &p_label_coord, int p_image_buffer_count, int p_warmup_count, int p_pre_event_count, int p_post_event_count, int p_stream_replay_buffer, int p_alarm_frame_count, int p_section_length, int p_frame_skip, int p_capture_delay, int p_alarm_capture_delay, int p_fps_report_interval, int p_ref_blend_perc, bool p_track_motion, Rgb p_signal_check_colour, Purpose p_purpose, int p_n_zones=0, Zone *p_zones[]=0 );
 	~Monitor();
 
 	void AddZones( int p_n_zones, Zone *p_zones[] );
