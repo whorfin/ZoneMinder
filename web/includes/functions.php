@@ -2364,46 +2364,6 @@ function jsonDecode( $value )
     return( $result );
 }
 
-function xmlEncode ($mixed,$domElement=null,$DOMDocument=null){
-    if(is_null($DOMDocument)){
-        $DOMDocument=new DOMDocument;
-        $DOMDocument->formatOutput=true;
-		$node=$DOMDocument->createElement("Response");
-		$DOMDocument->appendChild($node);
-        xmlEncode($mixed,$node,$DOMDocument);
-        return $DOMDocument->saveXML();
-    }
-    else{
-        if(is_array($mixed)){
-            foreach($mixed as $index=>$mixedElement){
-                if(is_int($index)){
-                    if($index==0){
-                        $node=$domElement;
-                    }
-                    else{
-                        $node=$DOMDocument->createElement($domElement->tagName);
-                        $domElement->parentNode->appendChild($node);
-                    }
-                }
-                else{
-                    $plural=$DOMDocument->createElement($index);
-                    $domElement->appendChild($plural);
-                    $node=$plural;
-                    if(rtrim($index,'s')!==$index && $index != "status" && $index != "fps"){
-                        $singular=$DOMDocument->createElement(rtrim($index,'s'));
-                        $plural->appendChild($singular);
-                        $node=$singular;
-                    }
-                }
-                xmlEncode($mixedElement,$node,$DOMDocument);
-            }
-        }
-        else{
-            $domElement->appendChild($DOMDocument->createTextNode($mixed));
-        }
-    }
-}
-
 define( 'HTTP_STATUS_OK', 200 );
 define( 'HTTP_STATUS_BAD_REQUEST', 400 );
 define( 'HTTP_STATUS_FORBIDDEN', 403 );
