@@ -3562,28 +3562,28 @@ void MonitorStream::runStream()
 	int lock_fd = 0;
 	last_reduction_time = -1;
     bool buffered_playback = false;
- 
-	if ( connkey && playback_buffer > 0 ) {
-        Debug( 2, "Checking swap image location" );
-        Debug( 3, "Checking swap image path" );
-        strncpy( swap_path, config.path_swap, sizeof(swap_path) );
-        if ( checkSwapPath( swap_path, false ) )
-        {
-            snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
-            if ( checkSwapPath( swap_path, true ) )
-            {
-                snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
-                if ( checkSwapPath( swap_path, true ) )
-                {
-                    buffered_playback = true;
-                }
-            }
-        }
-	}
 	char sock_path_lock[PATH_MAX];
 	sock_path_lock[0] = 0;
+ 
 	if (connkey)
 	{
+		if ( connkey && playback_buffer > 0 ) {
+			Debug( 2, "Checking swap image location" );
+			Debug( 3, "Checking swap image path" );
+			strncpy( swap_path, config.path_swap, sizeof(swap_path) );
+			if ( checkSwapPath( swap_path, false ) )
+			{
+				snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
+				if ( checkSwapPath( swap_path, true ) )
+				{
+					snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
+					if ( checkSwapPath( swap_path, true ) )
+					{
+						buffered_playback = true;
+					}
+				}
+			}
+		}
 		snprintf( sock_path_lock, sizeof(sock_path_lock), "%s/zms-%06d.lock", config.path_socks, connkey);
 
 		lock_fd = open(sock_path_lock, O_CREAT|O_WRONLY, S_IRUSR | S_IWUSR);
@@ -3621,52 +3621,8 @@ void MonitorStream::runStream()
     temp_read_index = temp_image_buffer_count;
     temp_write_index = temp_image_buffer_count;
 
-    char swap_path[PATH_MAX] = "";
-    bool buffered_playback = false;
-
-	int lock_fd = 0;
-	last_reduction_time = -1;
-	char sock_path_lock[PATH_MAX];
-	sock_path_lock[0] = 0;
-
-    if ( connkey ) {
-		if ( playback_buffer > 0 )
-		{
-			Debug( 2, "Checking swap image location" );
-			Debug( 3, "Checking swap image path" );
-			strncpy( swap_path, config.path_swap, sizeof(swap_path) );
-			if ( checkSwapPath( swap_path, false ) )
-			{
-				snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
-				if ( checkSwapPath( swap_path, true ) )
-				{
-					snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
-					if ( checkSwapPath( swap_path, true ) )
-					{
-						buffered_playback = true;
-					} else {
-						Error( "Unable to validate swap image path at %s, disabling buffered playback", swap_path );
-					}
-				} else {
-					Error( "Unable to validate swap image path at %s, disabling buffered playback", swap_path );
-				}
-			} else {
-				Error( "Unable to validate swap image path at %s, disabling buffered playback", swap_path );
-			}
-		}
-
-
-		snprintf( sock_path_lock, sizeof(sock_path_lock), "%s/zms-%06d.lock", config.path_socks, connkey);
-
-		lock_fd = open(sock_path_lock, O_CREAT|O_WRONLY, S_IRUSR | S_IWUSR);
-		if (lock_fd <= 0 || flock(lock_fd, LOCK_SH|LOCK_NB) != 0)
-		{
-			Error("Unable to lock sock lock file %s: %s", sock_path_lock, strerror(errno) );
-
-			close(lock_fd);
-			lock_fd = 0;
-		}
-
+    if ( connkey && playback_buffer > 0 )
+    {
         if ( !buffered_playback )
         {
             Error( "Unable to validate swap image path, disabling buffered playback" );

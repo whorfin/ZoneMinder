@@ -1935,14 +1935,6 @@ body = "ZM alarm detected - %EL% secs, %EF%/%EFA% frames, t%EST%/m%ESM%/a%ESA% s
 		category => "eyeZm",
 	},
 	{
-		name => "ZM_REDUCTION_FPS_RESET_TIME",
-		default => "0",
-		description => "After how many seconds should the maxfps of a stream go back to normal after it has been throttled",
-		help => "When a stream cannot send frames as fast as requested (generally due to too slow of a connection) it will throttle it back, unfortunately if the cause of this was only temporary the FPS will never pickup again.  By setting this to a value greater than 0 it will automatically go back to the original FPS after X seconds from when the last throttle took place.",
-		type => $types{integer},
-		category => "images",
-	},
-	{
 		name => "ZM_RECORD_DIAG_IMAGES_FIFO",
 		default => "no",
 		description => "When Recording intermediate alarm diagnostic use fifo instead of files (faster)",

@@ -1,3 +1,9 @@
+zoneminder (1.25.2-1ubuntu10) UNRELEASED; urgency=low
+
+  * merge from mitchcapper tree
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 04 Dec 2012 12:13:08 -0500
+
 zoneminder (1.25.2-1ubuntu9) quantal; urgency=high
 
   * Add a fix to load local cameras using ServerHost
