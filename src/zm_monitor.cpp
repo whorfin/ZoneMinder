@@ -1297,7 +1297,7 @@ bool Monitor::Analyse()
                     {
                         if ( linked_monitors[i]->isConnected() )
                         {
-                            if ( linked_monitors[i]->isAlarmed() )
+                            if ( linked_monitors[i]->hasAlarmed() )
                             {
                                 if ( !event )
                                 {
