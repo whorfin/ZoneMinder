@@ -167,7 +167,10 @@ $statusData = array(
 function collectData()
 {
     global $statusData;
-
+	if (isset($_REQUEST['MainFrameID']) && $_REQUEST['MainFrameID'] == "1"){
+		$statusData["event"]["elements"]["MainFrameID"] = array( "sql" => "(select FrameID from Frames where EventId=Events.id order by Score desc,FrameId limit 1)"   );
+		$statusData["events"]["elements"]["MainFrameID"] = array( "sql" => "(select FrameID from Frames where EventId=Events.id order by Score desc,FrameId limit 1)"   );
+	}
     $entitySpec = &$statusData[strtolower(validJsStr($_REQUEST['entity']))];
     #print_r( $entitySpec );
     if ( !canView( $entitySpec['permission'] ) )
@@ -269,12 +272,16 @@ function collectData()
 				}
                 $sql .= " order by $col $dir";
 			}
+
             if ( !empty($entitySpec['limit']) )
                 $limit = $entitySpec['limit'];
             elseif ( !empty($_REQUEST['count']) )
                 $limit = validInt($_REQUEST['count']);
+			$limit_offset="";
+			if ( !empty($_REQUEST['offset']) )
+                $limit_offset = validInt($_REQUEST['offset']) . ", ";
             if ( !empty( $limit ) )
-                $sql .= " limit ".$limit;
+                $sql .= " limit ".$limit_offset . $limit;
             if ( isset($limit) && $limit == 1 )
             {
                 if ( $sqlData = dbFetchOne( $sql ) )

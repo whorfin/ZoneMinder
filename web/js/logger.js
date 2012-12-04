@@ -29,8 +29,8 @@ if ( !window.console )
         error:function() {}
     };
 }
-if ( !console.debug )//IE8 has console but doesn't have console.debug so lets alias it.
-    console.debug = console.log;
+if (! window.console.debug )//IE8 has console but doesn't have console.debug so lets alias it.
+    window.console.debug = console.log;
 
 var reportLogs = true;
 

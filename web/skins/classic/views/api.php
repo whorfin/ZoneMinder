@@ -1,4 +1,4 @@
-?php
+<?php
 header('Content-type: text/xml');
 header('Pragma: public');        
 header('Cache-control: private');
@@ -78,6 +78,7 @@ else if ($_REQUEST['action'] == "event_stats"){
 		$stat_str .= make_tag("BlobPixels",$stat["BlobPixels"]);
 		$stat_str .= make_tag("Blobs",$stat["Blobs"]);
 		$stat_str .= make_tag("ZoneName",$stat["ZoneName"]);
+		$stat_str .= make_tag("Score",$stat["Score"]);
 		print make_tag("stat",$stat_str);
 
 	}

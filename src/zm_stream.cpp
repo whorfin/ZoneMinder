@@ -302,6 +302,7 @@ void StreamBase::openComms()
 
 void StreamBase::closeComms()
 {
+	Debug(5, "closeComms called: connKey: %d, fd: %d, path: %s",connkey,sd,loc_sock_path);
     if ( connkey > 0 )
     {
         if ( sd >= 0 )

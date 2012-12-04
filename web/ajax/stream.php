@@ -51,7 +51,7 @@ while ( !file_exists($remSockFile) && $max_socket_tries-- ) //sometimes we are t
     sleep(1);
 
 $max_socket_refuse_trys = 2;
-while (! ($socket_res = @socket_sendto( $socket, $msg, strlen($msg), 0, $remSockFile )) &&  socket_last_error() == 111 && $max_socket_refuse_trys--)
+while (! ($socket_res = @socket_sendto( $socket, $msg, strlen($msg), 0, $remSockFile )) && socket_last_error() == 111 && $max_socket_refuse_trys--)
 	sleep(1);
 if ( ! $socket_res)
 {
@@ -107,6 +107,9 @@ switch ( $data['type'] )
         $data['rate'] /= RATE_BASE;
         $data['delay'] = sprintf( "%.2f", $data['delay'] );
         $data['zoom'] = sprintf( "%.1f", $data['zoom']/SCALE_BASE );
+		if (isset($_REQUEST['notes']) && $_REQUEST['notes'] == "1" && ($data['state'] == STATE_ALARM ||  $data['state'] == STATE_ALERT) ){
+				$data['notes'] = dbFetchOne("select Notes FROM Events WHERE MonitorId ='" . $data['monitor'] . "' order by id desc LIMIT 1","Notes");
+		}
         ajaxResponse( array( 'status'=>$data ) );
         break;
     }

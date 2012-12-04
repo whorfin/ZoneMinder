@@ -21,7 +21,7 @@
 #include "zm_image.h"
 #include "zm_utils.h"
 #include "zm_rgb.h"
-
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
 
@@ -776,33 +776,71 @@ bool Image::ReadJpeg( const char *filename, int p_colours, int p_subpixelorder)
 	return( true );
 }
 
-bool Image::WriteJpeg( const char *filename, int quality_override ) const
+bool Image::WriteJpeg( const char *filename, int quality_override, bool on_blocking_abort ) const
 {
 	if ( config.colour_jpeg_files && colours == ZM_COLOUR_GRAY8 )
 	{
 		Image temp_image( *this );
 		temp_image.Colourise( ZM_COLOUR_RGB24, ZM_SUBPIX_ORDER_RGB );
-		return( temp_image.WriteJpeg( filename, quality_override ) );
+		return( temp_image.WriteJpeg( filename, quality_override, on_blocking_abort ) );
 	}
 
 	int quality = quality_override?quality_override:config.jpeg_file_quality;
 
 	struct jpeg_compress_struct *cinfo = jpg_ccinfo[quality];
 
+	FILE *outfile =NULL;
+	static int raw_fd = 0;
+	bool need_create_comp = false;
+	raw_fd = 0;
 	if ( !cinfo )
 	{
 		cinfo = jpg_ccinfo[quality] = new jpeg_compress_struct;
 		cinfo->err = jpeg_std_error( &jpg_err.pub );
+		need_create_comp=true;
+	}
+	if (! on_blocking_abort)
+	{
 		jpg_err.pub.error_exit = zm_jpeg_error_exit;
 		jpg_err.pub.emit_message = zm_jpeg_emit_message;
-		jpeg_create_compress( cinfo );
 	}
+	else
+	{
+		jpg_err.pub.error_exit = zm_jpeg_error_silent;
+	    jpg_err.pub.emit_message = zm_jpeg_emit_silence;
+		if (setjmp( jpg_err.setjmp_buffer ) )
+		{
+			jpeg_abort_compress( cinfo );
+			Debug( 5, "Aborted a write mid-stream and %s and %d", (outfile == NULL) ? "closing file" : "file not opened", raw_fd );
+			if (raw_fd)
+				close(raw_fd);
+				if (outfile)
+				fclose( outfile );
+			return ( false );
+		}
+	}
+	if (need_create_comp)
+		jpeg_create_compress( cinfo );
 
-	FILE *outfile;
+	if (! on_blocking_abort)
+	{
 	if ( (outfile = fopen( filename, "wb" )) == NULL )
 	{
-		Error( "Can't open %s: %s", filename, strerror(errno) );
+			Error( "Can't open %s for writing: %s", filename, strerror(errno) );
+			return( false );
+		}
+	}
+	else
+	{
+		raw_fd = open(filename,O_WRONLY|O_NONBLOCK|O_CREAT|O_TRUNC,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+		if (raw_fd < 0)
+			return ( false );
+		outfile = fdopen(raw_fd,"wb");
+		if (outfile == NULL)
+		{
+			close(raw_fd);
 		return( false );
+	}
 	}
 	jpeg_stdio_dest( cinfo, outfile );
 
