@@ -890,7 +890,7 @@ function canStreamIframe()
 function canStreamNative()
 {
    // Chrome can display the stream, but then it blocks everything else (Chrome bug 5876)
-   return( ZM_WEB_CAN_STREAM == "yes" || ( ZM_WEB_CAN_STREAM == "auto" && (!isInternetExplorer() && !isChrome()) ) );
+   return( ZM_WEB_CAN_STREAM == "yes" || ( ZM_WEB_CAN_STREAM == "auto" && (!isInternetExplorer() ) ) );
 }
 
 function canStreamApplet()
