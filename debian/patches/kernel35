@@ -1,0 +1,39 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## make_zmc_die_on_serverhost_change.dpatch by  <iconnor@www6.internal.point-one.com>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -urNad '--exclude=CVS' '--exclude=.svn' '--exclude=.git' '--exclude=.arch' '--exclude=.hg' '--exclude=_darcs' '--exclude=.bzr' zoneminder-1.24.4~/src/zm_local_camera.cpp zoneminder-1.24.4/src/zm_local_camera.cpp
+--- ZoneMinder-kfir.orig/src/zm_local_camera.cpp	2012-12-03 13:42:10.000000000 -0500
++++ ZoneMinder-kfir/src/zm_local_camera.cpp	2012-12-03 14:00:45.000000000 -0500
+@@ -739,7 +739,8 @@
+     {
+         Debug( 3, "Terminating video stream" );
+         //enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+-        enum v4l2_buf_type type = v4l2_data.fmt.type;
++	//        enum v4l2_buf_type type = v4l2_data.fmt.type;
++		enum v4l2_buf_type type = (v4l2_buf_type)v4l2_data.fmt.type;
+         if ( vidioctl( vid_fd, VIDIOC_STREAMOFF, &type ) < 0 )
+             Error( "Failed to stop capture stream: %s", strerror(errno) );
+ 
+@@ -1519,7 +1520,7 @@
+ 
+         Debug( 3, "Starting video stream" );
+         //enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+-        enum v4l2_buf_type type = v4l2_data.fmt.type;
++        enum v4l2_buf_type type = (v4l2_buf_type)v4l2_data.fmt.type;
+         if ( vidioctl( vid_fd, VIDIOC_STREAMON, &type ) < 0 )
+             Fatal( "Failed to start capture stream: %s", strerror(errno) );
+     }
+
+@@ -1931,7 +1931,7 @@ int LocalCamera::PrimeCapture()
+ 
+         Debug( 3, "Starting video stream" );
+         //enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+-        enum v4l2_buf_type type = v4l2_data.fmt.type;
++        enum v4l2_buf_type type = (v4l2_buf_type)v4l2_data.fmt.type;
+         if ( vidioctl( vid_fd, VIDIOC_STREAMON, &type ) < 0 )
+             Fatal( "Failed to start capture stream: %s", strerror(errno) );
+     }

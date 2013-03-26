@@ -1,3 +1,9 @@
+zoneminder (1.25.2-1ubuntu11) UNRELEASED; urgency=low
+
+  * merge fix from redhat bug 903063
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 26 Mar 2012 14:29:08 -0400
+
 zoneminder (1.25.2-1ubuntu10) UNRELEASED; urgency=low
 
   * merge from mitchcapper tree
