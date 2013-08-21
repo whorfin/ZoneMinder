@@ -25,6 +25,7 @@
 #include "zm_user.h"
 #include "zm_signal.h"
 #include "zm_monitor.h"
+#include "zm_fifo.h"
 
 bool ValidateAccess( User *user, int mon_id )
 {
@@ -54,7 +55,7 @@ int main( int argc, const char *argv[] )
 {
     srand( getpid() * time( 0 ) );
 
-	enum { ZMS_MONITOR, ZMS_EVENT } source = ZMS_MONITOR;
+	enum { ZMS_MONITOR, ZMS_EVENT, ZMS_FIFO } source = ZMS_MONITOR;
 	enum { ZMS_JPEG, ZMS_MPEG, ZMS_RAW, ZMS_ZIP, ZMS_SINGLE } mode = ZMS_JPEG;
 	char format[32] = "";
 	int monitor_id = 0;
@@ -119,6 +120,8 @@ int main( int argc, const char *argv[] )
 			if ( !strcmp( name, "source" ) )
 			{
 				source = !strcmp( value, "event" )?ZMS_EVENT:ZMS_MONITOR;
+				if (! strcmp( value,"fifo") )
+					source = ZMS_FIFO;
 			}
 			else if ( !strcmp( name, "mode" ) )
 			{
@@ -323,5 +326,12 @@ int main( int argc, const char *argv[] )
         }
         stream.runStream();
     }
+	else if (source == ZMS_FIFO )
+	{
+		FifoStream stream;
+		stream.setStreamMaxFPS( maxfps );
+		stream.setStreamStart( monitor_id, format );
+		stream.runStream();
+	}
 	return( 0 );
 }

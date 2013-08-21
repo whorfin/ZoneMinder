@@ -63,6 +63,8 @@ else
         'Method' => "",
         'Host' => "",
         'Path' => "",
+        'JPGPath' => "",
+        'MJPGPath' => "",
         'Port' => "80",
         'Colours' => 3,
         'Palette' => 0,
@@ -102,6 +104,7 @@ else
         'SignalCheckColour' => '#0000c0',
         'WebColour' => 'red',
         'Triggers' => "",
+	'ServerHost' => ZM_SERVER_HOST,
     );
 }
 
@@ -440,6 +443,7 @@ if ( $tab != 'general' )
 {
 ?>
         <input type="hidden" name="newMonitor[Name]" value="<?= validHtmlStr($newMonitor['Name']) ?>"/>
+        <input type="hidden" name="newMonitor[ServerHost]" value="<?= validHtmlStr($newMonitor['ServerHost']) ?>"/>
         <input type="hidden" name="newMonitor[Type]" value="<?= validHtmlStr($newMonitor['Type']) ?>"/>
         <input type="hidden" name="newMonitor[Function]" value="<?= validHtmlStr($newMonitor['Function']) ?>"/>
         <input type="hidden" name="newMonitor[Enabled]" value="<?= validHtmlStr($newMonitor['Enabled']) ?>"/>
@@ -484,6 +488,8 @@ if ( $tab != 'source' || ($newMonitor['Type'] != 'Remote' && $newMonitor['Type']
 {
 ?>
     <input type="hidden" name="newMonitor[Path]" value="<?= validHtmlStr($newMonitor['Path']) ?>"/>
+    <input type="hidden" name="newMonitor[JPGPath]" value="<?= validHtmlStr($newMonitor['JPGPath']) ?>"/>
+    <input type="hidden" name="newMonitor[MJPGPath]" value="<?= validHtmlStr($newMonitor['MJPGPath']) ?>"/>
 <?php
 }
 if ( $tab != 'source' )
@@ -566,6 +572,8 @@ switch ( $tab )
     {
 ?>
             <tr><td><?= $SLANG['Name'] ?></td><td><input type="text" name="newMonitor[Name]" value="<?= validHtmlStr($newMonitor['Name']) ?>" size="16"/></td></tr>
+            <tr><td><?= $SLANG['ServerHost'] ?></td><td><input type="text" name="newMonitor[ServerHost]" value="<?= validHtmlStr($newMonitor['ServerHost']) ?>" size="16"/></td></tr>
+
             <tr><td><?= $SLANG['SourceType'] ?></td><td><?= buildSelect( "newMonitor[Type]", $sourceTypes ); ?></td></tr>
             <tr><td><?= $SLANG['Function'] ?></td><td><select name="newMonitor[Function]">
 <?php
@@ -678,6 +686,8 @@ switch ( $tab )
             <tr><td><?= $SLANG['RemoteHostName'] ?></td><td><input type="text" name="newMonitor[Host]" value="<?= validHtmlStr($newMonitor['Host']) ?>" size="36"/></td></tr>
             <tr><td><?= $SLANG['RemoteHostPort'] ?></td><td><input type="text" name="newMonitor[Port]" value="<?= validHtmlStr($newMonitor['Port']) ?>" size="6"/></td></tr>
             <tr><td><?= $SLANG['RemoteHostPath'] ?></td><td><input type="text" name="newMonitor[Path]" value="<?= validHtmlStr($newMonitor['Path']) ?>" size="36"/></td></tr>
+            <tr><td><?= $SLANG['RemoteHostJPGPath'] ?></td><td><input type="text" name="newMonitor[JPGPath]" value="<?= validHtmlStr($newMonitor['JPGPath']) ?>" size="36"/></td></tr>
+            <tr><td><?= $SLANG['RemoteHostMJPGPath'] ?></td><td><input type="text" name="newMonitor[MJPGPath]" value="<?= validHtmlStr($newMonitor['MJPGPath']) ?>" size="36"/></td></tr>
 <?php
         }
         elseif ( $newMonitor['Type'] == "File" || $newMonitor['Type'] == "Ffmpeg" )

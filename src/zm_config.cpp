@@ -95,6 +95,8 @@ void zmLoadConfig()
             staticConfig.DB_PASS = val;
 		else if ( strcasecmp( name_ptr, "ZM_PATH_WEB" ) == 0 )
             staticConfig.PATH_WEB = val;
+		else if ( strcasecmp( name_ptr, "ZM_SERVER_HOST" ) == 0 )
+            staticConfig.SERVER_HOST = val;
 		else
 		{
 			// We ignore this now as there may be more parameters than the

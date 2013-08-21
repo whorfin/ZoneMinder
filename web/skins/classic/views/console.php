@@ -231,6 +231,7 @@ else
           <tr>
             <th class="colName"><?= $SLANG['Name'] ?></th>
             <th class="colFunction"><?= $SLANG['Function'] ?></th>
+            <th class="colServerHost"><?= $SLANG['ServerHost'] ?></th>
             <th class="colSource"><?= $SLANG['Source'] ?></th>
 <?php
 for ( $i = 0; $i < count($eventCounts); $i++ )
@@ -254,7 +255,7 @@ if ( canEdit('Monitors') )
         </thead>
         <tfoot>
           <tr>
-            <td class="colLeftButtons" colspan="3">
+            <td class="colLeftButtons" colspan="4">
               <input type="button" value="<?= $SLANG['Refresh'] ?>" onclick="location.reload(true);"/>
               <?= makePopupButton( '?view=monitor', 'zmMonitor0', 'monitor', $SLANG['AddNewMonitor'], (canEdit( 'Monitors' ) && !$user['MonitorIds']) ) ?>
               <?= makePopupButton( '?view=filter&amp;filter[terms][0][attr]=DateTime&amp;filter[terms][0][op]=%3c&amp;filter[terms][0][val]=now', 'zmFilter', 'filter', $SLANG['Filters'], canView( 'Events' ) ) ?>
@@ -300,6 +301,7 @@ foreach( $displayMonitors as $monitor )
 ?>
             <td class="colName"><?= makePopupLink( '?view=watch&amp;mid='.$monitor['Id'], 'zmWatch'.$monitor['Id'], array( 'watch', reScale( $monitor['Width'], $scale ), reScale( $monitor['Height'], $scale ) ), $monitor['Name'], $running && ($monitor['Function'] != 'None') && canView( 'Stream' ) ) ?></td>
             <td class="colFunction"><?= makePopupLink( '?view=function&amp;mid='.$monitor['Id'], 'zmFunction', 'function', '<span class="'.$fclass.'">'.$monitor['Function'].'</span>', canEdit( 'Monitors' ) ) ?></td>
+            <td class="colServerHost"><?= makePopupLink( '?view=function&amp;mid='.$monitor['Id'], 'zmFunction', 'ServerHost', '<span class="'.$fclass.'">'.$monitor['ServerHost'].'</span>', canEdit( 'Monitors' ) ) ?></td>
 <?php if ( $monitor['Type'] == "Local" ) { ?>
             <td class="colSource"><?= makePopupLink( '?view=monitor&amp;mid='.$monitor['Id'], 'zmMonitor'.$monitor['Id'], 'monitor', '<span class="'.$dclass.'">'.$monitor['Device'].' ('.$monitor['Channel'].')</span>', canEdit( 'Monitors' ) ) ?></td>
 <?php } elseif ( $monitor['Type'] == "Remote" ) { ?>

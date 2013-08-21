@@ -31,8 +31,11 @@ if ( !empty($_REQUEST['group']) )
     $row = dbFetchOne( $sql );
     $groupSql = " and find_in_set( Id, '".$row['MonitorIds']."' )";
 }
-
+if ( ZM_SERVER_HOST ) {
+$sql = "select * from Monitors where Function != 'None' and ServerHost='".ZM_SERVER_HOST."'$groupSql order by Sequence";
+} else {
 $sql = "select * from Monitors where Function != 'None'$groupSql order by Sequence";
+}
 $maxWidth = 0;
 $maxHeight = 0;
 $showControl = false;

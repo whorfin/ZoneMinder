@@ -116,7 +116,7 @@ Event::Event( Monitor *p_monitor, struct timeval p_start_time, const std::string
             stat( path, &statbuf );
             if ( errno == ENOENT || errno == ENOTDIR )
             {
-                if ( mkdir( path, 0755 ) )
+                if ( mkdir( path, 0755 ) < 0 )
                 {
                     Fatal( "Can't mkdir %s: %s", path, strerror(errno));
                 }
@@ -147,7 +147,7 @@ Event::Event( Monitor *p_monitor, struct timeval p_start_time, const std::string
         stat( path, &statbuf );
         if ( errno == ENOENT || errno == ENOTDIR )
         {
-            if ( mkdir( path, 0755 ) )
+            if ( mkdir( path, 0755 ) < 0 )
             {
                 Error( "Can't mkdir %s: %s", path, strerror(errno));
             }
