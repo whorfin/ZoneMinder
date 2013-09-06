@@ -20,6 +20,9 @@
 #ifndef ZM_MONITOR_H
 #define ZM_MONITOR_H
 
+#include <vector>
+#include <sstream>
+
 #include "zm.h"
 #include "zm_coord.h"
 #include "zm_image.h"
@@ -27,6 +30,8 @@
 #include "zm_zone.h"
 #include "zm_event.h"
 #include "zm_camera.h"
+
+#include "zm_image_analyser.h"
 
 #include <sys/time.h>
 #include <stdint.h>
@@ -275,6 +280,8 @@ protected:
 	int				n_zones;
 	Zone			**zones;
 
+   int iDoNativeMotDet;
+
 	int				n_linked_monitors;
 	MonitorLink		**linked_monitors;
 
@@ -374,6 +381,8 @@ public:
 	}
 
 	unsigned int DetectMotion( const Image &comp_image, Event::StringSet &zoneSet );
+   // DetectBlack seems to be unused. Check it on zm_monitor.cpp for more info.
+   //unsigned int DetectBlack( const Image &comp_image, Event::StringSet &zoneSet );
 	bool CheckSignal( const Image *image );
 	bool Analyse();
 	void DumpImage( Image *dump_image ) const;

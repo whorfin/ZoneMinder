@@ -1,8 +1,8 @@
 AC_PREREQ(2.59)
-AC_INIT(zm,1.27.0,[http://www.zoneminder.com/forums/ - Please check FAQ first],ZoneMinder,http://www.zoneminder.com/downloads.html)
+AC_INIT(zm,1.27.1,[http://www.zoneminder.com/forums/ - Please check FAQ first],ZoneMinder,http://www.zoneminder.com/downloads.html)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/zm.h)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AC_SUBST([AM_CXXFLAGS], [-D__STDC_CONSTANT_MACROS])
 
@@ -16,7 +16,7 @@ AC_ARG_VAR(ZM_DB_NAME,[Name of ZoneMinder database, default zm])
 AC_ARG_VAR(ZM_DB_USER,[Name of ZoneMinder database user, default zmuser])
 AC_ARG_VAR(ZM_DB_PASS,[Password of ZoneMinder database user, default zmpass])
 AC_ARG_VAR(ZM_SSL_LIB,[Library to use for ssl functions, default gnutls])
-AC_ARG_VAR(ZM_MYSQL_ENGINE,[MySQL engine to use with database, default MyISAM])
+AC_ARG_VAR(ZM_MYSQL_ENGINE,[MySQL engine to use with database, default InnoDB])
 AC_ARG_VAR(ZM_RUNDIR,[Location of transient process files, default /var/run/zm])
 AC_ARG_VAR(ZM_TMPDIR,[Location of temporary files, default /tmp/zm])
 AC_ARG_VAR(ZM_LOGDIR,[Location of generated log files, default /var/log/zm])
@@ -37,7 +37,7 @@ if test "$ZM_SSL_LIB" == ""; then
 	AC_SUBST(ZM_SSL_LIB,gnutls)
 fi
 if test "$ZM_MYSQL_ENGINE" == ""; then
-	AC_SUBST(ZM_MYSQL_ENGINE,MyISAM)
+	AC_SUBST(ZM_MYSQL_ENGINE,InnoDB)
 fi
 if test "$ZM_RUNDIR" == ""; then
 	AC_SUBST(ZM_RUNDIR,[/var/run/zm])
@@ -296,7 +296,9 @@ fi
 AC_CHECK_HEADERS(gcrypt.h,,AC_MSG_WARN(zm requires libgcrypt headers to be installed for gnutls),)
 AC_CHECK_LIB(gcrypt,gcry_check_version,,AC_MSG_WARN([libgcrypt.a is required for authenticated streaming - use ZM_SSL_LIB option to select openssl instead]))
 AC_CHECK_LIB(gnutls,gnutls_fingerprint,,AC_MSG_WARN([libgnutls.a is required for authenticated streaming - use ZM_SSL_LIB option to select openssl instead]))
+if test "$ZM_HAS_GNUTLS_OPENSSL" == "1"; then
 AC_CHECK_LIB(gnutls-openssl,MD5,,AC_MSG_WARN([libgnutls.a is required for authenticated streaming - use ZM_SSL_LIB option to select openssl instead]))
+fi
 fi
 AC_CHECK_LIB(pcre,pcre_compile,,AC_MSG_WARN(libpcre.a may be required for remote/network camera support))
 AC_CHECK_LIB(z,zlibVersion)
@@ -304,8 +306,15 @@ AC_CHECK_LIB(x264,x264_predict_16x16_init)
 AC_CHECK_LIB(avutil,av_malloc,,AC_MSG_WARN(libavutil.a may be required for MPEG streaming))
 # Don't bother to warn about this one
 AC_CHECK_LIB(avcore,av_image_copy,,)
+<<<<<<< HEAD
 AC_CHECK_LIB(avcodec,avcodec_register,,AC_MSG_WARN(libavcodec.a is required for MPEG streaming))
 AC_CHECK_LIB(avformat,av_new_stream,,AC_MSG_WARN(libavformat.a is required for MPEG streaming))
+=======
+AC_CHECK_LIB(avcodec,avcodec_version,,AC_MSG_WARN(libavcodec.a is required for MPEG streaming))
+AC_CHECK_LIB(avformat,avformat_version,,AC_MSG_WARN(libavformat.a is required for MPEG streaming))
+#AC_CHECK_LIB(avcodec,avcodec_open,,AC_MSG_WARN(libavcodec.a is required for MPEG streaming))
+#AC_CHECK_LIB(avformat,av_new_stream,,AC_MSG_WARN(libavformat.a is required for MPEG streaming))
+>>>>>>> master
 AC_CHECK_LIB(avdevice,avdevice_register_all,,AC_MSG_WARN(libavdevice.a may be required for MPEG streaming))
 AC_CHECK_LIB(swscale,sws_scale,,,-lswscale)
 AC_CHECK_LIB(bz2,BZ2_bzCompress,,AC_MSG_WARN(zm requires libbz2.a for recent versions of ffmpeg))

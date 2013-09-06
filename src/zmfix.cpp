@@ -175,11 +175,11 @@ int main( int argc, char *argv[] )
 
 	if ( staticConfig.SERVER_HOST.empty() )
     {
-    snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isnull(ControlDevice) && ControlDevice != ''" );
+    snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isEmpty(ControlDevice) && ControlDevice != ''" );
     }
     else
     {
-    snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isnull(ControlDevice) && ControlDevice != '' AND serverhost='%s'", staticConfig.SERVER_HOST.c_str() );
+    snprintf( sql, sizeof(sql), "select distinct ControlDevice from Monitors where not isEmpty(ControlDevice) && ControlDevice != '' AND serverhost='%s'", staticConfig.SERVER_HOST.c_str() );
     }
     if ( mysql_query( &dbconn, sql ) )
     {

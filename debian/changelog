@@ -1,6 +1,7 @@
-zoneminder (1.27.0-1ubuntu1) UNRELEASED; urgency=low
+zoneminder (1.27.1-iconnor) precise; urgency=low
 
-  * Bump version #'s to 1.27
+  * Bump version #'s to 1.27.1
+  * 
 
  -- Isaac Connor <iconnor@connortechnology.com>  Wed, 21 Aug 2013 13:23:53 -0400
 

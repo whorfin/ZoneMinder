@@ -51,6 +51,35 @@
 #include <sys/shm.h>
 #endif // ZM_MEM_MAPPED
 
+//=============================================================================
+std::string trimSpaces(std::string str)
+{
+    // Trim Both leading and trailing spaces
+    size_t startpos = str.find_first_not_of(" \t"); // Find the first character position after excluding leading blank spaces
+    size_t endpos = str.find_last_not_of(" \t"); // Find the first character position from reverse af
+ 
+    // if all spaces or empty return an empty string
+    if(( std::string::npos == startpos ) || ( std::string::npos == endpos))
+    {
+        return std::string("");
+    }
+    else
+        return str.substr( startpos, endpos-startpos+1 );
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delim)) {
+        elems.push_back(trimSpaces(item));
+    }
+    return elems;
+}
+//=============================================================================
+
+
+
 Monitor::MonitorLink::MonitorLink( int p_id, const char *p_name ) : id( p_id )
 {
     strncpy( name, p_name, sizeof(name) );
@@ -230,7 +259,7 @@ bool Monitor::MonitorLink::hasAlarmed()
     {
         return( true );
     }
-    else if( shared_data->last_event != last_event )
+    else if( shared_data->last_event != (unsigned int)last_event )
     {
         last_event = shared_data->last_event;
         return( true );
@@ -415,6 +444,7 @@ Monitor::Monitor(
 	Debug(3,"Aligning shared memory images to the next 16 byte boundary");
 	shared_images = (uint8_t*)((unsigned long)shared_images + (16 - ((unsigned long)shared_images % 16)));
     }
+    
 
     if ( purpose == CAPTURE )
     {
@@ -450,6 +480,7 @@ Monitor::Monitor(
         shared_data->last_read_time = 0;
         shared_data->alarm_x = -1;
         shared_data->alarm_y = -1;
+
     }
 
     if ( !shared_data->valid )
@@ -531,7 +562,8 @@ Monitor::Monitor(
                 Fatal( "Can't change to parent directory: %s", strerror(errno) );
         }
 
-        while( shared_data->last_write_index == image_buffer_count && shared_data->last_write_time == 0)
+        while( shared_data->last_write_index == (unsigned int)image_buffer_count 
+               && shared_data->last_write_time == 0)
         {
             Warning( "Waiting for capture daemon" );
             sleep( 1 );
@@ -674,12 +706,12 @@ struct timeval Monitor::GetTimestamp( int index ) const
 
 unsigned int Monitor::GetLastReadIndex() const
 {
-    return( shared_data->last_read_index!=image_buffer_count?shared_data->last_read_index:-1 );
+    return( shared_data->last_read_index!=(unsigned int)image_buffer_count?shared_data->last_read_index:-1 );
 }
 
 unsigned int Monitor::GetLastWriteIndex() const
 {
-    return( shared_data->last_write_index!=image_buffer_count?shared_data->last_write_index:-1 );
+    return( shared_data->last_write_index!=(unsigned int)image_buffer_count?shared_data->last_write_index:-1 );
 }
 
 unsigned int Monitor::GetLastEvent() const
@@ -1283,6 +1315,7 @@ bool Monitor::Analyse()
                 {
                     Event::StringSet zoneSet;
                     int motion_score = DetectMotion( *snap_image, zoneSet );
+                    //int motion_score = DetectBlack( *snap_image, zoneSet );
                     if ( motion_score )
                     {
                         if ( !event )
@@ -1297,6 +1330,7 @@ bool Monitor::Analyse()
                             score += motion_score;
                         }
                         noteSetMap[MOTION_CAUSE] = zoneSet;
+
                     }
                     shared_data->active = signal;
                 }
@@ -1611,6 +1645,7 @@ void Monitor::Reload()
 
     static char sql[ZM_SQL_MED_BUFSIZ];
     snprintf( sql, sizeof(sql), "select Function+0, Enabled, LinkedMonitors, EventPrefix, LabelFormat, LabelX, LabelY, WarmupCount, PreEventCount, PostEventCount, AlarmFrameCount, SectionLength, FrameSkip, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, TrackMotion, SignalCheckColour from Monitors where Id = '%d'", id );
+
     if ( mysql_query( &dbconn, sql ) )
     {
         Error( "Can't run query: %s", mysql_error( &dbconn ) );
@@ -1650,6 +1685,8 @@ void Monitor::Reload()
         fps_report_interval = atoi(dbrow[index++]);
         ref_blend_perc = atoi(dbrow[index++]);
         track_motion = atoi(dbrow[index++]);
+        
+
         if ( dbrow[index][0] == '#' )
             signal_check_colour = strtol(dbrow[index]+1,0,16);
         else
@@ -1704,7 +1741,7 @@ void Monitor::ReloadLinkedMonitors( const char *p_linked_monitors )
     if ( p_linked_monitors )
     {
         int n_link_ids = 0;
-        int link_ids[256];
+        unsigned int link_ids[256];
 
         char link_id_str[8];
         char *dest_ptr = link_id_str;
@@ -1714,7 +1751,7 @@ void Monitor::ReloadLinkedMonitors( const char *p_linked_monitors )
             dest_ptr = link_id_str;
             while( *src_ptr >= '0' && *src_ptr <= '9' )
             {
-                if ( (dest_ptr-link_id_str) < (sizeof(link_id_str)-1) )
+                if ( (dest_ptr-link_id_str) < (unsigned int)(sizeof(link_id_str)-1) )
                 {
                     *dest_ptr++ = *src_ptr++;
                 }
@@ -1727,7 +1764,7 @@ void Monitor::ReloadLinkedMonitors( const char *p_linked_monitors )
             if ( dest_ptr != link_id_str )
             {
                 *dest_ptr = '\0';
-                int link_id = atoi(link_id_str);
+                unsigned int link_id = atoi(link_id_str);
                 if ( link_id > 0 && link_id != id)
                 {
                     Debug( 3, "Found linked monitor id %d", link_id );
@@ -1868,6 +1905,7 @@ int Monitor::LoadLocalMonitors( const char *device, Monitor **&monitors, Purpose
         int fps_report_interval = atoi(dbrow[col]); col++;
         int ref_blend_perc = atoi(dbrow[col]); col++;
         int track_motion = atoi(dbrow[col]); col++;
+
         int signal_check_colour;
         if ( dbrow[col][0] == '#' )
             signal_check_colour = strtol(dbrow[col]+1,0,16);
@@ -1925,7 +1963,9 @@ int Monitor::LoadLocalMonitors( const char *device, Monitor **&monitors, Purpose
             ref_blend_perc,
             track_motion,
             signal_check_colour,
-            purpose
+            purpose,
+            0,
+            0
         );
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
@@ -2019,6 +2059,7 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
         int ref_blend_perc = atoi(dbrow[col]); col++;
         int track_motion = atoi(dbrow[col]); col++;
 
+
         int cam_width = ((orientation==ROTATE_90||orientation==ROTATE_270)?height:width);
         int cam_height = ((orientation==ROTATE_90||orientation==ROTATE_270)?width:height);
 
@@ -2093,7 +2134,10 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
             ref_blend_perc,
             track_motion,
             RGB_WHITE,
-            purpose
+            purpose,
+            0,
+            0
+
         );
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
@@ -2225,7 +2269,10 @@ int Monitor::LoadFileMonitors( const char *file, Monitor **&monitors, Purpose pu
             ref_blend_perc,
             track_motion,
             RGB_WHITE,
-            purpose
+            purpose,
+            0,
+            0
+
         );
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
@@ -2358,7 +2405,9 @@ int Monitor::LoadFfmpegMonitors( const char *file, Monitor **&monitors, Purpose 
             ref_blend_perc,
             track_motion,
             RGB_WHITE,
-            purpose
+            purpose,
+            0,
+            0
         );
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
@@ -2448,6 +2497,7 @@ Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
         int fps_report_interval = atoi(dbrow[col]); col++;
         int ref_blend_perc = atoi(dbrow[col]); col++;
         int track_motion = atoi(dbrow[col]); col++;
+
         int signal_check_colour;
         if ( dbrow[col][0] == '#' )
             signal_check_colour = strtol(dbrow[col]+1,0,16);
@@ -2596,7 +2646,10 @@ Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
             ref_blend_perc,
             track_motion,
             signal_check_colour,
-            purpose
+            purpose,
+            0,
+            0
+
         );
 
         int n_zones = 0;
@@ -2707,7 +2760,7 @@ int Monitor::Capture()
             return( -1 );
         }
 
-        if ( (index == shared_data->last_read_index) && (function > MONITOR) )
+        if ( ((unsigned int)index == shared_data->last_read_index) && (function > MONITOR) )
         {
             Warning( "Buffer overrun at index %d, image %d, slow down capture, speed up analysis or increase ring buffer size", index, image_count );
             time_t now = time(0);
@@ -2774,7 +2827,7 @@ void Monitor::TimestampImage( Image *ts_image, const struct timeval *ts_time ) c
         char label_text[1024];
         const char *s_ptr = label_time_text;
         char *d_ptr = label_text;
-        while ( *s_ptr && ((d_ptr-label_text) < sizeof(label_text)) )
+        while ( *s_ptr && ((d_ptr-label_text) < (unsigned int)sizeof(label_text)) )
         {
             if ( *s_ptr == '%' )
             {
@@ -2821,6 +2874,191 @@ bool Monitor::closeEvent()
     }
     return( false );
 }
+
+//-----------------------------------------
+
+/* 
+ * NOTE Nextime's comment:
+ *
+ * OurCheckAlarms seems to be called only by DetectBlack method, and DetectBlack 
+ * method is only called in a commented line  instead of DetectMotion in zm_monitor.cpp.
+ *
+ * Probably this is just a dead code used for debugghing purpose, so, instead of fixing it
+ * it seems to be safe to just comment it out.
+ *
+ * Anyway, the issues with this code is that it assumes the image to be an RGB24 image,
+ * so, as i've discussed on IRC with mastertheknife, changes needed are:
+ *
+ * Check if the image is 24 or 32 bits ( pImage->Colours() says 3 for 24 and 4 for 32 bits, 
+ * comparing it with ZM_COLOUR_RGB24 or ZM_COLOUR_RGB32 is the way ), and then
+ * manage che check using RGB_VAL_RED() and so on macros instead of just RED().
+ *
+ * Be carefull that in 32 bit images we need to check also where the alpha channel is, so,
+ * (RGBA and BGRA) or (ABGR and ARGB) aren't the same!
+ *
+ * To check black pixels in 32 bit images i can do a more efficient way using 
+ * RGBA_ZERO_ALPHA(pixel) == RGBA_ZERO_ALPHA(RGB_BLACK), but before of that i need to 
+ * check where the alpha channel is and maybe convert it.
+ * Maybe this won't work as they assign "23" to black_thr, so, they are not checking
+ * if the pixel is black, but just "quasi" black is enough.
+ *
+ * Anyway, for the moment, comment out whole part.
+ */
+
+/*
+bool Monitor::OurCheckAlarms( Zone *zone, const Image *pImage )
+{
+    Info("Entering OurCheckAlarms >>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    unsigned char black_thr = 23;
+    int min_alarm_score = 10;
+    int max_alarm_score = 99;
+    //bool alarm = false;
+    unsigned int score;
+    Polygon zone_polygon = zone->GetPolygon();
+    Info("Got polygon of a zone. It has %d vertices.", zone_polygon.getNumCoords());
+
+  zone->ResetStats();
+    Info("ResetStats done.");
+
+    if ( !zone->CheckOverloadCount() )
+    {
+        Info("CheckOverloadCount() return false, we'll return false.");
+        return( false );
+    }
+
+    Image *pMaskImage = new Image(pImage->Width(), pImage->Height(), ZM_COLOUR_GRAY8, pImage->SubpixelOrder());
+    Info("Mask image created.");
+ 
+    pMaskImage->Fill(BLACK);
+    Info("Mask image filled with BLACK.");
+    if (pImage->Colours() == ZM_COLOUR_GRAY8)
+    {
+        Info("Analysed image is not colored! Set score = 0.");
+        score = 0;
+    }
+    else
+    {
+        Info("Start processing image.");
+        //Process image
+        unsigned char *buffer = (unsigned char*)pImage->Buffer();
+        unsigned char *mask_buffer = (unsigned char*)pMaskImage->Buffer();
+        
+        int black_pixels_count = 0;
+        Info("Loop for black pixels counting and mask filling.");
+        while (buffer < (pImage->Buffer() + pImage->Size()))
+        {
+            if ( (RED(buffer) < black_thr) && (GREEN(buffer) < black_thr) && (BLUE(buffer) < black_thr) )
+            {
+                *mask_buffer = WHITE;
+                black_pixels_count++;
+            }
+            buffer += pImage->Colours();
+            mask_buffer++;
+        }
+
+        if ( !black_pixels_count )
+        {
+            delete pMaskImage;
+            return( false );
+        }
+        score = (100*black_pixels_count)/zone_polygon.Area();
+        Info("Number of black pixels is %d, zone polygon area is %d, score is %d", black_pixels_count, zone_polygon.Area(), score);
+
+        if ( min_alarm_score && ( score < min_alarm_score) )
+        {
+            delete pMaskImage;
+            return( false );
+        }
+        if ( max_alarm_score && (score > max_alarm_score) )
+        {
+            zone->SetOverloadCount(zone->GetOverloadFrames());
+            delete pMaskImage;
+            return( false );
+        }
+    }
+
+    zone->SetScore(score);
+    Info("Score have been set in zone.");
+    //Get mask
+    Rgb alarm_colour = RGB_RED;
+  Image *tempImage = pMaskImage->HighlightEdges(alarm_colour, &zone_polygon.Extent() );
+    Info("After HighlightEdges");
+
+    zone->SetAlarmImage(tempImage);
+    Info("After SetAlarmImage");
+    delete pMaskImage;
+    Info("After Delete pMaskImage");
+    delete tempImage;
+
+    Info("Leaving OurCheckAlarms >>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    return true;
+}
+
+unsigned int Monitor::DetectBlack(const Image &comp_image, Event::StringSet &zoneSet )
+{
+    Info("Entering DetectBlack >>>>>>>>>>>>>>>>>>>>>>>>>>");
+    bool alarm = false;
+    unsigned int score = 0;
+
+    if ( n_zones <= 0 ) return( alarm );
+
+//    Coord alarm_centre;
+//    int top_score = -1;
+
+    // Find all alarm pixels in active zones
+    Info("Number of zones to process %d", n_zones);
+    for ( int n_zone = 0; n_zone < n_zones; n_zone++ )
+    {
+        Zone *zone = zones[n_zone];
+        if ( !zone->IsActive() )
+        {
+            continue;
+        }
+        Debug( 3, "Checking active zone %s", zone->Label() );
+        Info( "Checking active zone %s", zone->Label() );
+        if ( OurCheckAlarms( zone, &comp_image ) )
+        {
+            Info("OurCheckAlarm is TRUE!!!!!!");
+            alarm = true;
+            score += zone->Score();
+            zone->SetAlarm();
+            Debug( 3, "Zone is alarmed, zone score = %d", zone->Score() );
+            Info( "Zone is alarmed, zone score = %d", zone->Score() );
+            zoneSet.insert( zone->Label() );
+//            if ( config.opt_control && track_motion )
+//            {
+//                if ( (int)zone->Score() > top_score )
+//                {
+//                    top_score = zone->Score();
+//                    alarm_centre = zone->GetAlarmCentre();
+//                }
+//            }
+        }
+        Info( "Finish checking active zone %s", zone->Label() );
+    }
+
+
+//    if ( top_score > 0 )
+//    {
+//        shared_data->alarm_x = alarm_centre.X();
+//        shared_data->alarm_y = alarm_centre.Y();
+//
+//        Info( "Got alarm centre at %d,%d, at count %d", shared_data->alarm_x, shared_data->alarm_y, image_count );
+//    }
+//    else
+//    {
+//        shared_data->alarm_x = shared_data->alarm_y = -1;
+//    }
+
+    // This is a small and innocent hack to prevent scores of 0 being returned in alarm state
+    Info("Leaving DetectBlack <<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    return( score?score:alarm );
+}
+
+*/
+//-----------------------------------------------------------------------------------------------
+
+
 
 unsigned int Monitor::DetectMotion( const Image &comp_image, Event::StringSet &zoneSet )
 {
@@ -2943,7 +3181,7 @@ unsigned int Monitor::DetectMotion( const Image &comp_image, Event::StringSet &z
                     zoneSet.insert( zone->Label() );
                     if ( config.opt_control && track_motion )
                     {
-                        if ( zone->Score() > top_score )
+                        if ( zone->Score() > (unsigned int)top_score )
                         {
                             top_score = zone->Score();
                             alarm_centre = zone->GetAlarmCentre();
@@ -3654,7 +3892,7 @@ void MonitorStream::runStream()
             }
         }
 
-        bool frame_sent = false;
+        //bool frame_sent = false;
         if ( buffered_playback && delayed )
         {
             if ( temp_read_index == temp_write_index )
@@ -3699,7 +3937,7 @@ void MonitorStream::runStream()
                                 if ( !sendFrame( temp_image_buffer[temp_index].file_name, &temp_image_buffer[temp_index].timestamp ) )
                                     zm_terminate = true;
                                 memcpy( &last_frame_timestamp, &(swap_image->timestamp), sizeof(last_frame_timestamp) );
-                                frame_sent = true;
+                                //frame_sent = true;
                             }
                             temp_read_index = MOD_ADD( temp_read_index, (replay_rate>0?1:-1), temp_image_buffer_count );
                         }
@@ -3715,7 +3953,7 @@ void MonitorStream::runStream()
                     if ( !sendFrame( temp_image_buffer[temp_read_index].file_name, &temp_image_buffer[temp_read_index].timestamp ) )
                         zm_terminate = true;
                     memcpy( &last_frame_timestamp, &(swap_image->timestamp), sizeof(last_frame_timestamp) );
-                    frame_sent = true;
+                    //frame_sent = true;
                     step = 0;
                 }
                 else
@@ -3730,7 +3968,7 @@ void MonitorStream::runStream()
                         // Send the next frame
                         if ( !sendFrame( temp_image_buffer[temp_index].file_name, &temp_image_buffer[temp_index].timestamp ) )
                             zm_terminate = true;
-                        frame_sent = true;
+                        //frame_sent = true;
                     }
                 }
             }
@@ -3745,7 +3983,7 @@ void MonitorStream::runStream()
                 replay_rate = ZM_RATE_BASE;
             }
         }
-        if ( last_read_index != monitor->shared_data->last_write_index )
+        if ( (unsigned int)last_read_index != monitor->shared_data->last_write_index )
         {
             int index = monitor->shared_data->last_write_index%monitor->image_buffer_count;
             last_read_index = monitor->shared_data->last_write_index;
@@ -3760,7 +3998,7 @@ void MonitorStream::runStream()
                     if ( !sendFrame( snap->image, snap->timestamp ) )
                         zm_terminate = true;
                     memcpy( &last_frame_timestamp, snap->timestamp, sizeof(last_frame_timestamp) );
-                    frame_sent = true;
+                    //frame_sent = true;
 
                     temp_read_index = temp_write_index;
                 }
@@ -3889,7 +4127,7 @@ void MonitorStream::runStream()
             }
             else
             {
-                for ( int i = 0; i < pglob.gl_pathc; i++ )
+                for ( unsigned int i = 0; i < pglob.gl_pathc; i++ )
                 {
                     if ( unlink( pglob.gl_pathv[i] ) < 0 )
                     {

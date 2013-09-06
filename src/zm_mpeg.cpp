@@ -32,6 +32,24 @@ extern "C" {
 #include <libavutil/mathematics.h>
 }
 
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 1, 0)
+static int encode_frame(AVCodecContext *c, AVFrame *frame)
+{
+    AVPacket pkt = { 0 };
+    int ret, got_output;
+
+    av_init_packet(&pkt);
+    av_init_packet(&pkt);
+    ret = avcodec_encode_video2(c, &pkt, frame, &got_output);
+    if (ret < 0)
+        return ret;
+
+    ret = pkt.size;
+    av_free_packet(&pkt);
+    return ret;
+}
+#endif
+
 bool VideoStream::initialised = false;
 
 VideoStream::MimeData VideoStream::mime_data[] = {
@@ -122,8 +140,11 @@ void VideoStream::SetupCodec( int colours, int subpixelorder, int width, int hei
 	ost = NULL;
 	if (of->video_codec != CODEC_ID_NONE)
 	{
-		ost = avformat_new_stream(ofc, NULL);
-		ost->id = 0;
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53, 4, 0)
+		ost = av_new_stream(ofc, 0);
+#else
+      ost = avformat_new_stream(ofc, 0);
+#endif
 		if (!ost)
 		{
 			Panic( "Could not alloc stream" );
@@ -172,10 +193,24 @@ void VideoStream::SetupCodec( int colours, int subpixelorder, int width, int hei
 	}
 }
 
+void VideoStream::SetParameters()
+{
+	/* set the output parameters (must be done even if no
+	   parameters). */
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53, 4, 0)
+	if ( av_set_parameters(ofc, NULL) < 0 )
+#else
+	if ( avformat_write_header(ofc, NULL) < 0 )
+#endif
+	{
+		Panic( "Invalid output format parameters" );
+	}
+	//dump_format(ofc, 0, filename, 1);
+}
 
 const char *VideoStream::MimeType() const
 {
-	for ( int i = 0; i < sizeof(mime_data)/sizeof(*mime_data); i++ )
+	for ( unsigned int i = 0; i < sizeof(mime_data)/sizeof(*mime_data); i++ )
 	{
 		if ( strcmp( format, mime_data[i].format ) == 0 )
 		{
@@ -212,7 +247,11 @@ void VideoStream::OpenStream()
 		}
 
 		/* open the codec */
-		if ( avcodec_open2(c, codec, NULL) < 0 )
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53, 7, 0)
+		if ( avcodec_open(c, codec) < 0 )
+#else
+      if ( avcodec_open2(c, codec, 0) < 0 )
+#endif
 		{
 			Panic( "Could not open codec" );
 		}
@@ -260,7 +299,7 @@ void VideoStream::OpenStream()
 #if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51,2,1)
 		if ( avio_open(&ofc->pb, filename, AVIO_FLAG_WRITE) < 0 )
 #else
-		if ( url_fopen(&ofc->pb, filename, URL_WRONLY) < 0 )
+		if ( url_fopen(&ofc->pb, filename, AVIO_FLAG_WRITE) < 0 )
 #endif
 		{
 			Fatal( "Could not open '%s'", filename );
@@ -277,10 +316,11 @@ void VideoStream::OpenStream()
 	}
 
 	/* write the stream header, if any */
-	if (avformat_write_header(ofc, NULL) < 0)
-	{
-		Panic( "Invalid output format parameters or unable to write header" );
-	}
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53, 4, 0)
+	av_write_header(ofc);
+#else
+	avformat_write_header(ofc, NULL);
+#endif
 }
 
 VideoStream::VideoStream( const char *filename, const char *format, int bitrate, double frame_rate, int colours, int subpixelorder, int width, int height )
@@ -318,7 +358,7 @@ VideoStream::~VideoStream()
 	av_write_trailer(ofc);
 	
 	/* free the streams */
-	for( int i = 0; i < ofc->nb_streams; i++)
+	for( unsigned int i = 0; i < ofc->nb_streams; i++)
 	{
 		av_freep(&ofc->streams[i]);
 	}
@@ -409,7 +449,12 @@ double VideoStream::EncodeFrame( const uint8_t *buffer, int buffer_size, bool ad
 	{
 		if ( add_timestamp )
 			ost->pts.val = timestamp;
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 1, 0) // NEXTIME
 		int out_size = avcodec_encode_video(c, video_outbuf, video_outbuf_size, opicture_ptr);
+#else
+      int out_size = encode_frame(c, opicture_ptr);
+
+#endif
 		if ( out_size > 0 )
 		{
 #if ZM_FFMPEG_048

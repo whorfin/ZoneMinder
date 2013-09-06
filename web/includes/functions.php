@@ -795,7 +795,7 @@ function getBrowser( &$browser, &$version )
     }
     else
     {
-        if ( preg_match( '/MSIE ([0-9].[0-9]{1,2})/', $_SERVER['HTTP_USER_AGENT'], $logVersion) )
+        if ( preg_match( '/MSIE (.*?);/', $_SERVER['HTTP_USER_AGENT'], $logVersion) )
         {
             $version = $logVersion[1];
             $browser = 'ie';
@@ -912,7 +912,7 @@ function fixDevices()
 
 function packageControl( $command )
 {
-    $string = ZM_PATH_BIN."/zmpkg.pl $command";
+    $string = ZM_PATH_BIN.'/zmpkg.pl '.escapeshellarg( $command );
     $string .= " 2>/dev/null >&- <&- >/dev/null";
     exec( $string );
 }
@@ -2152,7 +2152,8 @@ function setDeviceStatusX10( $key, $status )
     else
     {
         // Can't connect so use script
-        $command = ZM_PATH_BIN."/zmx10.pl --command $status --unit-code $key";
+        $command = ZM_PATH_BIN.'/zmx10.pl --command '.escapeshellarg( $status );
+        $command .= ' --unit-code '.escapeshellarg( $key );
         //$command .= " 2>/dev/null >&- <&- >/dev/null";
         $x10Response = exec( $command );
     }
