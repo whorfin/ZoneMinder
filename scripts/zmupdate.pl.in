@@ -1024,32 +1024,7 @@ if ( $version )
         	}
         $cascade = !undef if ! $dbh->errstr;
     }
-    if ( $cascade || $version lt "1.27.0" )
-    {
-        my $sth = $dbh->prepare_cached( 'select * from Monitors LIMIT 0,1' );
-        die "Error: " . $dbh->errstr . "\n" unless ($sth);
-        die "Error: " . $sth->errstr . "\n" unless ($sth->execute);
 
-        my $columns = $sth->{'NAME'};
-        if ( ! grep( /^ServerHost$/, @$columns ) ) {
-            $dbh->do(q{alter table Monitors add column `ServerHost` varchar(64) not null default '' after `Name`;} );
-        } # end if
-        if ( ! grep(/^JPGPath$/, @$columns ) ) {
-            $dbh->do(q{alter table Monitors add column `JPGPath` VARCHAR(255) NOT NULL default '' after `Path`;});
-            $dbh->do(q{Update Monitors set `JPGPath`=`Path`;});
-        } # end if
-        if ( ! grep(/^MJPGPath$/, @$columns ) ) {
-            $dbh->do(q{alter table Monitors add column `MJPGPath` VARCHAR(255) NOT NULL default '' after `JPGPath`;});
-            $dbh->do(q{Update Monitors set `MJPGPath`=`Path`;});
-        } # end if
-		$sth->finish();
-
-<<<<<<< HEAD
-        $cascade = !undef if ! $dbh->errstr;
-    }
-=======
-		$cascade = !undef;
-	}
     if ( $cascade || $version eq "1.26.1" )
     {
         # Patch the database
@@ -1071,7 +1046,28 @@ if ( $version )
         $cascade = !undef;
     }
 
->>>>>>> 3f4e13dd47d1232b3eb94a7cf4abe47cf1b61130
+    if ( $cascade || $version lt "1.27.0" )
+    {
+        my $sth = $dbh->prepare_cached( 'select * from Monitors LIMIT 0,1' );
+        die "Error: " . $dbh->errstr . "\n" unless ($sth);
+        die "Error: " . $sth->errstr . "\n" unless ($sth->execute);
+
+        my $columns = $sth->{'NAME'};
+        if ( ! grep( /^ServerHost$/, @$columns ) ) {
+            $dbh->do(q{alter table Monitors add column `ServerHost` varchar(64) not null default '' after `Name`;} );
+        } # end if
+        if ( ! grep(/^JPGPath$/, @$columns ) ) {
+            $dbh->do(q{alter table Monitors add column `JPGPath` VARCHAR(255) NOT NULL default '' after `Path`;});
+            $dbh->do(q{Update Monitors set `JPGPath`=`Path`;});
+        } # end if
+        if ( ! grep(/^MJPGPath$/, @$columns ) ) {
+            $dbh->do(q{alter table Monitors add column `MJPGPath` VARCHAR(255) NOT NULL default '' after `JPGPath`;});
+            $dbh->do(q{Update Monitors set `MJPGPath`=`Path`;});
+        } # end if
+		$sth->finish();
+
+        $cascade = !undef if ! $dbh->errstr;
+    }
     if ( $cascade )
     {
         my $installed_version = ZM_VERSION;
