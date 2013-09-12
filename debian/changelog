@@ -1,3 +1,9 @@
+zoneminder (1.27.2-iconnor) precise; urgency=low
+
+  * Merge commits from master (1.26.3)
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 12 Sep 2013 11:28:59 -0400
+
 zoneminder (1.27.1-iconnor) precise; urgency=low
 
   * Bump version #'s to 1.27.1

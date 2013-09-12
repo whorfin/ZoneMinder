@@ -1801,7 +1801,7 @@ body = "ZM alarm detected - %EL% secs, %EF%/%EFA% frames, t%EST%/m%ESM%/a%ESA% s
 	},
 	{
 		name => "ZM_DYN_CURR_VERSION",
-		default => "1.25.0",
+		default => "1.27.1",
 		description => "What the effective current version of ZoneMinder is, might be different from actual if versions ignored",
 		help => "",
 		type => $types{string},
@@ -1810,7 +1810,7 @@ body = "ZM alarm detected - %EL% secs, %EF%/%EFA% frames, t%EST%/m%ESM%/a%ESA% s
 	},
 	{
 		name => "ZM_DYN_DB_VERSION",
-		default => "1.25.0",
+		default => "1.27.1",
 		description => "What the version of the database is, from zmupdate",
 		help => "",
 		type => $types{string},
@@ -1852,6 +1852,15 @@ body = "ZM alarm detected - %EL% secs, %EF%/%EFA% frames, t%EST%/m%ESM%/a%ESA% s
 		type => $types{boolean},
 		readonly => 1,
 		category => "dynamic",
+	},
+	{
+		name => "ZM_REDUCTION_FPS_RESET_TIME",
+		default => "0",
+		description => "After how many seconds should the maxfps of a stream go back to normal after it has been throttled",
+		help => "When a stream cannot send frames as fast as requested (generally due to too slow of a connection) it will throttle it back, unfortunately if the cause of this was only temporary the FPS will never pickup again.  By setting this to a value greater than 0 it will automatically go back to the original FPS after X seconds from when the last throttle took place.",
+		type => $types{integer},
+		readonly => 0,
+		category => "image",
 	},
 	{
 		name => "ZM_EYEZM_DEBUG",
@@ -1924,6 +1933,14 @@ body = "ZM alarm detected - %EL% secs, %EF%/%EFA% frames, t%EST%/m%ESM%/a%ESA% s
 		help => "The HTTP-5 Live Streaming Protocol segments the input video stream into small chunks of a duration specified by this parameter. Increasing the segment duration will help with choppy connections on the other end, but will increase the latency in starting a stream.",
 		type => $types{string},
 		category => "eyeZm",
+	},
+	{
+		name => "ZM_RECORD_DIAG_IMAGES_FIFO",
+		default => "no",
+		description => "When Recording intermediate alarm diagnostic use fifo instead of files (faster)",
+		help => "This tries to lessen the load of recording diag images by sending them to a memory FIFO pipe instead of creating each file.",
+		type => $types{boolean},
+		category => "logging",
 	},
 );
 

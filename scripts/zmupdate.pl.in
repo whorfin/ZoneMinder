@@ -1044,8 +1044,34 @@ if ( $version )
         } # end if
 		$sth->finish();
 
+<<<<<<< HEAD
         $cascade = !undef if ! $dbh->errstr;
     }
+=======
+		$cascade = !undef;
+	}
+    if ( $cascade || $version eq "1.26.1" )
+    {
+        # Patch the database
+        patchDB( $dbh, "1.26.1" );
+        $cascade = !undef;
+    }
+
+    if ( $cascade || $version eq "1.26.2" )
+    {
+        # Patch the database
+        patchDB( $dbh, "1.26.2" );
+        $cascade = !undef;
+    }
+
+    if ( $cascade || $version eq "1.26.3" )
+    {
+        # Patch the database
+        patchDB( $dbh, "1.26.3" );
+        $cascade = !undef;
+    }
+
+>>>>>>> 3f4e13dd47d1232b3eb94a7cf4abe47cf1b61130
     if ( $cascade )
     {
         my $installed_version = ZM_VERSION;

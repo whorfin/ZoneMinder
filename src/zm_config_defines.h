@@ -208,18 +208,20 @@
 #define ZM_DYN_NEXT_REMINDER 204
 #define ZM_DYN_DONATE_REMINDER_TIME 205
 #define ZM_DYN_SHOW_DONATE_REMINDER 206
-#define ZM_EYEZM_DEBUG 207
-#define ZM_EYEZM_LOG_TO_FILE 208
-#define ZM_EYEZM_LOG_FILE 209
-#define ZM_EYEZM_EVENT_VCODEC 210
-#define ZM_EYEZM_FEED_VCODEC 211
-#define ZM_EYEZM_H264_DEFAULT_BR 212
-#define ZM_EYEZM_H264_DEFAULT_EVBR 213
-#define ZM_EYEZM_H264_TIMEOUT 214
-#define ZM_EYEZM_SEG_DURATION 215
+#define ZM_REDUCTION_FPS_RESET_TIME 207
+#define ZM_EYEZM_DEBUG 208
+#define ZM_EYEZM_LOG_TO_FILE 209
+#define ZM_EYEZM_LOG_FILE 210
+#define ZM_EYEZM_EVENT_VCODEC 211
+#define ZM_EYEZM_FEED_VCODEC 212
+#define ZM_EYEZM_H264_DEFAULT_BR 213
+#define ZM_EYEZM_H264_DEFAULT_EVBR 214
+#define ZM_EYEZM_H264_TIMEOUT 215
+#define ZM_EYEZM_SEG_DURATION 216
+#define ZM_RECORD_DIAG_IMAGES_FIFO 217
 
 
-#define ZM_MAX_CFG_ID 220
+#define ZM_MAX_CFG_ID 217
 
 #define ZM_CFG_DECLARE_LIST \
 	const char *lang_default;\
@@ -429,6 +431,7 @@
 	const char *dyn_next_reminder;\
 	int dyn_donate_reminder_time;\
 	bool dyn_show_donate_reminder;\
+	int reduction_fps_reset_time;\
 	bool eyezm_debug;\
 	bool eyezm_log_to_file;\
 	const char *eyezm_log_file;\
@@ -438,6 +441,7 @@
 	const char *eyezm_h264_default_evbr;\
 	const char *eyezm_h264_timeout;\
 	const char *eyezm_seg_duration;\
+	bool record_diag_images_fifo;\
 
 
 #define ZM_CFG_ASSIGN_LIST \
@@ -648,6 +652,7 @@
 	dyn_next_reminder = (const char *)config.Item( ZM_DYN_NEXT_REMINDER );\
 	dyn_donate_reminder_time = (int)config.Item( ZM_DYN_DONATE_REMINDER_TIME );\
 	dyn_show_donate_reminder = (bool)config.Item( ZM_DYN_SHOW_DONATE_REMINDER );\
+	reduction_fps_reset_time = (int)config.Item( ZM_REDUCTION_FPS_RESET_TIME );\
 	eyezm_debug = (bool)config.Item( ZM_EYEZM_DEBUG );\
 	eyezm_log_to_file = (bool)config.Item( ZM_EYEZM_LOG_TO_FILE );\
 	eyezm_log_file = (const char *)config.Item( ZM_EYEZM_LOG_FILE );\
@@ -657,5 +662,6 @@
 	eyezm_h264_default_evbr = (const char *)config.Item( ZM_EYEZM_H264_DEFAULT_EVBR );\
 	eyezm_h264_timeout = (const char *)config.Item( ZM_EYEZM_H264_TIMEOUT );\
 	eyezm_seg_duration = (const char *)config.Item( ZM_EYEZM_SEG_DURATION );\
+	record_diag_images_fifo = (bool)config.Item( ZM_RECORD_DIAG_IMAGES_FIFO );\
 
 

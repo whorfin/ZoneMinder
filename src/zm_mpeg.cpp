@@ -193,21 +193,6 @@ void VideoStream::SetupCodec( int colours, int subpixelorder, int width, int hei
 	}
 }
 
-void VideoStream::SetParameters()
-{
-	/* set the output parameters (must be done even if no
-	   parameters). */
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53, 4, 0)
-	if ( av_set_parameters(ofc, NULL) < 0 )
-#else
-	if ( avformat_write_header(ofc, NULL) < 0 )
-#endif
-	{
-		Panic( "Invalid output format parameters" );
-	}
-	//dump_format(ofc, 0, filename, 1);
-}
-
 const char *VideoStream::MimeType() const
 {
 	for ( unsigned int i = 0; i < sizeof(mime_data)/sizeof(*mime_data); i++ )
