@@ -283,7 +283,6 @@ fi
 AC_CHECK_LIB(mysqlclient,mysql_init,,AC_MSG_ERROR(zm requires libmysqlclient.a))
 AC_CHECK_LIB(jpeg,jpeg_start_compress,,AC_MSG_ERROR(zm requires libjpeg.a))
 AC_CHECK_LIB(pthread,pthread_create,,AC_MSG_ERROR(zm requires libpthread.a))
-AC_CHECK_LIB(dl,dlsym,,AC_MSG_ERROR(zm requires libdl.a))
 if test "$ZM_SSL_LIB" == "openssl"; then
 AC_CHECK_HEADERS(openssl/md5.h,,AC_MSG_WARN(zm requires openssl/md5.h header to be installed for openssl),)
 AC_CHECK_LIB(crypto,MD5,,AC_MSG_WARN([libcrypto.a is required for authenticated streaming - use ZM_SSL_LIB option to select gnutls instead]))
