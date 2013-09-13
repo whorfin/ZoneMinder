@@ -19,7 +19,7 @@
 
 #include <getopt.h>
 #include <signal.h>
-#include <values.h>
+#include <limits.h>
 
 #include "zm.h"
 #include "zm_db.h"
@@ -226,7 +226,7 @@ int main( int argc, char *argv[] )
 		sigprocmask( SIG_BLOCK, &block_set, 0 );
 		for ( int i = 0; i < n_monitors; i++ )
 		{
-			long min_delay = MAXINT;
+			long min_delay = INT_MAX;
 
 			gettimeofday( &now, NULL );
 			for ( int j = 0; j < n_monitors; j++ )
