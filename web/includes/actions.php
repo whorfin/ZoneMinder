@@ -559,8 +559,12 @@ if ( !empty($action) )
                 if ( daemonCheck() )
                 {
                     zmaControl( $monitor, "stop" );
-                    zmcControl( $monitor, "restart" );
-                    zmaControl( $monitor, "start" );
+					if ( ZM_SERVER_HOST && ( $monitor['ServerHost'} != ZM_SERVER_HOST ) ) {
+						zmcControl( $monitor, "stop" );
+					} else {
+						zmcControl( $monitor, "restart" );
+						zmaControl( $monitor, "start" );
+					}  
                 }
                 //daemonControl( 'restart', 'zmwatch.pl' );
                 $refreshParent = true;

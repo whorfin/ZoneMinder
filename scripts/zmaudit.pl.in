@@ -114,13 +114,13 @@ my $cleaned = 0;
 MAIN: while( $loop )
 {
     my $db_monitors;
-    my $monitorSelectSql = "select Id from Monitors order by Id";
+	my $monitorSelectSql = "select * from Monitors order by Id asc";
     my $monitorSelectSth = $dbh->prepare_cached( $monitorSelectSql ) or Fatal( "Can't prepare '$monitorSelectSql': ".$dbh->errstr() );
     my $eventSelectSql = "select Id, (unix_timestamp() - unix_timestamp(StartTime)) as Age from Events where MonitorId = ? order by Id";
     my $eventSelectSth = $dbh->prepare_cached( $eventSelectSql ) or Fatal( "Can't prepare '$eventSelectSql': ".$dbh->errstr() );
 
     $cleaned = 0;
-    my $res = $monitorSelectSth->execute() or Fatal( "Can't execute: ".$monitorSelectSth->errstr() );
+	my $res = $sth->execute( ) or Fatal( "Can't execute: ".$monitorSelectSth->errstr() );
     while( my $monitor = $monitorSelectSth->fetchrow_hashref() )
     {
         Debug( "Found database monitor '$monitor->{Id}'" );
@@ -139,6 +139,12 @@ MAIN: while( $loop )
     foreach my $monitor ( <[0-9]*> )
     {
         Debug( "Found filesystem monitor '$monitor'" );
+		if ( ( ZM_SERVERHOST ) ) {
+			if ( $db_monitors->{$monitor}->{ServerHost} ne ''.(ZM_SERVERHOST) ) {
+				Debug( "Skipping since it has handled by " . $db_monitors->{$monitor}->{ServerHost} . "\n" );
+				next;
+			} # end if same serverhost
+		} # end if  there is a defined serverhost
         my $fs_events = $fs_monitors->{$monitor} = {};
         ( my $monitor_dir ) = ( $monitor =~ /^(.*)$/ ); # De-taint
 

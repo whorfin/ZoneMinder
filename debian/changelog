@@ -1,5 +1,11 @@
 zoneminder (1.27.2-iconnor) precise; urgency=low
 
+  fix zmupdate.pl.in 
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 12 Sep 2013 16:30:56 -0400
+
+zoneminder (1.27.2-iconnor) precise; urgency=low
+
   * Merge commits from master (1.26.3)
 
  -- Isaac Connor <iconnor@connortechnology.com>  Thu, 12 Sep 2013 11:28:59 -0400
