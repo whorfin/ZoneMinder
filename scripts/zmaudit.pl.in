@@ -120,7 +120,7 @@ MAIN: while( $loop )
     my $eventSelectSth = $dbh->prepare_cached( $eventSelectSql ) or Fatal( "Can't prepare '$eventSelectSql': ".$dbh->errstr() );
 
     $cleaned = 0;
-	my $res = $sth->execute( ) or Fatal( "Can't execute: ".$monitorSelectSth->errstr() );
+	my $res = $monitorSelectSth->execute( ) or Fatal( "Can't execute: ".$monitorSelectSth->errstr() );
     while( my $monitor = $monitorSelectSth->fetchrow_hashref() )
     {
         Debug( "Found database monitor '$monitor->{Id}'" );
@@ -139,8 +139,8 @@ MAIN: while( $loop )
     foreach my $monitor ( <[0-9]*> )
     {
         Debug( "Found filesystem monitor '$monitor'" );
-		if ( ( ZM_SERVERHOST ) ) {
-			if ( $db_monitors->{$monitor}->{ServerHost} ne ''.(ZM_SERVERHOST) ) {
+		if ( ( ZM_SERVER_HOST ) ) {
+			if ( $db_monitors->{$monitor}->{ServerHost} ne ''.(ZM_SERVER_HOST) ) {
 				Debug( "Skipping since it has handled by " . $db_monitors->{$monitor}->{ServerHost} . "\n" );
 				next;
 			} # end if same serverhost
