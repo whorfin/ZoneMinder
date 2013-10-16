@@ -46,6 +46,8 @@ void Usage()
 
 int main( int argc, char *argv[] )
 {
+	self = argv[0];
+
 	srand( getpid() * time( 0 ) );
 
 	const char *device = "";
