@@ -124,7 +124,8 @@ MAIN: while( $loop )
     while( my $monitor = $monitorSelectSth->fetchrow_hashref() )
     {
         Debug( "Found database monitor '$monitor->{Id}'" );
-        my $db_events = $db_monitors->{$monitor->{Id}} = {};
+        my $db_events = {};
+		$db_monitors->{$monitor->{Id}} = $monitor;
         my $res = $eventSelectSth->execute( $monitor->{Id} ) or Fatal( "Can't execute: ".$eventSelectSth->errstr() );
         while ( my $event = $eventSelectSth->fetchrow_hashref() )
         {
