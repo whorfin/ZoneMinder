@@ -688,7 +688,7 @@ function getFormChanges( $values, $newValues, $types=false, $columns=false )
                 {
                     if ( join(',',$newValues[$key]) != $values[$key] )
                     {
-                        $changes[$key] = "$key = '".dbEscape(join(',',$newValues[$key]))."'";
+                        $changes[$key] = "$key = ".dbEscape(join(',',$newValues[$key]));
                     }
                 }
                 elseif ( $values[$key] )
@@ -708,12 +708,12 @@ function getFormChanges( $values, $newValues, $types=false, $columns=false )
                     $changes[$key.'Size'] = $key."Size = ".$newValues[$key]['size'];
                     ob_start();
                     readfile( $newValues[$key]['tmp_name'] );
-                    $changes[$key] = $key." = '".dbEscape( ob_get_contents() )."'";
+                    $changes[$key] = $key." = ".dbEscape( ob_get_contents() );
                     ob_end_clean();
                 }
                 else
                 {
-                    $changes[$key] = "$key = '".dbEscape($value)."'";
+                    $changes[$key] = "$key = ".dbEscape($value);
                 }
                 break;
             }
@@ -726,18 +726,18 @@ function getFormChanges( $values, $newValues, $types=false, $columns=false )
                     $changes[$key.'Size'] = $key."Size = ".$newValues[$key]['size'];
                     ob_start();
                     readfile( $newValues[$key]['tmp_name'] );
-                    $changes[$key] = $key." = '".dbEscape( ob_get_contents() )."'";
+                    $changes[$key] = $key." = ".dbEscape( ob_get_contents() );
                     ob_end_clean();
                 }
                 else
                 {
-                    $changes[$key] = "$key = '".dbEscape($value)."'";
+                    $changes[$key] = "$key = ".dbEscape($value);
                 }
                 break;
             }
             case 'file' :
             {
-                $changes[$key.'Type'] = $key."Type = '".dbEscape($newValues[$key]['type'])."'";
+                $changes[$key.'Type'] = $key."Type = ".dbEscape($newValues[$key]['type']);
                 $changes[$key.'Size'] = $key."Size = ".dbEscape($newValues[$key]['size']);
                 ob_start();
                 readfile( $newValues[$key]['tmp_name'] );
@@ -757,7 +757,7 @@ function getFormChanges( $values, $newValues, $types=false, $columns=false )
             {
                 if ( !isset($values[$key]) || ($values[$key] != $value) )
                 {
-                    $changes[$key] = "$key = '".dbEscape($value)."'";
+                    $changes[$key] = "$key = ".dbEscape($value);
                 }
                 break;
             }
@@ -985,7 +985,7 @@ function zmaControl( $monitor, $mode=false )
 {
     if ( !is_array( $monitor ) )
     {
-        $sql = "select C.*, M.* from Monitors as M left join Controls as C on (M.ControlId = C.Id ) where M.Id = '".dbEscape($monitor)."'";
+        $sql = "select C.*, M.* from Monitors as M left join Controls as C on (M.ControlId = C.Id ) where M.Id = ".dbEscape($monitor);
         $monitor = dbFetchOne( $sql );
     }
     if ( !$monitor || $monitor['Function'] == 'None' || $monitor['Function'] == 'Monitor' || $mode == "stop" )
@@ -1401,7 +1401,7 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                 switch ( $filter['terms'][$i]['attr'] )
                 {
                     case 'MonitorName':
-                        $filter['sql'] .= 'M.'.dbEscape(preg_replace( '/^Monitor/', '', $filter['terms'][$i]['attr'] ));
+                        $filter['sql'] .= dbEscape('M.'.preg_replace( '/^Monitor/', '', $filter['terms'][$i]['attr'] ));
                         break;
                     case 'DateTime':
                         $filter['sql'] .= "E.StartTime";
@@ -1427,7 +1427,7 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                     case 'Cause':
                     case 'Notes':
                     case 'Archived':
-                        $filter['sql'] .= "E.".dbEscape($filter['terms'][$i]['attr']);
+                        $filter['sql'] .= dbEscape('E.'.$filter['terms'][$i]['attr']);
                         break;
                     case 'DiskPercent':
                         $filter['sql'] .= getDiskPercent();
@@ -1448,7 +1448,7 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                         case 'Name':
                         case 'Cause':
                         case 'Notes':
-                            $value = "'".dbEscape($value)."'";
+                            $value = dbEscape($value);
                             break;
                         case 'DateTime':
                             $value = "'".strftime( STRF_FMT_DATETIME_DB, strtotime( $value ) )."'";
@@ -1474,7 +1474,7 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                     case '>' :
                     case '<' :
                     case '<=' :
-                        $filter['sql'] .= " ".dbEscape($filter['terms'][$i]['op'])." $value";
+                        $filter['sql'] .= " ".$filter['terms'][$i]['op']." $value";
                         break;
                     case '=~' :
                         $filter['sql'] .= " regexp ".$value;
