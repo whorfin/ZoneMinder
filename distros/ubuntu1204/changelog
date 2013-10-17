@@ -1,3 +1,9 @@
+zoneminder (1.27.3-isaac1) precise; urgency=low
+
+  * 
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 17 Oct 2013 16:20:36 -0400
+
 zoneminder (1.26.4-3) precise; urgency=low
 
   * Convert from php mysql ext to PDO
