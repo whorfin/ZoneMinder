@@ -10,6 +10,7 @@ PATH_BUILD=`pwd`
 AC_SUBST(PATH_BUILD)
 TIME_BUILD=`date +'%s'`
 AC_SUBST(TIME_BUILD)
+AC_SUBST(VERSION)
 
 AC_ARG_VAR(ZM_DB_TYPE,[Type of the ZoneMinder database, default mysql])
 AC_ARG_VAR(ZM_DB_HOST,[Hostname where ZoneMinder database located, default localhost])
