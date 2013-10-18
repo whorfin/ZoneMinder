@@ -46,6 +46,8 @@ while ( !feof($cfg) )
         define( $matches[1], $matches[2] );
 }
 fclose( $cfg );
+// Define, and override any given in config file
+define( "ZM_VERSION", "@ZM_VERSION@" );               // Version
 
 //
 // This section is options normally derived from other options or configuration
