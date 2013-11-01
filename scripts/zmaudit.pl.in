@@ -114,6 +114,7 @@ my $cleaned = 0;
 MAIN: while( $loop )
 {
     my $db_monitors;
+	my %db_events;
 	my $monitorSelectSql = "select * from Monitors order by Id asc";
     my $monitorSelectSth = $dbh->prepare_cached( $monitorSelectSql ) or Fatal( "Can't prepare '$monitorSelectSql': ".$dbh->errstr() );
     my $eventSelectSql = "select Id, (unix_timestamp() - unix_timestamp(StartTime)) as Age from Events where MonitorId = ? order by Id";
@@ -131,6 +132,7 @@ MAIN: while( $loop )
         {
             $db_events->{$event->{Id}} = $event->{Age};
         }
+		$db_events{$monitor->{Id}} = $db_events;
         Debug( "Got ".int(keys(%$db_events))." events\n" );
         $eventSelectSth->finish();
     }
@@ -217,7 +219,7 @@ MAIN: while( $loop )
     $cleaned = 0;
     while ( my ( $fs_monitor, $fs_events ) = each(%$fs_monitors) )
     {
-        if ( my $db_events = $db_monitors->{$fs_monitor} )
+        if ( my $db_events = $db_events{$fs_monitor} )
         {
             if ( $fs_events )
             {
@@ -273,7 +275,7 @@ MAIN: while( $loop )
     my $deleteFramesSth = $dbh->prepare_cached( $deleteFramesSql ) or Fatal( "Can't prepare '$deleteFramesSql': ".$dbh->errstr() );
     my $deleteStatsSql = "delete low_priority from Stats where EventId = ?";
     my $deleteStatsSth = $dbh->prepare_cached( $deleteStatsSql ) or Fatal( "Can't prepare '$deleteStatsSql': ".$dbh->errstr() );
-    while ( my ( $db_monitor, $db_events ) = each(%$db_monitors) )
+    while ( my ( $db_monitor, $db_events ) = each(%db_events) )
     {
         if ( my $fs_events = $fs_monitors->{$db_monitor} )
         {
