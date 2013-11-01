@@ -22,6 +22,8 @@
 // This section contains options substituted by the zmconfig.pl utility, do not edit these directly
 //
 define( "ZM_CONFIG", "@ZM_CONFIG@" );               // Path to config file
+// Define, and override any given in config file
+define( "ZM_VERSION", "@VERSION@" );               // Version
 
 $configFile = ZM_CONFIG;
 $localConfigFile = basename($configFile);
@@ -145,16 +147,16 @@ function loadConfig( $defineConsts=true )
 {
     global $config;
     global $configCats;
+	global $dbConn;
 
     $config = array();
     $configCat = array();
 
-    $sql = "select * from Config order by Id asc";
-    $result = mysql_query( $sql );
+    $result = $dbConn->query( 'select * from Config order by Id asc' );
     if ( !$result )
         echo mysql_error();
     $monitors = array();
-    while( $row = mysql_fetch_assoc( $result ) )
+    while( $row = dbFetchNext( $result ) )
     {
         if ( $defineConsts )
             define( $row['Name'], $row['Value'] );
