@@ -24,18 +24,18 @@ if ( !canView( 'Stream' ) )
     return;
 }
 
-$groupSql = "";
+$sql = "select * from Monitors where Function != 'None'";
 if ( !empty($_REQUEST['group']) )
 {
-    $sql = "select * from Groups where Id = ".dbEscape($_REQUEST['group']);
-    $row = dbFetchOne( $sql );
-    $groupSql = " and find_in_set( Id, '".$row['MonitorIds']."' )";
+    $row = dbFetchOne( 'select * from Groups where Id = ?', NULL, array($_REQUEST['group']) );
+	$sql .= " and find_in_set( Id, '".$row['MonitorIds']."' )";
+} else { 
 }
-if ( ZM_SERVER_HOST ) {
-$sql = "select * from Monitors where Function != 'None' and ServerHost='".ZM_SERVER_HOST."'$groupSql order by Sequence";
-} else {
-$sql = "select * from Monitors where Function != 'None'$groupSql order by Sequence";
+if ( ''+ZM_SERVER_HOST ) {
+	$sql .= " and ServerHost='".ZM_SERVER_HOST."'";
 }
+$sql .= " order by Sequence";
+
 $maxWidth = 0;
 $maxHeight = 0;
 $showControl = false;
