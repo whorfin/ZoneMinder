@@ -6,10 +6,6 @@ AC_CONFIG_HEADERS(config.h)
 
 AC_SUBST([AM_CXXFLAGS], [-D__STDC_CONSTANT_MACROS])
 
-PATH_BUILD=`pwd`
-AC_SUBST(PATH_BUILD)
-TIME_BUILD=`date +'%s'`
-AC_SUBST(TIME_BUILD)
 AC_SUBST(VERSION)
 
 AC_ARG_VAR(ZM_DB_TYPE,[Type of the ZoneMinder database, default mysql])
