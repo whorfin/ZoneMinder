@@ -10,6 +10,12 @@ zoneminder (1.26.4-3) precise; urgency=low
 
  -- Isaac Connor <iconnor@connortechnology.com>  Wed, 16 Oct 2013 15:51:39 -0400
 
+zoneminder (1.26.4+1-SNAPSHOT2013110302) precise; urgency=high
+
+  * Today's snapshot of master
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Sun, 03 Nov 2013 14:05:46 -0500
+
 zoneminder (1.26.4-2) precise; urgency=high
 
   * improvements to zmupdate.pl, cleanups
