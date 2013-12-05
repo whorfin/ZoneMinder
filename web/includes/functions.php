@@ -2224,10 +2224,11 @@ function isVector ( &$array )
     return( true );
 }
 
-function checkJsonError()
+function checkJsonError($value)
 {
     if ( function_exists('json_last_error') )
     {
+        $value = var_export($value,true);
         switch( json_last_error() )
         {
             case JSON_ERROR_DEPTH :
@@ -2255,7 +2256,7 @@ function jsonEncode( &$value )
     if ( function_exists('json_encode') )
     {
         $string = json_encode( $value );
-        checkJsonError();
+        checkJsonError($value);
         return( $string );
     }
 
@@ -2336,7 +2337,7 @@ function jsonDecode( $value )
     if ( function_exists('json_decode') )
     {
         $object = json_decode( $value, true );
-        checkJsonError();
+        checkJsonError($value);
         return( $object );
     }
 
