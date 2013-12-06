@@ -31,7 +31,7 @@ if ( !empty($_REQUEST['group']) )
 	$sql .= " and find_in_set( Id, '".$row['MonitorIds']."' )";
 } else { 
 }
-if ( ''+ZM_SERVER_HOST ) {
+if ( ZM_SERVER_HOST ) {
 	$sql .= " and ServerHost='".ZM_SERVER_HOST."'";
 }
 $sql .= " order by Sequence";

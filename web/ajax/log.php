@@ -99,7 +99,7 @@ switch ( $_REQUEST['task'] )
             }
             else
             {
-                foreach( dbFetchAll( $sql, $field ) as $value )
+                foreach( dbFetchAll( $sql, $field, $fieldValues ) as $value )
                     if ( $value != '' )
                         $options[$field][] = $value;
             }

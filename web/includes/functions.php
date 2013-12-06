@@ -1394,7 +1394,7 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                 switch ( $filter['terms'][$i]['attr'] )
                 {
                     case 'MonitorName':
-                        $filter['sql'] .= dbEscape('M.'.preg_replace( '/^Monitor/', '', $filter['terms'][$i]['attr'] ));
+                        $filter['sql'] .= 'M.'.preg_replace( '/^Monitor/', '', $filter['terms'][$i]['attr'] );
                         break;
                     case 'DateTime':
                         $filter['sql'] .= "E.StartTime";
@@ -1420,7 +1420,7 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                     case 'Cause':
                     case 'Notes':
                     case 'Archived':
-                        $filter['sql'] .= dbEscape('E.'.$filter['terms'][$i]['attr']);
+                        $filter['sql'] .= 'E.'.$filter['terms'][$i]['attr'];
                         break;
                     case 'DiskPercent':
                         $filter['sql'] .= getDiskPercent();
