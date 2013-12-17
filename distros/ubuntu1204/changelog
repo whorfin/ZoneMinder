@@ -1,6 +1,6 @@
-zoneminder (1.27.5-1) precise; urgency=high
+zoneminder (1.27.6-1) precise; urgency=high
 
-  * 
+  * Add video storage stuff
 
  -- Isaac Connor <iconnor@connortechnology.com>  Thu, 03 Oct 2013 11:40:32 -0400
 
