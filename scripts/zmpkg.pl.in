@@ -25,6 +25,7 @@
 # allow command line control for automatic restart on reboot (see zm script)
 #
 use strict;
+use warnings;
 use bytes;
 
 # ==========================================================================
@@ -38,6 +39,7 @@ use ZoneMinder;
 use DBI;
 use POSIX;
 use Time::HiRes qw/gettimeofday/;
+use Getopt::Long;
 
 # Detaint our environment
 $ENV{PATH}  = '/bin:/usr/bin';
@@ -46,73 +48,70 @@ delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
 logInit();
 
-my $command = $ARGV[0];
-
-my $state;
-
+my ($start, $stop, $restart, $status, $logrot, $state);
 my $dbh = zmDbConnect();
+my $status = runCommand( "zmdc.pl check" );
 
-if ( !$command || $command !~ /^(?:start|stop|restart|status|logrot)$/ )
-{
-	if ( $command )
-	{
-		# Check to see if it's a valid run state
-		my $sql = 'select * from States where Name = ?';
-		my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
-		my $res = $sth->execute( $command ) or Fatal( "Can't execute: ".$sth->errstr() );
-		if ( $state = $sth->fetchrow_hashref() )
-		{
-			$state->{Name} = $command;
-			$state->{Definitions} = [];
-			foreach( split( /,/, $state->{Definition} ) )
-			{
-				my ( $id, $function, $enabled ) = split( /:/, $_ );
-				push( @{$state->{Definitions}}, { Id=>$id, Function=>$function, Enabled=>$enabled } );
-			}
-			$command = 'state';
-		}
-		else
-		{
-			$command = undef;
-		}
-	}
-	if ( !$command )
-	{
-		print( "Usage: zmpkg.pl <start|stop|restart|status|logrot|'state'>\n" );
-		exit( -1 );
-	}
-}
+GetOptions (
+'start' => \&start,
+'stop' => \&stop,
+'restart' => \&restart,
+'status' => sub { print( STDOUT $status."\n" ) },
+'logrot' => sub { runCommand( "zmdc.pl logrot" ) },
+'state=s' => \&state
+);
 
-# Move to the right place
 chdir( ZM_PATH_WEB ) or Fatal( "Can't chdir to '".ZM_PATH_WEB."': $!" );
-
-my $dbg_id = "";
 
 Info( "Command: $command\n" );
 
-my $retval = 0;
+sub state() {
+   if ( stateCheck(@_) ) {
+      updateMonitorFunction();
+   }
+}
 
-if ( $command eq "state" )
-{
-	Info( "Updating DB: $state->{Name}\n" );
-	my $sql = "select * from Monitors order by Id asc";
-	my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
-	my $res = $sth->execute() or Fatal( "Can't execute: ".$sth->errstr() );
-	while( my $monitor = $sth->fetchrow_hashref() )
-	{
-		foreach my $definition ( @{$state->{Definitions}} )
-		{
-			if ( $monitor->{Id} =~ /^$definition->{Id}$/ )
-			{
-				$monitor->{NewFunction} = $definition->{Function};
-				$monitor->{NewEnabled} = $definition->{Enabled};
-			}
-		}
+sub stateCheck() {
+   my ($opt_name, $opt_value) = @_;
+   my $sql = 'select * from States where Name = ?';
+   my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
+   my $res = $sth->execute( $opt_value ) or Fatal( "Can't execute: ".$sth->errstr() );
+   if ( $state = $sth->fetchrow_hashref() ) {
+      $state->{Name} = $opt_value;
+      $state->{Definitions} = [];
+      foreach( split( /,/, $state->{Definition} ) ) {
+         my ( $id, $function, $enabled ) = split( /:/, $_ );
+         push( @{$state->{Definitions}}, { Id=>$id, Function=>$function, Enabled=>$enabled } );
+      }
+   } else {
+      Fatal( "Invalid state!");
+   }
+}
+
+sub getMonitors() {
+   my @monitors;
+   my $sql = "select Id from Monitors order by Id asc";
+   my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
+   my $res = $sth->execute() or Fatal( "Can't execute: ".$sth->errstr() );
+   while ( my $monitor = $sth->fetchrow_hashref() ) {
+      push (@monitors, $monitor);
+   }
+   return @monitors;
+}
+
+sub updateMonitorFunction() {
+   my @monitors = getMonitors();
+   foreach my $monitor (@monitors) {
+      foreach my $definition ( @{$state->{Definitions}} ) {
+         if ( $monitor->{Id} =~ /^$definition->{Id}$/ ) {
+            $monitor->{NewFunction} = $definition->{Function};
+            $monitor->{NewEnabled} = $definition->{Enabled};
+         }
+      }
 		#next if ( !$monitor->{NewFunction} );
 		$monitor->{NewFunction} = 'None' if ( !$monitor->{NewFunction} );
 		$monitor->{NewEnabled} = 0 if ( !$monitor->{NewEnabled} );
-		if ( $monitor->{Function} ne $monitor->{NewFunction} || $monitor->{Enabled} ne $monitor->{NewEnabled} )
-		{
+		if ( $monitor->{Function} ne $monitor->{NewFunction} || $monitor->{Enabled} ne $monitor->{NewEnabled} ) {
 			my $sql = "update Monitors set Function = ?, Enabled = ? where Id = ?";
 			my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
 			my $res = $sth->execute( $monitor->{NewFunction}, $monitor->{NewEnabled}, $monitor->{Id} ) or Fatal( "Can't execute: ".$sth->errstr() );
@@ -120,84 +119,71 @@ if ( $command eq "state" )
 	}
 	$sth->finish();
 
-	$command = "restart";
+        restart();
 }
 
-if ( $command =~ /^(?:stop|restart)$/ )
-{
-	my $status = runCommand( "zmdc.pl check" );
-
-	if ( $status eq "running" )
-	{
-		runCommand( "zmdc.pl shutdown" );
-		zmMemTidy();
-	}
-	else
-	{
-		$retval = 1;
-	}
+sub stop() {
+   if ( $status eq "running" ) {
+      runCommand( "zmdc.pl shutdown" );
+      zmMemTidy();
+   } else {
+      Fatal( "ZoneMinder is not running");
+   }
 }
 
-#runCommand( "zmupdate.pl -f" );
+sub restart() {
+   stop();
+   start();
+}
 
-if ( $command =~ /^(?:start|restart)$/ )
-{
-	my $status = runCommand( "zmdc.pl check" );
+sub compareVersions() {
+   if ( ZM_DYN_DB_VERSION && ZM_DYN_DB_VERSION ne ZM_VERSION ) {
+      Fatal( "Version mismatch, system is version ".ZM_VERSION.", database is ".ZM_DYN_DB_VERSION.", please run zmupdate.pl to update." );
+      exit( -1 );
+   }
+}
 
-	if ( $status eq "stopped" )
-	{
-        if ( ZM_DYN_DB_VERSION && ZM_DYN_DB_VERSION ne ZM_VERSION )
-        {
-            Fatal( "Version mismatch, system is version ".ZM_VERSION.", database is ".ZM_DYN_DB_VERSION.", please run zmupdate.pl to update." );
-            exit( -1 );
-        }
+sub createTmpDir() {
+# Recreate the temporary directory if it's been wiped
+   if ( !-e "@ZM_TMPDIR@" ) {
+      Debug( "Recreating temporary directory '@ZM_TMPDIR@'" );
+      mkdir( "@ZM_TMPDIR@", 0700 ) or Fatal( "Can't create missing temporary directory '@ZM_TMPDIR@': $!" );
+      my ( $runName ) = getpwuid( $> );
+      if ( $runName ne ZM_WEB_USER ) {
+         # Not running as web user, so should be root in whch case chown the temporary directory
+         my ( $webName, $webPass, $webUid, $webGid ) = getpwnam( ZM_WEB_USER ) or Fatal( "Can't get user details for web user '".ZM_WEB_USER."': $!" );
+         chown( $webUid, $webGid, "@ZM_TMPDIR@" ) or Fatal( "Can't change ownership of temporary directory '@ZM_TMPDIR@' to '".ZM_WEB_USER.":".ZM_WEB_GROUP."': $!" );
+      }
+   }
+}
 
-        # Recreate the temporary directory if it's been wiped
-        if ( !-e "@ZM_TMPDIR@" )
-        {
-            Debug( "Recreating temporary directory '@ZM_TMPDIR@'" );
-            mkdir( "@ZM_TMPDIR@", 0700 ) or Fatal( "Can't create missing temporary directory '@ZM_TMPDIR@': $!" );
-            my ( $runName ) = getpwuid( $> );
-            if ( $runName ne ZM_WEB_USER )
-            {
-                # Not running as web user, so should be root in whch case chown the temporary directory
-                my ( $webName, $webPass, $webUid, $webGid ) = getpwnam( ZM_WEB_USER ) or Fatal( "Can't get user details for web user '".ZM_WEB_USER."': $!" );
-                chown( $webUid, $webGid, "@ZM_TMPDIR@" ) or Fatal( "Can't change ownership of temporary directory '@ZM_TMPDIR@' to '".ZM_WEB_USER.":".ZM_WEB_GROUP."': $!" );
-            }
-        }
-		zmMemTidy();
-		runCommand( "zmfix" );
-		runCommand( "zmdc.pl startup" );
+sub start() {
+   if ( $status eq "stopped" ) {
+      compareVersions();
+      createTmpDir();
 
-		my $sql = "select * from Monitors";
-		my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
-		my $res = $sth->execute() or Fatal( "Can't execute: ".$sth->errstr() );
-		while( my $monitor = $sth->fetchrow_hashref() )
-		{
-			if ( $monitor->{Function} ne 'None' )
-			{
-				if ( $monitor->{Type} eq 'Local' )
-				{
+      zmMemTidy();
+      runCommand( "zmfix" );
+      runCommand( "zmdc.pl startup" );
+
+      getMonitors();
+		while( my $monitor = $sth->fetchrow_hashref() ) {
+			if ( $monitor->{Function} ne 'None' ) {
+
+				if ( $monitor->{Type} eq 'Local' ) {
 					runCommand( "zmdc.pl start zmc -d $monitor->{Device}" );
-				}
-				else
-				{
+				} else {
 					runCommand( "zmdc.pl start zmc -m $monitor->{Id}" );
 				}
-				if ( $monitor->{Function} ne 'Monitor' )
-				{
-					if ( ZM_OPT_FRAME_SERVER )
-					{
-						runCommand( "zmdc.pl start zmf -m $monitor->{Id}" );
-					}
+
+				if ( $monitor->{Function} ne 'Monitor' ) {
+					runCommand( "zmdc.pl start zmf -m $monitor->{Id}" ) if ( ZM_OPT_FRAME_SERVER );
 					runCommand( "zmdc.pl start zma -m $monitor->{Id}" );
 				}
-				if ( ZM_OPT_CONTROL )
-				{
-					if ( $monitor->{Function} eq 'Modect' || $monitor->{Function} eq 'Mocord' )
-					{
-						if ( $monitor->{Controllable} && $monitor->{TrackMotion} )
-						{
+
+				if ( ZM_OPT_CONTROL ) {
+					if ( $monitor->{Function} eq 'Modect' || $monitor->{Function} eq 'Mocord' ) {
+						if ( $monitor->{Controllable} && $monitor->{TrackMotion} ) {
 							runCommand( "zmdc.pl start zmtrack.pl -m $monitor->{Id}" );
 						}
 					}
@@ -208,40 +194,18 @@ if ( $command =~ /^(?:start|restart)$/ )
 
 		# This is now started unconditionally
 		runCommand( "zmdc.pl start zmfilter.pl" );
-		if ( ZM_RUN_AUDIT )
-		{
-			runCommand( "zmdc.pl start zmaudit.pl -c" );
-		}
-		if ( ZM_OPT_TRIGGERS )
-		{
-			runCommand( "zmdc.pl start zmtrigger.pl" );
-		}
-		if ( ZM_OPT_X10 )
-		{
-			runCommand( "zmdc.pl start zmx10.pl -c start" );
-		}
+		runCommand( "zmdc.pl start zmaudit.pl -c" ) if ( ZM_RUN_AUDIT );
+		runCommand( "zmdc.pl start zmtrigger.pl" ) if ( ZM_OPT_TRIGGERS );
+		runCommand( "zmdc.pl start zmx10.pl -c start" ) if ( ZM_OPT_X10 );
 		runCommand( "zmdc.pl start zmwatch.pl" );
-		if ( ZM_CHECK_FOR_UPDATES )
-		{
-			runCommand( "zmdc.pl start zmupdate.pl -c" );
-		}
-	}
-	else
-	{
-		$retval = 1;
+		runCommand( "zmdc.pl start zmupdate.pl -c" ) if ( ZM_CHECK_FOR_UPDATES );
+	} else {
+	   fatal ("ZoneMinder is already running");
+	   exit (1);
 	}
 }
 
-if ( $command eq "status" )
-{
-	my $status = runCommand( "zmdc.pl check" );
-
-	print( STDOUT $status."\n" );
+sub usage() {
+   print( "Usage: zmpkg.pl <start|stop|restart|status|logrot|'state'>\n" );
+   exit( -1 );
 }
-
-if ( $command eq "logrot" )
-{
-	runCommand( "zmdc.pl logrot" );
-}
-
-exit( $retval );
