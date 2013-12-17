@@ -249,12 +249,15 @@ function collectData()
             {
                 $index = 0;
                 $where = array();
-                foreach( $entitySpec['selector'] as $selector )
-                {
-                    if ( is_array( $selector ) )
-                        $where[] = $selector['selector']." = ".validInt($id[$index]);
-                    else
-                        $where[] = $selector." = ".validInt($id[$index]);
+				$values = array();
+                foreach( $entitySpec['selector'] as $selector ) {
+                    if ( is_array( $selector ) ) {
+                        $where[] = $selector['selector'].' = ?';
+						$values[] = validInt($id[$index]);
+                    } else {
+                        $where[] = $selector.' = ?';
+						$values[] = validInt($id[$index]);
+					}
                     $index++;
                 }
                 $sql .= " where ".join( " and ", $where );
@@ -282,20 +285,15 @@ function collectData()
                 $limit_offset = validInt($_REQUEST['offset']) . ", ";
             if ( !empty( $limit ) )
                 $sql .= " limit ".$limit_offset . $limit;
-            if ( isset($limit) && $limit == 1 )
-            {
-                if ( $sqlData = dbFetchOne( $sql ) )
-                {
+            if ( isset($limit) && $limit == 1 ) {
+                if ( $sqlData = dbFetchOne( $sql, NULL, $values ) ) {
                     foreach ( $postFuncs as $element=>$func )
                         $sqlData[$element] = eval( 'return( '.$func.'( $sqlData ) );' );
                     $data = array_merge( $data, $sqlData );
                 }
-            }
-            else
-            {
+            } else {
                 $count = 0;
-                foreach( dbFetchAll( $sql ) as $sqlData )
-                {
+                foreach( dbFetchAll( $sql, NULL, $values ) as $sqlData ) {
                     foreach ( $postFuncs as $element=>$func )
                         $sqlData[$element] = eval( 'return( '.$func.'( $sqlData ) );' );
                     $data[] = $sqlData;
