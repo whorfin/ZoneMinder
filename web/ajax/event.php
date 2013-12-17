@@ -25,8 +25,8 @@ if ( canView( 'Events' ) )
             }
             else
             {
-                $sql = "select E.*,M.Name as MonitorName,M.DefaultRate,M.DefaultScale from Events as E inner join Monitors as M on E.MonitorId = M.Id where E.Id = ".dbEscape($_REQUEST['id']).monitorLimitSql();
-                if ( !($event = dbFetchOne( $sql )) )
+                $sql = "select E.*,M.Name as MonitorName,M.DefaultRate,M.DefaultScale from Events as E inner join Monitors as M on E.MonitorId = M.Id where E.Id = ?".monitorLimitSql();
+                if ( !($event = dbFetchOne( $sql, NULL, array( $_REQUEST['id'] ) )) )
                     ajaxError( "Video Generation Failure, can't load event" );
                 else
                     if ( $videoFile = createVideo( $event, $_REQUEST['videoFormat'], $_REQUEST['rate'], $_REQUEST['scale'], !empty($_REQUEST['overwrite']) ) )
@@ -90,7 +90,7 @@ if ( canEdit( 'Events' ) )
         case "rename" :
         {
             if ( !empty($_REQUEST['eventName']) )
-                dbQuery( "update Events set Name = '".dbEscape($_REQUEST['eventName'])."' where Id = '".dbEscape($_REQUEST['id'])."'" );
+                dbQuery( 'update Events set Name = ? where Id = ?', array( $_REQUEST['eventName'], $_REQUEST['id'] ) );
             else
                 ajaxError( "No new event name supplied" );
             ajaxResponse( array( 'refreshEvent'=>true, 'refreshParent'=>true ) );
@@ -98,7 +98,7 @@ if ( canEdit( 'Events' ) )
         }
         case "eventdetail" :
         {
-            dbQuery( "update Events set Cause = '".dbEscape($_REQUEST['newEvent']['Cause'])."', Notes = '".dbEscape($_REQUEST['newEvent']['Notes'])."' where Id = '".dbEscape($_REQUEST['id'])."'" );
+            dbQuery( 'update Events set Cause = ?, Notes = ? where Id = ?', array( $_REQUEST['newEvent']['Cause'], $_REQUEST['newEvent']['Notes'], $_REQUEST['id'] ) );
             ajaxResponse( array( 'refreshEvent'=>true, 'refreshParent'=>true ) );
             break;
         }
@@ -106,7 +106,7 @@ if ( canEdit( 'Events' ) )
         case "unarchive" :
         {
             $archiveVal = ($_REQUEST['action'] == "archive")?1:0;
-            dbQuery( "update Events set Archived = ".$archiveVal." where Id = '".dbEscape($_REQUEST['id'])."'" );
+            dbQuery( 'update Events set Archived = ? where Id = ?', array( $archiveVal, $_REQUEST['id'] ) );
             ajaxResponse( array( 'refreshEvent'=>true, 'refreshParent'=>false ) );
             break;
         }
