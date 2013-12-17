@@ -44,7 +44,7 @@ if ( !empty($_REQUEST['mid']) )
 {
     $monitor = dbFetchMonitor( $_REQUEST['mid'] );
     if ( ZM_OPT_X10 )
-        $x10Monitor = dbFetchOne( "select * from TriggersX10 where MonitorId = ".dbEscape($_REQUEST['mid']) );
+        $x10Monitor = dbFetchOne( 'SELECT * FROM TriggersX10 WHERE MonitorId = ?', NULL, array( $_REQUEST['mid']) );
 }
 else
 {
@@ -97,7 +97,8 @@ else
         'MaxFPS' => "",
         'AlarmMaxFPS' => "",
         'FPSReportInterval' => 1000,
-        'RefBlendPerc' => 12,
+        'RefBlendPerc' => 6,
+        'AlarmRefBlendPerc' => 3,
         'DefaultView' => 'Events',
         'DefaultRate' => '100',
         'DefaultScale' => '100',
@@ -141,9 +142,8 @@ if ( $newMonitor['MaxFPS'] == '0.00' )
 if ( $newMonitor['AlarmMaxFPS'] == '0.00' )
     $newMonitor['AlarmMaxFPS'] = '';
 
-if ( !empty($_REQUEST['preset']) )
-{
-    $preset = dbFetchOne( "select Type, Device, Channel, Format, Protocol, Method, Host, Port, Path, Width, Height, Palette, MaxFPS, Controllable, ControlId, ControlDevice, ControlAddress, DefaultRate, DefaultScale from MonitorPresets where Id = ".dbEscape($_REQUEST['preset']) );
+if ( !empty($_REQUEST['preset']) ) {
+    $preset = dbFetchOne( 'SELECT Type, Device, Channel, Format, Protocol, Method, Host, Port, Path, Width, Height, Palette, MaxFPS, Controllable, ControlId, ControlDevice, ControlAddress, DefaultRate, DefaultScale FROM MonitorPresets WHERE Id = ?', NULL, array($_REQUEST['preset']) );
     foreach ( $preset as $name=>$value )
     {
         if ( isset($value) )
@@ -309,7 +309,7 @@ if ( ZM_HAS_V4L2 )
         //"YVU410" =>   fourcc('Y','V','U','9'), /*  9  YVU 4:1:0     */
         //"YVU420" =>   fourcc('Y','V','1','2'), /* 12  YVU 4:2:0     */
 
-        //"UYVY" =>     fourcc('U','Y','V','Y'), /* 16  YUV 4:2:2     */
+        "*UYVY" =>     fourcc('U','Y','V','Y'), /* 16  YUV 4:2:2     */
         "*YUV422P" =>  fourcc('4','2','2','P'), /* 16  YVU422 planar */
         "*YUV411P" =>  fourcc('4','1','1','P'), /* 16  YVU411 planar */
         //"Y41P" =>     fourcc('Y','4','1','P'), /* 12  YUV 4:1:1     */
@@ -389,7 +389,27 @@ $deinterlaceopts_v4l2 = array(
     "V4L2: Capture bottom field only"                     => 0x03000000,
     "V4L2: Alternate fields (Bob)"                        => 0x07000000,
     "V4L2: Progressive"                                   => 0x01000000,
-    "V4L2: Interlaced"                                    => 0x04000000,
+    "V4L2: Interlaced"                                    => 0x04000000
+);
+
+$fastblendopts = array(
+    "No blending"                                         => 0,
+    "1.5625%"                                             => 1,
+    "3.125%"                                              => 3,
+    "6.25% (Indoor)"                                      => 6,
+    "12.5% (Outdoor)"                                     => 12,
+    "25%"                                                 => 25,
+    "50%"                                                 => 50
+);
+
+$fastblendopts_alarm = array(
+    "No blending (Alarm lasts forever)"                   => 0,
+    "1.5625%"                                             => 1,
+    "3.125%"                                              => 3,
+    "6.25%"                                               => 6,
+    "12.5%"                                               => 12,
+    "25%"                                                 => 25,
+    "50% (Alarm lasts a moment)"                          => 50
 );
 
 xhtmlHeaders(__FILE__, $SLANG['Monitor']." - ".validHtmlStr($monitor['Name']) );
@@ -448,6 +468,7 @@ if ( $tab != 'general' )
         <input type="hidden" name="newMonitor[Function]" value="<?= validHtmlStr($newMonitor['Function']) ?>"/>
         <input type="hidden" name="newMonitor[Enabled]" value="<?= validHtmlStr($newMonitor['Enabled']) ?>"/>
         <input type="hidden" name="newMonitor[RefBlendPerc]" value="<?= validHtmlStr($newMonitor['RefBlendPerc']) ?>"/>
+        <input type="hidden" name="newMonitor[AlarmRefBlendPerc]" value="<?= validHtmlStr($newMonitor['AlarmRefBlendPerc']) ?>"/>
         <input type="hidden" name="newMonitor[MaxFPS]" value="<?= validHtmlStr($newMonitor['MaxFPS']) ?>"/>
         <input type="hidden" name="newMonitor[AlarmMaxFPS]" value="<?= validHtmlStr($newMonitor['AlarmMaxFPS']) ?>"/>
 <?php
@@ -611,7 +632,20 @@ switch ( $tab )
             </tr>
             <tr><td><?= $SLANG['MaximumFPS'] ?></td><td><input type="text" name="newMonitor[MaxFPS]" value="<?= validHtmlStr($newMonitor['MaxFPS']) ?>" size="6"/></td></tr>
             <tr><td><?= $SLANG['AlarmMaximumFPS'] ?></td><td><input type="text" name="newMonitor[AlarmMaxFPS]" value="<?= validHtmlStr($newMonitor['AlarmMaxFPS']) ?>" size="6"/></td></tr>
+<?php
+	if ( ZM_FAST_IMAGE_BLENDS )
+        {
+?>
+            <tr><td><?= $SLANG['RefImageBlendPct'] ?></td><td><select name="newMonitor[RefBlendPerc]"><?php foreach ( $fastblendopts as $name => $value ) { ?><option value="<?= $value ?>"<?php if ( $value == $newMonitor['RefBlendPerc'] ) { ?> selected="selected"<?php } ?>><?= $name ?></option><?php } ?></select></td></tr>
+            <tr><td><?= "Alarm " . $SLANG['RefImageBlendPct'] ?></td><td><select name="newMonitor[AlarmRefBlendPerc]"><?php foreach ( $fastblendopts_alarm as $name => $value ) { ?><option value="<?= $value ?>"<?php if ( $value == $newMonitor['AlarmRefBlendPerc'] ) { ?> selected="selected"<?php } ?>><?= $name ?></option><?php } ?></select></td></tr>
+<?php
+	} else {
+?>
             <tr><td><?= $SLANG['RefImageBlendPct'] ?></td><td><input type="text" name="newMonitor[RefBlendPerc]" value="<?= validHtmlStr($newMonitor['RefBlendPerc']) ?>" size="4"/></td></tr>
+            <tr><td><?= "Alarm " . $SLANG['RefImageBlendPct'] ?></td><td><input type="text" name="newMonitor[AlarmRefBlendPerc]" value="<?= validHtmlStr($newMonitor['AlarmRefBlendPerc']) ?>" size="4"/></td></tr>
+<?php
+        }
+?>
             <tr><td><?= $SLANG['Triggers'] ?></td><td>
 <?php
         $optTriggers = getSetValues( 'Monitors', 'Triggers' );

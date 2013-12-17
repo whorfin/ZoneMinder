@@ -29,8 +29,8 @@ if ( !empty($user['MonitorIds']) )
 else
     $midSql = '';
 
-$sql = "select E.*,M.Name as MonitorName,M.Width,M.Height,M.DefaultRate,M.DefaultScale from Events as E inner join Monitors as M on E.MonitorId = M.Id where E.Id = ".dbEscape($_REQUEST['eid']).$midSql;
-$event = dbFetchOne( $sql );
+$sql = 'SELECT E.*,M.Name as MonitorName,M.Width,M.Height,M.DefaultRate,M.DefaultScale from Events as E inner join Monitors as M on E.MonitorId = M.Id where E.Id = ?'.$midSql;
+$event = dbFetchOne( $sql, NULL, array( $_REQUEST['eid'] ) );
 
 if ( isset( $_REQUEST['rate'] ) )
     $rate = validInt($_REQUEST['rate']);

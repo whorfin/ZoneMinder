@@ -1,24 +1,6 @@
-zoneminder (1.27.3-isaac2) precise; urgency=low
+zoneminder (1.27.5-1) precise; urgency=high
 
   * 
-
- -- Isaac Connor <iconnor@connortechnology.com>  Thu, 17 Oct 2013 16:20:36 -0400
-
-zoneminder (1.26.4-3) precise; urgency=low
-
-  * Convert from php mysql ext to PDO
-
- -- Isaac Connor <iconnor@connortechnology.com>  Wed, 16 Oct 2013 15:51:39 -0400
-
-zoneminder (1.26.4+1-SNAPSHOT2013110302) precise; urgency=high
-
-  * Today's snapshot of master
-
- -- Isaac Connor <iconnor@connortechnology.com>  Sun, 03 Nov 2013 14:05:46 -0500
-
-zoneminder (1.26.4-2) precise; urgency=high
-
-  * improvements to zmupdate.pl, cleanups
 
  -- Isaac Connor <iconnor@connortechnology.com>  Thu, 03 Oct 2013 11:40:32 -0400
 
