@@ -142,8 +142,8 @@ MAIN: while( $loop )
     foreach my $monitor ( <[0-9]*> )
     {
         Debug( "Found filesystem monitor '$monitor'" );
-		if ( ( ZM_SERVER_HOST ) ) {
-			if ( $db_monitors->{$monitor}->{ServerHost} ne ''.(ZM_SERVER_HOST) ) {
+		if ( $Config{ZM_SERVER_HOST} ) {
+			if ( $db_monitors->{$monitor}->{ServerHost} ne $Config{ZM_SERVER_HOST} ) {
 				Debug( "Skipping since it has handled by " . $db_monitors->{$monitor}->{ServerHost} . "\n" );
 				next;
 			} # end if same serverhost

@@ -71,13 +71,13 @@ sleep( START_DELAY );
 
 my $dbh = zmDbConnect();
 
-my $sql = (ZM_SERVER_HOST) ? "select * from Monitors where ServerHost=?" : "select * from Monitors";
+my $sql = $Config{ZM_SERVER_HOST} ? 'SELECT * FROM Monitors WHERE ServerHost=?' : 'SELECT * FROM Monitors';
 my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
 
 while( 1 )
 {
 	my $now = time();
-	my $res = $sth->execute( (ZM_SERVER_HOST) ? ZM_SERVER_HOST : () ) or Fatal( "Can't execute: ".$sth->errstr() );
+	my $res = $sth->execute( $Config{ZM_SERVER_HOST} ? $Config{ZM_SERVER_HOST} : () ) or Fatal( "Can't execute: ".$sth->errstr() );
 	while( my $monitor = $sth->fetchrow_hashref() )
 	{
 		if ( $monitor->{Function} ne 'None' )

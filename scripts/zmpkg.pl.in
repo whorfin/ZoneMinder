@@ -95,9 +95,9 @@ my $retval = 0;
 if ( $command eq "state" )
 {
 	Info( "Updating DB: $state->{Name}\n" );
-	my $sql = (ZM_SERVER_HOST) ? "select * from Monitors where ServerHost=? order by Id asc" : "select * from Monitors order by Id asc";
+	my $sql = $Config{ZM_SERVER_HOST} ? 'SELECT * FROM Monitors WHERE ServerHost=? ORDER BY Id ASC' : 'SELECT * FROM Monitors ORDER BY Id ASC';
 	my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
-	my $res = $sth->execute( (ZM_SERVER_HOST) ? ZM_SERVER_HOST : () ) or Fatal( "Can't execute: ".$sth->errstr() );
+	my $res = $sth->execute( $Config{ZM_SERVER_HOST} ? $Config{ZM_SERVER_HOST}: () ) or Fatal( "Can't execute: ".$sth->errstr() );
 	while( my $monitor = $sth->fetchrow_hashref() )
 	{
 		foreach my $definition ( @{$state->{Definitions}} )
@@ -169,9 +169,9 @@ if ( $command =~ /^(?:start|restart)$/ )
 		runCommand( "zmfix" );
 		runCommand( "zmdc.pl startup" );
 
-		my $sql = (ZM_SERVER_HOST) ? "select * from Monitors WHERE ServerHost=?" : "select * from Monitors";
+		my $sql = $Config{ZM_SERVER_HOST} ? 'SELECT * FROM Monitors WHERE ServerHost=?' : 'SELECT * FROM Monitors';
 		my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
-		my $res = $sth->execute( (ZM_SERVER_HOST) ? ZM_SERVER_HOST : () ) or Fatal( "Can't execute: ".$sth->errstr() );
+		my $res = $sth->execute( $Config{ZM_SERVER_HOST} ? $Config{ZM_SERVER_HOST} : () ) or Fatal( "Can't execute: ".$sth->errstr() );
 		while( my $monitor = $sth->fetchrow_hashref() )
 		{
 			if ( $monitor->{Function} ne 'None' )
