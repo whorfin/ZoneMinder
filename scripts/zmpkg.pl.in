@@ -59,7 +59,7 @@ GetOptions (
 'status' => sub { print( STDOUT $status."\n" ) },
 'logrot' => sub { runCommand( "zmdc.pl logrot" ) },
 'state=s' => \&state
-);
+) or usage();
 
 chdir( ZM_PATH_WEB ) or Fatal( "Can't chdir to '".ZM_PATH_WEB."': $!" );
 
@@ -96,6 +96,7 @@ sub getMonitors() {
    while ( my $monitor = $sth->fetchrow_hashref() ) {
       push (@monitors, $monitor);
    }
+   $sth->finish();
    return @monitors;
 }
 
@@ -108,18 +109,17 @@ sub updateMonitorFunction() {
             $monitor->{NewEnabled} = $definition->{Enabled};
          }
       }
-		#next if ( !$monitor->{NewFunction} );
-		$monitor->{NewFunction} = 'None' if ( !$monitor->{NewFunction} );
-		$monitor->{NewEnabled} = 0 if ( !$monitor->{NewEnabled} );
-		if ( $monitor->{Function} ne $monitor->{NewFunction} || $monitor->{Enabled} ne $monitor->{NewEnabled} ) {
-			my $sql = "update Monitors set Function = ?, Enabled = ? where Id = ?";
-			my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
-			my $res = $sth->execute( $monitor->{NewFunction}, $monitor->{NewEnabled}, $monitor->{Id} ) or Fatal( "Can't execute: ".$sth->errstr() );
-		}
-	}
-	$sth->finish();
 
-        restart();
+      #next if ( !$monitor->{NewFunction} );
+      $monitor->{NewFunction} = 'None' if ( !$monitor->{NewFunction} );
+      $monitor->{NewEnabled} = 0 if ( !$monitor->{NewEnabled} );
+      if ( $monitor->{Function} ne $monitor->{NewFunction} || $monitor->{Enabled} ne $monitor->{NewEnabled} ) {
+         my $sql = "update Monitors set Function = ?, Enabled = ? where Id = ?";
+         my $sth = $dbh->prepare_cached( $sql ) or Fatal( "Can't prepare '$sql': ".$dbh->errstr() );
+         my $res = $sth->execute( $monitor->{NewFunction}, $monitor->{NewEnabled}, $monitor->{Id} ) or Fatal( "Can't execute: ".$sth->errstr() );
+      }
+   }
+   restart();
 }
 
 sub stop() {
@@ -166,39 +166,39 @@ sub start() {
       runCommand( "zmfix" );
       runCommand( "zmdc.pl startup" );
 
-      getMonitors();
-		while( my $monitor = $sth->fetchrow_hashref() ) {
-			if ( $monitor->{Function} ne 'None' ) {
+     my @monitors = getMonitors();
+     foreach my $monitor (@monitors) {
+        if ( $monitor->{Function} ne 'None' ) {
 
-				if ( $monitor->{Type} eq 'Local' ) {
-					runCommand( "zmdc.pl start zmc -d $monitor->{Device}" );
-				} else {
-					runCommand( "zmdc.pl start zmc -m $monitor->{Id}" );
-				}
+           if ( $monitor->{Type} eq 'Local' ) {
+              runCommand( "zmdc.pl start zmc -d $monitor->{Device}" );
+           } else {
+              runCommand( "zmdc.pl start zmc -m $monitor->{Id}" );
+           }
 
-				if ( $monitor->{Function} ne 'Monitor' ) {
-					runCommand( "zmdc.pl start zmf -m $monitor->{Id}" ) if ( ZM_OPT_FRAME_SERVER );
-					runCommand( "zmdc.pl start zma -m $monitor->{Id}" );
-				}
+          if ( $monitor->{Function} ne 'Monitor' ) {
+             runCommand( "zmdc.pl start zmf -m $monitor->{Id}" ) if ( ZM_OPT_FRAME_SERVER );
+             runCommand( "zmdc.pl start zma -m $monitor->{Id}" );
+          }
 
-				if ( ZM_OPT_CONTROL ) {
-					if ( $monitor->{Function} eq 'Modect' || $monitor->{Function} eq 'Mocord' ) {
-						if ( $monitor->{Controllable} && $monitor->{TrackMotion} ) {
-							runCommand( "zmdc.pl start zmtrack.pl -m $monitor->{Id}" );
-						}
-					}
-				}
-			}
-		}
-		$sth->finish();
+         if ( ZM_OPT_CONTROL ) {
+            if ( $monitor->{Function} eq 'Modect' || $monitor->{Function} eq 'Mocord' ) {
+               if ( $monitor->{Controllable} && $monitor->{TrackMotion} ) {
+                  runCommand( "zmdc.pl start zmtrack.pl -m $monitor->{Id}" );
+               }
+            }
+         }
 
-		# This is now started unconditionally
-		runCommand( "zmdc.pl start zmfilter.pl" );
-		runCommand( "zmdc.pl start zmaudit.pl -c" ) if ( ZM_RUN_AUDIT );
-		runCommand( "zmdc.pl start zmtrigger.pl" ) if ( ZM_OPT_TRIGGERS );
-		runCommand( "zmdc.pl start zmx10.pl -c start" ) if ( ZM_OPT_X10 );
-		runCommand( "zmdc.pl start zmwatch.pl" );
-		runCommand( "zmdc.pl start zmupdate.pl -c" ) if ( ZM_CHECK_FOR_UPDATES );
+      }
+   }
+
+
+   runCommand( "zmdc.pl start zmfilter.pl" );
+   runCommand( "zmdc.pl start zmaudit.pl -c" ) if ( ZM_RUN_AUDIT );
+   runCommand( "zmdc.pl start zmtrigger.pl" ) if ( ZM_OPT_TRIGGERS );
+   runCommand( "zmdc.pl start zmx10.pl -c start" ) if ( ZM_OPT_X10 );
+   runCommand( "zmdc.pl start zmwatch.pl" );
+   runCommand( "zmdc.pl start zmupdate.pl -c" ) if ( ZM_CHECK_FOR_UPDATES );
 	} else {
 	   fatal ("ZoneMinder is already running");
 	   exit (1);
