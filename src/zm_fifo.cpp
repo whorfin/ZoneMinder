@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <signal.h>
+#include <string.h>
  
 #include "zm.h"
 #include "zm_db.h"
@@ -181,24 +182,19 @@ void FifoStream::setStreamStart( const char * path ){
 }
 void FifoStream::setStreamStart( int monitor_id, const char * format ){
 	char diag_path[PATH_MAX];
-	char * filename;
-	if (! strcmp(format,"reference") )
-	{
+	std::string filename;
+	if (! strcmp(format,"reference") ) {
 		stream_type = MJPEG;
 		filename = "diagpipe-r.jpg";
-	}
-	else if (! strcmp(format,"delta"))
-	{
-		filename = "diagpipe-d.jpg";
+	} else if (! strcmp(format,"delta")) {
 		stream_type = MJPEG;
-	}
-	else
-	{
+		filename = "diagpipe-d.jpg";
+	} else {
 		stream_type = RAW;
 		filename = "dbgpipe.log";
 	}
 
-	snprintf( diag_path, sizeof(diag_path), "%s/%s/%d/%s", staticConfig.PATH_WEB.c_str(), config.dir_events, monitor_id, filename );
+	snprintf( diag_path, sizeof(diag_path), "%s/%s/%d/%s", staticConfig.PATH_WEB.c_str(), config.dir_events, monitor_id, filename.c_str() );
 	setStreamStart(diag_path);
 }
 void FifoStream::runStream(){
