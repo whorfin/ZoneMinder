@@ -166,7 +166,6 @@ if ( $command =~ /^(?:start|restart)$/ )
             }
         }
 		zmMemTidy();
-		runCommand( "zmfix" );
 		runCommand( "zmdc.pl startup" );
 
 		my $sql = $Config{ZM_SERVER_HOST} ? 'SELECT * FROM Monitors WHERE ServerHost=?' : 'SELECT * FROM Monitors';

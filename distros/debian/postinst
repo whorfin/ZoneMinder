@@ -2,8 +2,6 @@
 
 set -e
 
-VERSION=1.27.2
-
 if [ "$1" = "configure" ]; then
                 #
                 # Get mysql started if it isn't
