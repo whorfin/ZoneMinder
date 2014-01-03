@@ -227,10 +227,6 @@ protected:
 	int				contrast;			    // The statically saved contrast of the camera
 	int				hue;				    // The statically saved hue of the camera
 	int				colour;				    // The statically saved colour of the camera
-	int savejpegspref;
-	int videowriterpref;
-	std::string encoderparams;
-	std::vector<EncoderParameter_t> encoderparamsvec;
 	char			event_prefix[64];	    // The prefix applied to event names as they are created
 	char			label_format[64];	    // The format of the timestamp on the images
 	Coord			label_coord;		    // The coordinates of the timestamp on the images
