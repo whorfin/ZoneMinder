@@ -80,7 +80,7 @@ public:
 	virtual int Encode(const Image* img, const unsigned int frame_time) = 0;
 	virtual int Open() = 0;
 	virtual int Close() = 0;
-	virtual int Reset();
+	virtual int Reset(const char* new_path = NULL);
 	
 	const char* GetContainer() const {
 		return container.c_str();
@@ -145,7 +145,6 @@ protected:
 
 	/* Internal functions */
 	int x264config();
-	int x264userparams();
 	void x264encodeloop(bool bFlush = false);
 
 	/* x264 objects */
@@ -166,7 +165,7 @@ public:
 	int Encode(const Image* img, const unsigned int frame_time);
 	int Open();
 	int Close();
-	int Reset();
+	int Reset(const char* new_path = NULL);
 	
 };
 #endif // HAVE_LIBX264 && HAVE_LIBMP4V2 && HAVE_LIBAVUTIL && HAVE_LIBSWSCALE
