@@ -1,8 +1,8 @@
-zoneminder (1.26.5-1) precise; urgency=high
+zoneminder (1.26.5+1-precise-SNAPSHOT2014010601) precise; urgency=high
 
-  * improvements to zmupdate.pl, cleanups
+  * Today's snapshot.
 
- -- Isaac Connor <iconnor@connortechnology.com>  Thu, 03 Oct 2013 11:40:32 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 06 Jan 2014 09:22:00 -0400
 
 zoneminder (1.26.3-1) unstable; urgency=low
 
