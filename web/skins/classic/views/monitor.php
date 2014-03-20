@@ -67,6 +67,8 @@ else
         'JPGPath' => "",
         'MJPGPath' => "",
         'Port' => "80",
+        'User' => "",
+        'Pass' => "",
         'Colours' => 3,
         'Palette' => 0,
         'Width' => "320",
@@ -182,6 +184,7 @@ $sourceTypes = array(
     'File'   => $SLANG['File'],
     'Ffmpeg' => $SLANG['Ffmpeg'],
     'Libvlc' => $SLANG['Libvlc'],
+    'cURL'   => "cURL (HTTP only)"
 );
 if ( !ZM_HAS_V4L )
     unset($sourceTypes['Local']);
@@ -523,12 +526,14 @@ if ( $tab != 'source' || ($newMonitor['Type'] != 'Local' && $newMonitor['Type'] 
     <input type="hidden" name="newMonitor[Method]" value="<?= validHtmlStr($newMonitor['Method']) ?>"/>
 <?php
 }
-if ( $tab != 'source' || ($newMonitor['Type'] != 'Remote' && $newMonitor['Type'] != 'File' && $newMonitor['Type'] != 'Ffmpeg' && $newMonitor['Type'] != 'Libvlc') )
+if ( $tab != 'source' || ($newMonitor['Type'] != 'Remote' && $newMonitor['Type'] != 'File' && $newMonitor['Type'] != 'Ffmpeg' && $newMonitor['Type'] != 'Libvlc' && $newMonitor['Type'] != 'cURL') )
 {
 ?>
     <input type="hidden" name="newMonitor[Path]" value="<?= validHtmlStr($newMonitor['Path']) ?>"/>
     <input type="hidden" name="newMonitor[JPGPath]" value="<?= validHtmlStr($newMonitor['JPGPath']) ?>"/>
     <input type="hidden" name="newMonitor[MJPGPath]" value="<?= validHtmlStr($newMonitor['MJPGPath']) ?>"/>
+    <input type="hidden" name="newMonitor[User]" value="<?= validHtmlStr($newMonitor['User']) ?>"/>
+    <input type="hidden" name="newMonitor[Pass]" value="<?= validHtmlStr($newMonitor['Pass']) ?>"/>
 <?php
 }
 if ( $tab != 'source' )
@@ -627,7 +632,7 @@ switch ( $tab )
         foreach ( getEnumValues( 'Monitors', 'Function' ) as $optFunction )
         {
 ?>
-              <option value="<?= $optFunction ?>"<?php if ( $optFunction == $newMonitor['Function'] ) { ?> selected="selected"<?php } ?>><?= $optFunction ?></option>
+              <option value="<?= $optFunction ?>"<?php if ( $optFunction == $newMonitor['Function'] ) { ?> selected="selected"<?php } ?>><?= $SLANG['Fn'.$optFunction] ?></option>
 <?php
         }
 ?>
@@ -754,6 +759,14 @@ switch ( $tab )
         {
 ?>
             <tr><td><?= $SLANG['SourcePath'] ?></td><td><input type="text" name="newMonitor[Path]" value="<?= validHtmlStr($newMonitor['Path']) ?>" size="36"/></td></tr>
+<?php
+        }
+        elseif ( $newMonitor['Type'] == "cURL" )
+        {
+?>
+            <tr><td><?= "Address" ?></td><td><input type="text" name="newMonitor[Path]" value="<?= validHtmlStr($newMonitor['Path']) ?>" size="36"/></td></tr>
+            <tr><td><?= "Username" ?></td><td><input type="text" name="newMonitor[User]" value="<?= validHtmlStr($newMonitor['User']) ?>" size="12"/></td></tr>
+            <tr><td><?= "Password" ?></td><td><input type="text" name="newMonitor[Pass]" value="<?= validHtmlStr($newMonitor['Pass']) ?>" size="12"/></td></tr>
 <?php
         }
 ?>

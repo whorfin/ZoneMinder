@@ -3026,7 +3026,10 @@ void Image::Deinterlace_4Field(const Image* next_image, unsigned int threshold)
 /************************************************* BLEND FUNCTIONS *************************************************/
 
 
-__attribute__((noinline,__target__("sse2"))) void sse2_fastblend(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count, double blendpercent) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("sse2")))
+#endif
+void sse2_fastblend(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count, double blendpercent) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 	static uint32_t divider = 0;
 	static uint32_t clearmask = 0;
@@ -3368,7 +3371,10 @@ __attribute__((noinline)) void std_delta8_abgr(const uint8_t* col1, const uint8_
 }
 
 /* Grayscale SSE2 */
-__attribute__((noinline,__target__("sse2"))) void sse2_delta8_gray8(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("sse2")))
+#endif
+void sse2_delta8_gray8(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 
 	__asm__ __volatile__ (
@@ -3396,7 +3402,10 @@ __attribute__((noinline,__target__("sse2"))) void sse2_delta8_gray8(const uint8_
 }
 
 /* RGB32: RGBA SSE2 */
-__attribute__((noinline,__target__("sse2"))) void sse2_delta8_rgba(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("sse2")))
+#endif
+void sse2_delta8_rgba(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
   
 	__asm__ __volatile__ (
@@ -3451,7 +3460,10 @@ __attribute__((noinline,__target__("sse2"))) void sse2_delta8_rgba(const uint8_t
 }
 
 /* RGB32: BGRA SSE2 */
-__attribute__((noinline,__target__("sse2"))) void sse2_delta8_bgra(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("sse2")))
+#endif
+void sse2_delta8_bgra(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
   
 	__asm__ __volatile__ (
@@ -3506,7 +3518,10 @@ __attribute__((noinline,__target__("sse2"))) void sse2_delta8_bgra(const uint8_t
 }
 
 /* RGB32: ARGB SSE2 */
-__attribute__((noinline,__target__("sse2"))) void sse2_delta8_argb(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("sse2")))
+#endif
+void sse2_delta8_argb(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
   
 	__asm__ __volatile__ (
@@ -3562,7 +3577,10 @@ __attribute__((noinline,__target__("sse2"))) void sse2_delta8_argb(const uint8_t
 }
 
 /* RGB32: ABGR SSE2 */
-__attribute__((noinline,__target__("sse2"))) void sse2_delta8_abgr(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("sse2")))
+#endif
+void sse2_delta8_abgr(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
   
 	__asm__ __volatile__ (
@@ -3618,7 +3636,10 @@ __attribute__((noinline,__target__("sse2"))) void sse2_delta8_abgr(const uint8_t
 }
 
 /* RGB32: RGBA SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_delta8_rgba(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_delta8_rgba(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 	
 	__asm__ __volatile__ (
@@ -3670,7 +3691,10 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_delta8_rgba(const uint8
 }
 
 /* RGB32: BGRA SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_delta8_bgra(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_delta8_bgra(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 	
 	__asm__ __volatile__ (
@@ -3722,7 +3746,10 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_delta8_bgra(const uint8
 }
 
 /* RGB32: ARGB SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_delta8_argb(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_delta8_argb(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 	
 	__asm__ __volatile__ (
@@ -3775,7 +3802,10 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_delta8_argb(const uint8
 }
 
 /* RGB32: ABGR SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_delta8_abgr(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_delta8_abgr(const uint8_t* col1, const uint8_t* col2, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 	
 	__asm__ __volatile__ (
@@ -4027,7 +4057,10 @@ __attribute__((noinline)) void std_convert_yuyv_gray8(const uint8_t* col1, uint8
 }
 
 /* RGBA to grayscale SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_convert_rgba_gray8(const uint8_t* col1, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_convert_rgba_gray8(const uint8_t* col1, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 
 	__asm__ __volatile__ (
@@ -4073,7 +4106,10 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_convert_rgba_gray8(cons
 }
 
 /* Converts a YUYV image into grayscale by extracting the Y channel */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_convert_yuyv_gray8(const uint8_t* col1, uint8_t* result, unsigned long count) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_convert_yuyv_gray8(const uint8_t* col1, uint8_t* result, unsigned long count) {
 #if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))  
 	unsigned long i = 0;
   
@@ -4690,8 +4726,12 @@ __attribute__((noinline)) void std_deinterlace_4field_abgr(uint8_t* col1, uint8_
 }
 
 /* Grayscale SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray8(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
-	
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_deinterlace_4field_gray8(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+
+#if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))
 	union {
 		uint32_t int32;
 		uint8_t int8a[4];
@@ -4700,11 +4740,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 	threshold_mask.int8a[1] = 0;
 	threshold_mask.int8a[2] = threshold;
 	threshold_mask.int8a[3] = 0;
-	
+
 	unsigned long row_width = width;
 	uint8_t* max_ptr = col1 + (row_width * (height-2));
 	uint8_t* max_ptr2 = col1 + row_width;
-	
+
 	__asm__ __volatile__ (
 	/* Load the threshold */
 	"mov %5, %%eax\n\t"
@@ -4712,9 +4752,9 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 	"pshufd $0x0, %%xmm4, %%xmm4\n\t"
 	/* Zero the temporary register */
 	"pxor %%xmm0, %%xmm0\n\t"
-	
+
 	"algo_ssse3_deinterlace_4field_gray8:\n\t"
-	
+
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -4723,11 +4763,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 	"pminub %%xmm5, %%xmm2\n\t"
 	"psubb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -4735,17 +4775,17 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 	"pmaxub %%xmm2, %%xmm1\n\t"
 	"pminub %%xmm6, %%xmm2\n\t"
 	"psubb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 	"movdqa %%xmm1, %%xmm2\n\t"
-	
+
 	/* Do the comparison on words instead of bytes because we don't have unsigned comparison */
 	"punpcklbw %%xmm0, %%xmm1\n\t"                     // Expand pixels 0-7 into words into xmm1
 	"punpckhbw %%xmm0, %%xmm2\n\t"                     // Expand pixels 8-15 into words into xmm2
 	"pcmpgtw %%xmm4, %%xmm1\n\t"                       // Compare average delta with threshold for pixels 0-7
 	"pcmpgtw %%xmm4, %%xmm2\n\t"                       // Compare average delta with threshold for pixels 8-15
 	"packsswb %%xmm2, %%xmm1\n\t"                      // Pack the comparison results into xmm1
-	
+
 	"movdqa (%0,%4), %%xmm2\n\t"                       // Load pbelow
 	"pavgb %%xmm5, %%xmm2\n\t"                         // Average pabove and pbelow
 	"pand %%xmm1, %%xmm2\n\t"                          // Filter out pixels in avg that shouldn't be copied
@@ -4753,24 +4793,24 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 
 	"por %%xmm2, %%xmm1\n\t"                           // Put the new values in pcurrent
 	"movntdq %%xmm1, (%0)\n\t"                         // Write pcurrent
-	
+
 	"sub %4, %0\n\t"                                   // Restore pcurrent to pabove
 	"sub %4, %1\n\t"                                   // Restore pncurrent to pnabove
-	
+
 	/* Next pixels */
 	"add $0x10, %0\n\t"                                // Add 16 to pcurrent
 	"add $0x10, %1\n\t"                                // Add 16 to pncurrent
-	
+
 	/* Check if we reached the row end */
 	"cmp %2, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_gray8\n\t"       // Go for another iteration
-	
+
 	/* Next row */
 	"add %4, %0\n\t"                                   // Add width to pcurrent
 	"add %4, %1\n\t"                                   // Add width to pncurrent
 	"mov %0, %2\n\t"
 	"add %4, %2\n\t"                                   // Add width to max_ptr2
-	
+
 	/* Check if we reached the end */
 	"cmp %3, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_gray8\n\t"       // Go for another iteration
@@ -4784,11 +4824,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 	"pminub %%xmm5, %%xmm2\n\t"
 	"psubb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -4796,17 +4836,17 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 	"pmaxub %%xmm2, %%xmm1\n\t"
 	"pminub %%xmm6, %%xmm2\n\t"
 	"psubb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 	"movdqa %%xmm1, %%xmm2\n\t"
-	
+
 	/* Do the comparison on words instead of bytes because we don't have unsigned comparison */
 	"punpcklbw %%xmm0, %%xmm1\n\t"                     // Expand pixels 0-7 into words into xmm1
 	"punpckhbw %%xmm0, %%xmm2\n\t"                     // Expand pixels 8-15 into words into xmm2
 	"pcmpgtw %%xmm4, %%xmm1\n\t"                       // Compare average delta with threshold for pixels 0-7
 	"pcmpgtw %%xmm4, %%xmm2\n\t"                       // Compare average delta with threshold for pixels 8-15
 	"packsswb %%xmm2, %%xmm1\n\t"                      // Pack the comparison results into xmm1
-	
+
 	"pand %%xmm1, %%xmm5\n\t"                          // Filter out pixels in pabove that shouldn't be copied
 	"pandn %%xmm6, %%xmm1\n\t"                         // Filter out pixels in pcurrent that should be replaced
 
@@ -4816,18 +4856,25 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_gray
 	: "r" (col1), "r" (col2), "r" (max_ptr2), "r" (max_ptr), "r" (row_width), "m" (threshold_mask.int32)
 	: "%eax", "%xmm0", "%xmm1", "%xmm2", "%xmm3", "%xmm4", "%xmm5", "%xmm6", "%xmm7", "cc", "memory"
 	);
+#else
+	Panic("SSE function called on a non x86\\x86-64 platform");
+#endif
 }
 
 /* RGBA SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_deinterlace_4field_rgba(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))
 	__attribute__((aligned(16))) static const uint8_t movemask2[16] = {1,1,1,1,1,0,0,2,9,9,9,9,9,8,8,10};
-	
+
 	const uint32_t threshold_val = threshold;
-	
+
 	unsigned long row_width = width*4;
 	uint8_t* max_ptr = col1 + (row_width * (height-2));
 	uint8_t* max_ptr2 = col1 + row_width;
-	
+
 	__asm__ __volatile__ (
 	"mov $0x1F1F1F1F, %%eax\n\t"
 	"movd %%eax, %%xmm4\n\t"
@@ -4840,9 +4887,9 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 #endif
 	/* Zero the temporary register */
 	"pxor %%xmm0, %%xmm0\n\t"
-	
+
 	"algo_ssse3_deinterlace_4field_rgba:\n\t"
-	
+
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -4862,11 +4909,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -4885,7 +4932,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -4893,7 +4940,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"movdqa (%0,%4), %%xmm2\n\t"                       // Load pbelow
@@ -4903,28 +4950,28 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 
 	"por %%xmm2, %%xmm1\n\t"                           // Put the new values in pcurrent
 	"movntdq %%xmm1, (%0)\n\t"                         // Write pcurrent
-	
+
 	"sub %4, %0\n\t"                                   // Restore pcurrent to pabove
 	"sub %4, %1\n\t"                                   // Restore pncurrent to pnabove
-	
+
 	/* Next pixels */
 	"add $0x10, %0\n\t"                                // Add 16 to pcurrent
 	"add $0x10, %1\n\t"                                // Add 16 to pncurrent
-	
+
 	/* Check if we reached the row end */
 	"cmp %2, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_rgba\n\t"        // Go for another iteration
-	
+
 	/* Next row */
 	"add %4, %0\n\t"                                   // Add width to pcurrent
 	"add %4, %1\n\t"                                   // Add width to pncurrent
 	"mov %0, %2\n\t"
 	"add %4, %2\n\t"                                   // Add width to max_ptr2
-	
+
 	/* Check if we reached the end */
 	"cmp %3, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_rgba\n\t"        // Go for another iteration
-	
+
 	/* Special case for the last line */
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
@@ -4945,11 +4992,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -4968,7 +5015,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -4976,7 +5023,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"pand %%xmm1, %%xmm5\n\t"                          // Filter out pixels in pabove that shouldn't be copied
@@ -4992,18 +5039,25 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_rgba
 	: "%eax", "%xmm0", "%xmm1", "%xmm2", "%xmm3", "%xmm4", "%xmm5", "%xmm6", "%xmm7", "cc", "memory"
 #endif
 	);
+#else
+	Panic("SSE function called on a non x86\\x86-64 platform");
+#endif
 }
 
 /* BGRA SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_deinterlace_4field_bgra(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))
 	__attribute__((aligned(16))) static const uint8_t movemask2[16] = {1,1,1,1,1,2,2,0,9,9,9,9,9,10,10,8};
-	
+
 	const uint32_t threshold_val = threshold;
-	
+
 	unsigned long row_width = width*4;
 	uint8_t* max_ptr = col1 + (row_width * (height-2));
 	uint8_t* max_ptr2 = col1 + row_width;
-	
+
 	__asm__ __volatile__ (
 	"mov $0x1F1F1F1F, %%eax\n\t"
 	"movd %%eax, %%xmm4\n\t"
@@ -5016,9 +5070,9 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 #endif
 	/* Zero the temporary register */
 	"pxor %%xmm0, %%xmm0\n\t"
-	
+
 	"algo_ssse3_deinterlace_4field_bgra:\n\t"
-	
+
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5038,11 +5092,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5061,7 +5115,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -5069,7 +5123,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"movdqa (%0,%4), %%xmm2\n\t"                       // Load pbelow
@@ -5079,28 +5133,28 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 
 	"por %%xmm2, %%xmm1\n\t"                           // Put the new values in pcurrent
 	"movntdq %%xmm1, (%0)\n\t"                         // Write pcurrent
-	
+
 	"sub %4, %0\n\t"                                   // Restore pcurrent to pabove
 	"sub %4, %1\n\t"                                   // Restore pncurrent to pnabove
-	
+
 	/* Next pixels */
 	"add $0x10, %0\n\t"                                // Add 16 to pcurrent
 	"add $0x10, %1\n\t"                                // Add 16 to pncurrent
-	
+
 	/* Check if we reached the row end */
 	"cmp %2, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_bgra\n\t"        // Go for another iteration
-	
+
 	/* Next row */
 	"add %4, %0\n\t"                                   // Add width to pcurrent
 	"add %4, %1\n\t"                                   // Add width to pncurrent
 	"mov %0, %2\n\t"
 	"add %4, %2\n\t"                                   // Add width to max_ptr2
-	
+
 	/* Check if we reached the end */
 	"cmp %3, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_bgra\n\t"        // Go for another iteration
-	
+
 	/* Special case for the last line */
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
@@ -5121,11 +5175,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5144,7 +5198,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -5152,7 +5206,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"pand %%xmm1, %%xmm5\n\t"                          // Filter out pixels in pabove that shouldn't be copied
@@ -5168,18 +5222,25 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_bgra
 	: "%eax", "%xmm0", "%xmm1", "%xmm2", "%xmm3", "%xmm4", "%xmm5", "%xmm6", "%xmm7", "cc", "memory"
 #endif
 	);
+#else
+	Panic("SSE function called on a non x86\\x86-64 platform");
+#endif
 }
 
 /* ARGB SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_deinterlace_4field_argb(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))
 	__attribute__((aligned(16))) static const uint8_t movemask2[16] = {2,2,2,2,2,1,1,3,10,10,10,10,10,9,9,11};
-	
+
 	const uint32_t threshold_val = threshold;
-	
+
 	unsigned long row_width = width*4;
 	uint8_t* max_ptr = col1 + (row_width * (height-2));
 	uint8_t* max_ptr2 = col1 + row_width;
-	
+
 	__asm__ __volatile__ (
 	"mov $0x1F1F1F1F, %%eax\n\t"
 	"movd %%eax, %%xmm4\n\t"
@@ -5192,9 +5253,9 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 #endif
 	/* Zero the temporary register */
 	"pxor %%xmm0, %%xmm0\n\t"
-	
+
 	"algo_ssse3_deinterlace_4field_argb:\n\t"
-	
+
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5214,11 +5275,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5237,7 +5298,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -5245,7 +5306,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"movdqa (%0,%4), %%xmm2\n\t"                       // Load pbelow
@@ -5255,28 +5316,28 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 
 	"por %%xmm2, %%xmm1\n\t"                           // Put the new values in pcurrent
 	"movntdq %%xmm1, (%0)\n\t"                         // Write pcurrent
-	
+
 	"sub %4, %0\n\t"                                   // Restore pcurrent to pabove
 	"sub %4, %1\n\t"                                   // Restore pncurrent to pnabove
-	
+
 	/* Next pixels */
 	"add $0x10, %0\n\t"                                // Add 16 to pcurrent
 	"add $0x10, %1\n\t"                                // Add 16 to pncurrent
-	
+
 	/* Check if we reached the row end */
 	"cmp %2, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_argb\n\t"        // Go for another iteration
-	
+
 	/* Next row */
 	"add %4, %0\n\t"                                   // Add width to pcurrent
 	"add %4, %1\n\t"                                   // Add width to pncurrent
 	"mov %0, %2\n\t"
 	"add %4, %2\n\t"                                   // Add width to max_ptr2
-	
+
 	/* Check if we reached the end */
 	"cmp %3, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_argb\n\t"        // Go for another iteration
-	
+
 	/* Special case for the last line */
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
@@ -5297,11 +5358,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5320,7 +5381,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -5328,7 +5389,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"pand %%xmm1, %%xmm5\n\t"                          // Filter out pixels in pabove that shouldn't be copied
@@ -5344,18 +5405,25 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_argb
 	: "%eax", "%xmm0", "%xmm1", "%xmm2", "%xmm3", "%xmm4", "%xmm5", "%xmm6", "%xmm7", "cc", "memory"
 #endif
 	);
+#else
+	Panic("SSE function called on a non x86\\x86-64 platform");
+#endif
 }
 
 /* ABGR SSSE3 */
-__attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if defined(__i386__) || defined(__x86_64__)
+__attribute__((noinline,__target__("ssse3")))
+#endif
+void ssse3_deinterlace_4field_abgr(uint8_t* col1, uint8_t* col2, unsigned int threshold, unsigned int width, unsigned int height) {
+#if ((defined(__i386__) || defined(__x86_64__) || defined(ZM_KEEP_SSE)) && !defined(ZM_STRIP_SSE))
 	__attribute__((aligned(16))) static const uint8_t movemask2[16] = {2,2,2,2,2,3,3,1,10,10,10,10,10,11,11,9};
-	
+
 	const uint32_t threshold_val = threshold;
-	
+
 	unsigned long row_width = width*4;
 	uint8_t* max_ptr = col1 + (row_width * (height-2));
 	uint8_t* max_ptr2 = col1 + row_width;
-	
+
 	__asm__ __volatile__ (
 	"mov $0x1F1F1F1F, %%eax\n\t"
 	"movd %%eax, %%xmm4\n\t"
@@ -5368,9 +5436,9 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 #endif
 	/* Zero the temporary register */
 	"pxor %%xmm0, %%xmm0\n\t"
-	
+
 	"algo_ssse3_deinterlace_4field_abgr:\n\t"
-	
+
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5390,11 +5458,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5413,7 +5481,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -5421,7 +5489,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"movdqa (%0,%4), %%xmm2\n\t"                       // Load pbelow
@@ -5431,28 +5499,28 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 
 	"por %%xmm2, %%xmm1\n\t"                           // Put the new values in pcurrent
 	"movntdq %%xmm1, (%0)\n\t"                         // Write pcurrent
-	
+
 	"sub %4, %0\n\t"                                   // Restore pcurrent to pabove
 	"sub %4, %1\n\t"                                   // Restore pncurrent to pnabove
-	
+
 	/* Next pixels */
 	"add $0x10, %0\n\t"                                // Add 16 to pcurrent
 	"add $0x10, %1\n\t"                                // Add 16 to pncurrent
-	
+
 	/* Check if we reached the row end */
 	"cmp %2, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_abgr\n\t"        // Go for another iteration
-	
+
 	/* Next row */
 	"add %4, %0\n\t"                                   // Add width to pcurrent
 	"add %4, %1\n\t"                                   // Add width to pncurrent
 	"mov %0, %2\n\t"
 	"add %4, %2\n\t"                                   // Add width to max_ptr2
-	
+
 	/* Check if we reached the end */
 	"cmp %3, %0\n\t"
 	"jb algo_ssse3_deinterlace_4field_abgr\n\t"        // Go for another iteration
-	
+
 	/* Special case for the last line */
 	/* Load pabove into xmm1 and pnabove into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
@@ -5473,11 +5541,11 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
 	"movdqa %%xmm1, %%xmm7\n\t" /* Backup of delta2 in xmm7 for now */
-	
+
 	/* Next row */
 	"add %4, %0\n\t"
 	"add %4, %1\n\t"
-	
+
 	/* Load pcurrent into xmm1 and pncurrent into xmm2 */
 	"movdqa (%0), %%xmm1\n\t"
 	"movdqa (%1), %%xmm2\n\t"
@@ -5496,7 +5564,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 	"pshufb %%xmm3, %%xmm2\n\t"
 	"psadbw %%xmm0, %%xmm2\n\t"
 	"packuswb %%xmm2, %%xmm1\n\t"
-	
+
 	"pavgb %%xmm7, %%xmm1\n\t"                         // Average the two deltas together
 
 #if defined(__x86_64__)
@@ -5504,7 +5572,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 #else
 	"movd %%eax, %%xmm7\n\t"                           // Setup the threshold
 	"pshufd $0x0, %%xmm7, %%xmm7\n\t"
-	
+
 	"pcmpgtd %%xmm7, %%xmm1\n\t"                       // Compare average delta with the threshold
 #endif
 	"pand %%xmm1, %%xmm5\n\t"                          // Filter out pixels in pabove that shouldn't be copied
@@ -5520,5 +5588,7 @@ __attribute__((noinline,__target__("ssse3"))) void ssse3_deinterlace_4field_abgr
 	: "%eax", "%xmm0", "%xmm1", "%xmm2", "%xmm3", "%xmm4", "%xmm5", "%xmm6", "%xmm7", "cc", "memory"
 #endif
 	);
+#else
+	Panic("SSE function called on a non x86\\x86-64 platform");
+#endif
 }
-

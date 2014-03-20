@@ -223,7 +223,7 @@ else
 {
 ?><?= $SLANG['ConfiguredFor'] ?><?php
 }
-?>&nbsp;<?= makePopupLink( '?view=bandwidth', 'zmBandwidth', 'bandwidth', $bwArray[$_COOKIE['zmBandwidth']], ($user && $user['MaxBandwidth'] != 'low' ) ) ?> <?= $SLANG['Bandwidth'] ?></h3>
+?>&nbsp;<?= makePopupLink( '?view=bandwidth', 'zmBandwidth', 'bandwidth', $bwArray[$_COOKIE['zmBandwidth']], ($user && $user['MaxBandwidth'] != 'low' ) ) ?> <?= $SLANG['BandwidthHead'] ?></h3>
     </div>
     <div id="content">
       <table id="consoleTable" cellspacing="0">
@@ -302,7 +302,7 @@ foreach( $displayMonitors as $monitor )
 ?>
             <td class="colId"><?= makePopupLink( '?view=watch&amp;mid='.$monitor['Id'], 'zmWatch'.$monitor['Id'], array( 'watch', reScale( $monitor['Width'], $scale ), reScale( $monitor['Height'], $scale ) ), $monitor['Id'], $running && ($monitor['Function'] != 'None') && canView( 'Stream' ) ) ?></td>
             <td class="colName"><?= makePopupLink( '?view=watch&amp;mid='.$monitor['Id'], 'zmWatch'.$monitor['Id'], array( 'watch', reScale( $monitor['Width'], $scale ), reScale( $monitor['Height'], $scale ) ), $monitor['Name'], $running && ($monitor['Function'] != 'None') && canView( 'Stream' ) ) ?></td>
-            <td class="colFunction"><?= makePopupLink( '?view=function&amp;mid='.$monitor['Id'], 'zmFunction', 'function', '<span class="'.$fclass.'">'.$monitor['Function'].'</span>', canEdit( 'Monitors' ) ) ?></td>
+            <td class="colFunction"><?= makePopupLink( '?view=function&amp;mid='.$monitor['Id'], 'zmFunction', 'function', '<span class="'.$fclass.'">'.$SLANG['Fn'.$monitor['Function']].'</span>', canEdit( 'Monitors' ) ) ?></td>
             <td class="colServerHost"><?= makePopupLink( '?view=function&amp;mid='.$monitor['Id'], 'zmFunction', 'ServerHost', '<span class="'.$fclass.'">'.$monitor['ServerHost'].'</span>', canEdit( 'Monitors' ) ) ?></td>
 <?php if ( $monitor['Type'] == "Local" ) { ?>
             <td class="colSource"><?= makePopupLink( '?view=monitor&amp;mid='.$monitor['Id'], 'zmMonitor'.$monitor['Id'], 'monitor', '<span class="'.$dclass.'">'.$monitor['Device'].' ('.$monitor['Channel'].')</span>', canEdit( 'Monitors' ) ) ?></td>
@@ -317,6 +317,8 @@ foreach( $displayMonitors as $monitor )
     $shortpath = $domain ? $domain : preg_replace( '/^.*\//', '', $monitor['Path'] );
 ?>
             <td class="colSource"><?= makePopupLink( '?view=monitor&amp;mid='.$monitor['Id'], 'zmMonitor'.$monitor['Id'], 'monitor', '<span class="'.$dclass.'">'.$shortpath.'</span>', canEdit( 'Monitors' ) ) ?></td>
+<?php } elseif ( $monitor['Type'] == "cURL" ) { ?>
+            <td class="colSource"><?= makePopupLink( '?view=monitor&amp;mid='.$monitor['Id'], 'zmMonitor'.$monitor['Id'], 'monitor', '<span class="'.$dclass.'">'.preg_replace( '/^.*\//', '', $monitor['Path'] ).'</span>', canEdit( 'Monitors' ) ) ?></td>
 <?php } else { ?>
             <td class="colSource">&nbsp;</td>
 <?php } ?>
