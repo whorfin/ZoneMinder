@@ -59,8 +59,6 @@ require ZoneMinder::Control;
 
 our @ISA = qw(ZoneMinder::Control);
 
-our $VERSION = $ZoneMinder::Base::VERSION;
-
 # ==========================================================================
 #
 # Wanscam Control Protocol
@@ -106,7 +104,7 @@ sub open
 
     use LWP::UserAgent;
     $self->{ua} = LWP::UserAgent->new;
-    $self->{ua}->agent( "ZoneMinder Control Agent/".ZM_VERSION );
+    $self->{ua}->agent( "ZoneMinder Control Agent/".ZoneMinder::Base::ZM_VERSION );
 
     $self->{state} = 'open';
 }
