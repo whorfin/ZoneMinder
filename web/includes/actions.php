@@ -550,6 +550,7 @@ if ( !empty($action) )
             if ( $restart )
             {
                 $monitor = dbFetchOne( "select * from Monitors where Id = ?", NULL, array($mid) );
+                fixDevices();
                 //if ( $cookies )
                     //session_write_close();
                 if ( daemonCheck() )
