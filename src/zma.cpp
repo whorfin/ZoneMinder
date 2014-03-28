@@ -121,7 +121,7 @@ int main( int argc, char *argv[] )
 		while( !zm_terminate )
 		{
 			// Process the next image
-			sigprocmask( SIG_BLOCK, &block_set, 0 );
+			sigprocmask( SIG_BLOCK, &block_set, NULL );
 			if ( !monitor->Analyse() )
 			{
 				usleep( monitor->Active()?ZM_SAMPLE_RATE:ZM_SUSPENDED_RATE );
@@ -131,7 +131,7 @@ int main( int argc, char *argv[] )
 				monitor->Reload();
 				zm_reload = false;
 			}
-			sigprocmask( SIG_UNBLOCK, &block_set, 0 );
+			sigprocmask( SIG_UNBLOCK, &block_set, NULL );
 		}
 		delete monitor;
 	}
