@@ -898,7 +898,7 @@ bool Image::WriteJpeg( const char *filename, int quality_override, bool on_block
 	}
 	
 	jpeg_set_defaults( cinfo );
-	jpeg_set_quality( cinfo, quality, false );
+	jpeg_set_quality( cinfo, quality, FALSE );
 	cinfo->dct_method = JDCT_FASTEST;
 
 	jpeg_start_compress( cinfo, TRUE );
@@ -1131,7 +1131,7 @@ bool Image::EncodeJpeg( JOCTET *outbuffer, int *outbuffer_size, int quality_over
 	}
 	
 	jpeg_set_defaults( cinfo );
-	jpeg_set_quality( cinfo, quality, false );
+	jpeg_set_quality( cinfo, quality, FALSE );
 	cinfo->dct_method = JDCT_FASTEST;
 
 	jpeg_start_compress( cinfo, TRUE );
