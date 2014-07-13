@@ -1,6 +1,6 @@
-zoneminder (1.27.7-1) precise; urgency=high
+zoneminder (1.27.8-1) precise; urgency=high
 
-  * Merge 1.27
+  * move v4l sutff
 
  -- Isaac Connor <iconnor@connortechnology.com>  Thu, 20 Mar 2014 14:24:00 -0400
 
@@ -21,4 +21,3 @@ zoneminder (1.25.1-1) unstable; urgency=low
   * Initial Version.
 
  -- Isaac Connor <iconnor@connortechnology.com>  Mon, 29 Apr 2013 12:38:00 -0400
-
