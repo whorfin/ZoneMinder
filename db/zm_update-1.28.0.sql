@@ -28,8 +28,22 @@ SET @s = (SELECT IF(
 	AND table_schema = DATABASE()
 	AND column_name = 'V4LCapturesPerFrame'
 	) > 0,
-"SELECT 'Column CapturesPerFrame exists in Monitors'",
+"SELECT 'Column V4LCapturesPerFrame exists in Monitors'",
 "ALTER TABLE `Monitors` ADD `V4LCapturesPerFrame` tinyint(3) unsigned not null default 0 AFTER `V4LMultiBuffer`"
+));
+
+PREPARE stmt FROM @s;
+EXECUTE stmt;
+
+SET @s = (SELECT IF(
+	(SELECT COUNT(*)
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE table_name = 'Monitors'
+	AND table_schema = DATABASE()
+	AND column_name = 'ServerHost'
+	) > 0,
+"SELECT 'Column ServerHost exists in Monitors'",
+"ALTER TABLE `Monitors` ADD `ServerHost` varchar(64) AFTER `Name`"
 ));
 
 PREPARE stmt FROM @s;
