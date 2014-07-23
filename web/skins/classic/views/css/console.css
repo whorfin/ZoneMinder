@@ -62,6 +62,15 @@
     text-align: left;
 }
 
+
+#consoleTable .colId {
+	width: 35px;
+}
+
+#consoleTable .colFunction {
+	width: 120px;
+}
+
 #consoleTable .colOrder {
     text-align: center;
     width: 55px;
