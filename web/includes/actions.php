@@ -313,6 +313,9 @@ if ( !empty($action) )
                 }
                 $refreshParent = true;
             }
+			if ( $Config{OPT_EMAIL_MONITOR_CHANGES} ) {
+				mail( $Config{EMAIL_MONITOR_CHANGES_TO}, "Monitor $mod $monitor{Name} has been changed.", "$user{name} has changed the function to $newFunction " . $newEnabled ? 'Enabled' : 'Disabled', 'From: ' . $Config{FROM_EMAIL} . "\r\n" );
+			}
         }
         elseif ( $action == "zone" && isset( $_REQUEST['zid'] ) )
         {
