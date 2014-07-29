@@ -314,7 +314,7 @@ if ( !empty($action) )
                 $refreshParent = true;
             }
 			if ( ZM_OPT_EMAIL_MONITOR_CHANGES ) {
-				mail( ZM_EMAIL_MONITOR_CHANGES_TO, "Monitor $mod $monitor{Name} has been changed.", "$user{name} has changed the function to $newFunction " . $newEnabled ? 'Enabled' : 'Disabled', 'From: ' . ZM_FROM_EMAIL . "\r\n" );
+				mail( ZM_EMAIL_MONITOR_CHANGES_TO, "Monitor $mid $monitor[Name] has been changed.", "$user[Username] has changed the function to $newFunction " . ( $newEnabled ? 'Enabled' : 'Disabled' ), 'From: ' . ZM_FROM_EMAIL . "\r\n" );
 			}
         }
         elseif ( $action == "zone" && isset( $_REQUEST['zid'] ) )
