@@ -1,4 +1,11 @@
-zoneminder (1.28.0-7) precise; urgency=high
+zoneminder (1.28.0-8) trusty; urgency=high
+
+  * improve error messages
+  * Make zmupdate re-run the most recent patch so that people running the daily builds get their db updates
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 29 Jul 2014 14:50:20 -0400
+
+zoneminder (1.27.0+1-trusty-v4ltomonitor-1) trusty; urgency=high
 
   * minor fixes
 
