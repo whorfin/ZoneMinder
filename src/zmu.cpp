@@ -420,6 +420,7 @@ int main( int argc, char *argv[] )
 				Error( "Can't connect to capture daemon: %d %s", monitor->Id(), monitor->Name() );
 				exit( -1 );
 			} 
+
 			char separator = ' ';
 			bool have_output = false;
 			if ( function & ZMU_STATE )

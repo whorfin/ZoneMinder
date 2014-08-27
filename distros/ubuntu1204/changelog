@@ -1,3 +1,9 @@
+zoneminder (1.28.0-9) trusty; urgency=medium
+
+  * minor
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 19 Aug 2014 09:18:28 -0400
+
 zoneminder (1.28.0-8) trusty; urgency=high
 
   * improve error messages
