@@ -259,11 +259,12 @@ int main( int argc, char *argv[] )
 
 			if ( next_delays[i] <= min_delay || next_delays[i] <= 0 )
 			{
-				if ( monitors[i]->PreCapture() < 0 )
+				while ( monitors[i]->PreCapture() < 0 )
 				{
                     Error( "Failed to pre-capture monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
-                    zm_terminate = true;
-                    result = -1;
+                    //zm_terminate = true;
+                    //result = -1;
+					usleep( 1000000 );
                     break;
 				}
 				if ( monitors[i]->Capture() < 0 )
@@ -293,7 +294,7 @@ int main( int argc, char *argv[] )
 				}
 				gettimeofday( &(last_capture_times[i]), NULL );
 			}
-		}
+		} // end foreach n_monitors
 		sigprocmask( SIG_UNBLOCK, &block_set, 0 );
 	}
 	for ( int i = 0; i < n_monitors; i++ )
