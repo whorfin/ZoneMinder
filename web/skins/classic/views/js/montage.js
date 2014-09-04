@@ -119,6 +119,10 @@ function selectLayout( element )
     new Asset.css( cssFile, { id: 'dynamicStyles' } );
     Cookie.write( 'zmMontageLayout', $(element).get('value'), { duration: 10*365 } );
 }
+function selectHost( element )
+{
+    Cookie.write( 'zmMontageHost', $(element).get('value'), { duration: 10*365 } );
+}
 
 function changeScale()
 {
