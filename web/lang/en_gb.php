@@ -368,6 +368,7 @@ $SLANG = array(
     'HighBW'                => 'High&nbsp;B/W',
     'High'                  => 'High',
     'Home'                  => 'Home',
+	'Host'					=> 'Host',
     'Hour'                  => 'Hour',
     'Hue'                   => 'Hue',
     'Id'                    => 'Id',

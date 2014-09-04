@@ -49,3 +49,31 @@ SET @s = (SELECT IF(
 PREPARE stmt FROM @s;
 EXECUTE stmt;
 
+SET @s = (SELECT IF(
+	(SELECT COUNT(*)
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE table_name = 'Monitors'
+	AND table_schema = DATABASE()
+	AND column_name = 'JPGPath'
+	) > 0,
+"SELECT 'Column JPGPath exists in Monitors'",
+"ALTER TABLE `Monitors` ADD `JPGPath` varchar(255) NOT NULL default '' AFTER `SubPath`"
+));
+
+PREPARE stmt FROM @s;
+EXECUTE stmt;
+
+SET @s = (SELECT IF(
+	(SELECT COUNT(*)
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE table_name = 'Monitors'
+	AND table_schema = DATABASE()
+	AND column_name = 'MJPGPath'
+	) > 0,
+"SELECT 'Column MJPGPath exists in Monitors'",
+"ALTER TABLE `Monitors` ADD `MJPGPath` varchar(255) NOT NULL default '' AFTER `JPGPath`"
+));
+
+PREPARE stmt FROM @s;
+EXECUTE stmt;
+
