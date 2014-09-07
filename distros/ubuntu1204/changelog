@@ -1,3 +1,15 @@
+zoneminder (1.28.0-14) precise; urgency=medium
+
+  * put the actual sizes in the error message when captured size != expected size
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 05 Sep 2014 10:07:31 -0400
+
+zoneminder (1.28.0-13) precise; urgency=medium
+
+  * include Recording host in getStreamSrc
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Sep 2014 10:48:09 -0400
+
 zoneminder (1.28.0-12) precise; urgency=medium
 
   * add Host filter to montage.  Will default to all Hosts
