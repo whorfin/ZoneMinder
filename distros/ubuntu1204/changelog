@@ -1,8 +1,57 @@
-zoneminder (1.28.0-6) precise; urgency=high
+zoneminder (1.28.0-15) trusty; urgency=medium
 
-  * fix stream url for access other hosts
+  * fix v4l parsing
 
- -- Isaac Connor <iconnor@connortechnology.com>  Thu, 20 Mar 2014 14:24:00 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Sun, 07 Sep 2014 17:51:11 -0400
+
+zoneminder (1.28.0-14) precise; urgency=medium
+
+  * put the actual sizes in the error message when captured size != expected size
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 05 Sep 2014 10:07:31 -0400
+
+zoneminder (1.28.0-13) precise; urgency=medium
+
+  * include Recording host in getStreamSrc
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Sep 2014 10:48:09 -0400
+
+zoneminder (1.28.0-12) precise; urgency=medium
+
+  * add Host filter to montage.  Will default to all Hosts
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Sep 2014 10:36:01 -0400
+
+zoneminder (1.28.0-11) precise; urgency=medium
+
+  * db update fix, first version on ppa
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 03 Sep 2014 16:05:04 -0400
+
+zoneminder (1.28.0-10) trusty; urgency=medium
+
+  * make zmc wait on failure to pre-capture
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 27 Aug 2014 09:50:04 -0400
+
+zoneminder (1.28.0-9) trusty; urgency=medium
+
+  * minor
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 19 Aug 2014 09:18:28 -0400
+
+zoneminder (1.28.0-8) trusty; urgency=high
+
+  * improve error messages
+  * Make zmupdate re-run the most recent patch so that people running the daily builds get their db updates
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 29 Jul 2014 14:50:20 -0400
+
+zoneminder (1.27.0+1-trusty-v4ltomonitor-1) trusty; urgency=high
+
+  * minor fixes
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 24 Jul 2014 11:40:00 -0400
 
 zoneminder (1.27.6-1) precise; urgency=high
 

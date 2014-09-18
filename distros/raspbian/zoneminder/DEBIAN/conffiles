@@ -1,0 +1,3 @@
+/etc/zm/apache.conf
+/etc/zm/zm.conf
+/etc/init.d/zoneminder

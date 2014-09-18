@@ -425,6 +425,7 @@ int main( int argc, char *argv[] )
 			bool have_output = false;
 			if ( function & ZMU_STATE )
 			{
+					
 				Monitor::State state = monitor->GetState();
 				if ( verbose )
 					printf( "Current state: %s\n", state==Monitor::ALARM?"Alarm":(state==Monitor::ALERT?"Alert":"Idle") );

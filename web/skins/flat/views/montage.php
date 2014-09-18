@@ -24,14 +24,16 @@ if ( !canView( 'Stream' ) )
     return;
 }
 
-$groupSql = "";
+$sql = "select * from Monitors where Function != 'None'";
 if ( !empty($_REQUEST['group']) )
 {
     $row = dbFetchOne( 'select * from Groups where Id = ?', NULL, array($_REQUEST['group']) );
-	$sql = "select * from Monitors where Function != 'None' and find_in_set( Id, '".$row['MonitorIds']."' ) order by Sequence";
+	$sql .= " and find_in_set( Id, '".$row['MonitorIds']."' )";
 } else { 
-	$sql = "select * from Monitors where Function != 'None' order by Sequence";
 }
+if ( isset($_COOKIE['zmMontageHost']) )
+	$sql .= " and ServerHost='".$_COOKIE['zmMontageHost']."'";
+$sql .= " order by Sequence";
 
 $maxWidth = 0;
 $maxHeight = 0;
@@ -76,6 +78,7 @@ $layouts = array(
     'montage_4wide.css' => $SLANG['Mtg4widgrd'],
     'montage_3wide50enlarge.css' => $SLANG['Mtg3widgrx'],
 );
+$hosts = dbFetchAll( 'SELECT DISTINCT ServerHost FROM Monitors', 'ServerHost' );
 
 if ( isset($_COOKIE['zmMontageLayout']) )
     $layout = $_COOKIE['zmMontageLayout'];
@@ -100,6 +103,7 @@ if ( $showControl )
       <div id="headerControl">
         <span id="scaleControl"><?= $SLANG['Scale'] ?>: <?= buildSelect( "scale", $scales, "changeScale( this );" ); ?></span> 
         <label for="layout"><?= $SLANG['Layout'] ?>:</label><?= buildSelect( "layout", $layouts, 'selectLayout( this )' )?>
+		<label for="Host"><?= $SLANG['Host'] ?>:</label><?= buildSelect( "host", $hosts, 'selectHost(this)' ) ?>
       </div>
     </div>
     <div id="content">
@@ -117,12 +121,12 @@ foreach ( $monitors as $monitor )
 <?php
 if ( ZM_WEB_STREAM_METHOD == 'mpeg' && ZM_MPEG_LIVE_FORMAT )
 {
-    $streamSrc = getStreamSrc( array( "mode=mpeg", "monitor=".$monitor['Id'], "scale=".$scale, "bitrate=".ZM_WEB_VIDEO_BITRATE, "maxfps=".ZM_WEB_VIDEO_MAXFPS, "format=".ZM_MPEG_LIVE_FORMAT ) );
+    $streamSrc = getStreamSrc( array( "mode=mpeg", "monitor=".$monitor['Id'], "scale=".$scale, "bitrate=".ZM_WEB_VIDEO_BITRATE, "maxfps=".ZM_WEB_VIDEO_MAXFPS, "format=".ZM_MPEG_LIVE_FORMAT, "recorder" => $monitor['ServerHost'] ) );
     outputVideoStream( "liveStream".$monitor['Id'], $streamSrc, reScale( $monitor['Width'], $scale ), reScale( $monitor['Height'], $scale ), ZM_MPEG_LIVE_FORMAT );
 }
 else
 {
-    $streamSrc = getStreamSrc( array( "mode=jpeg", "monitor=".$monitor['Id'], "scale=".$scale, "maxfps=".ZM_WEB_VIDEO_MAXFPS ) );
+    $streamSrc = getStreamSrc( array( "mode=jpeg", "monitor=".$monitor['Id'], "scale=".$scale, "maxfps=".ZM_WEB_VIDEO_MAXFPS, "recorder" => $monitor['ServerHost'] ) );
     if ( canStreamNative() )
     {
         outputImageStream( "liveStream".$monitor['Id'], $streamSrc, reScale( $monitor['Width'], $scale ), reScale( $monitor['Height'], $scale ), validHtmlStr($monitor['Name']) );
