@@ -124,6 +124,7 @@ MAIN: while( $loop ) {
 		} # end if
 	} # end while can't connect to the db
 
+	my %db_events;
 	my $db_monitors;
     my $monitorSelectSql = "select Id from Monitors order by Id ASC";
     my $monitorSelectSth = $dbh->prepare_cached( $monitorSelectSql ) or Fatal( "Can't prepare '$monitorSelectSql': ".$dbh->errstr() );

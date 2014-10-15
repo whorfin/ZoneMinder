@@ -1,3 +1,9 @@
+zoneminder (1.28.0-18) trusty; urgency=medium
+
+  * Sync with master, which includes ffmpeg/libav fixes, rtsp_auth digest stuff and fixes for zm_audit to handle the db going down
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 15 Oct 2014 13:37:33 -0400
+
 zoneminder (1.28.0-17) trusty; urgency=medium
 
   * try to fix build failure
