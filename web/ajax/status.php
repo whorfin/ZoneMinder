@@ -283,9 +283,9 @@ function collectData()
                 $limit = validInt($_REQUEST['count']);
 			$limit_offset="";
 			if ( !empty($_REQUEST['offset']) )
-                $limit_offset = validInt($_REQUEST['offset']) . ", ";
-            if ( !empty( $limit ) )
-                $sql .= " limit ".$limit_offset . $limit;
+				$limit_offset = validInt($_REQUEST['offset']) . ", ";
+			if ( !empty( $limit ) )
+                $sql .= " limit ".$limit_offset.$limit;
             if ( isset($limit) && $limit == 1 ) {
                 if ( $sqlData = dbFetchOne( $sql, NULL, $values ) ) {
                     foreach ( $postFuncs as $element=>$func )
