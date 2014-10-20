@@ -1,62 +1,14 @@
-zoneminder (1.28.0-18) trusty; urgency=medium
+zoneminder (1.29.0-iconnor1) trusty; urgency=medium
 
-  * Sync with master, which includes ffmpeg/libav fixes, rtsp_auth digest stuff and fixes for zm_audit to handle the db going down
+  * Merge 1.28
 
- -- Isaac Connor <iconnor@connortechnology.com>  Wed, 15 Oct 2014 13:37:33 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 20 Oct 2014 15:35:19 -0400
 
-zoneminder (1.28.0-17) trusty; urgency=medium
+zoneminder (1.28.0-trusty) trusty; urgency=medium
 
-  * try to fix build failure
+  * Release
 
- -- Isaac Connor <iconnor@connortechnology.com>  Fri, 26 Sep 2014 16:19:05 -0400
-
-zoneminder (1.28.0-16) trusty; urgency=medium
-
-  * merge recent changes in master
-
- -- Isaac Connor <iconnor@connortechnology.com>  Fri, 26 Sep 2014 10:39:44 -0400
-
-zoneminder (1.28.0-15) trusty; urgency=medium
-
-  * fix v4l parsing
-
- -- Isaac Connor <iconnor@connortechnology.com>  Sun, 07 Sep 2014 17:51:11 -0400
-
-zoneminder (1.28.0-14) precise; urgency=medium
-
-  * put the actual sizes in the error message when captured size != expected size
-
- -- Isaac Connor <iconnor@connortechnology.com>  Fri, 05 Sep 2014 10:07:31 -0400
-
-zoneminder (1.28.0-13) precise; urgency=medium
-
-  * include Recording host in getStreamSrc
-
- -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Sep 2014 10:48:09 -0400
-
-zoneminder (1.28.0-12) precise; urgency=medium
-
-  * add Host filter to montage.  Will default to all Hosts
-
- -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Sep 2014 10:36:01 -0400
-
-zoneminder (1.28.0-11) precise; urgency=medium
-
-  * db update fix, first version on ppa
-
- -- Isaac Connor <iconnor@connortechnology.com>  Wed, 03 Sep 2014 16:05:04 -0400
-
-zoneminder (1.28.0-10) trusty; urgency=medium
-
-  * make zmc wait on failure to pre-capture
-
- -- Isaac Connor <iconnor@connortechnology.com>  Wed, 27 Aug 2014 09:50:04 -0400
-
-zoneminder (1.28.0-9) trusty; urgency=medium
-
-  * minor
-
- -- Isaac Connor <iconnor@connortechnology.com>  Tue, 19 Aug 2014 09:18:28 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 17 Oct 2014 09:25:55 -0400
 
 zoneminder (1.27.99+1-trusty-SNAPSHOT2014101401) trusty; urgency=medium
 
