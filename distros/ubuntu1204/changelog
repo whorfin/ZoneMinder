@@ -1,3 +1,9 @@
+zoneminder (1.29.0-iconnor2) utopic; urgency=medium
+
+  * merge group filtering changes and other master fixes
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 13 Nov 2014 12:17:49 -0500
+
 zoneminder (1.29.0-iconnor1) trusty; urgency=medium
 
   * Merge 1.28
