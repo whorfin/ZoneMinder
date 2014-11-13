@@ -207,6 +207,7 @@ int main( int argc, char *argv[] )
 	sigaddset( &block_set, SIGUSR1 );
 	sigaddset( &block_set, SIGUSR2 );
 
+	// PrimeCapture does not connect to remote, just sets up data structures, etc, I think.
 	if ( monitors[0]->PrimeCapture() < 0 )
 	{
         Error( "Failed to prime capture of initial monitor" );
@@ -259,8 +260,10 @@ int main( int argc, char *argv[] )
 
 			if ( next_delays[i] <= min_delay || next_delays[i] <= 0 )
 			{
-				while ( monitors[i]->PreCapture() < 0 )
-				{
+				// PreCapture does connection, so failures should come back here.  We loop, with sleeping until this succeeds
+				// We can get away with this for local cameras because they don't do anything for PreCapture
+				// remote http does Connect in here, so that's good.
+				while ( monitors[i]->PreCapture() < 0 ) {
                     Error( "Failed to pre-capture monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
                     //zm_terminate = true;
                     //result = -1;
