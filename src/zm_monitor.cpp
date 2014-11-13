@@ -330,7 +330,11 @@ Monitor::Monitor(
     zones( p_zones )
 {
     strncpy( name, p_name, sizeof(name) );
-    strncpy( serverhost, p_serverhost, sizeof(serverhost) );
+    if ( p_serverhost ) {
+		strncpy( serverhost, p_serverhost, sizeof(serverhost) );
+	} else {
+		*serverhost = '\0';
+	}
 
     strncpy( event_prefix, p_event_prefix, sizeof(event_prefix) );
     strncpy( label_format, p_label_format, sizeof(label_format) );
@@ -2069,8 +2073,8 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
         int col = 0;
 
         int id = atoi(dbrow[col]); col++;
-        std::string name = dbrow[col]; col++;
-		std::string serverhost = dbrow[col]; col++;
+        const char *name = dbrow[col]; col++;
+		const char *serverhost = dbrow[col]; col++;
         int function = atoi(dbrow[col]); col++;
         int enabled = atoi(dbrow[col]); col++;
         const char *linked_monitors = dbrow[col]; col++;
@@ -2169,8 +2173,8 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
 
         monitors[i] = new Monitor(
             id,
-            name.c_str(),
-			serverhost.c_str(),
+            name,
+			serverhost,
             function,
             enabled,
             linked_monitors,
@@ -2207,7 +2211,7 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
         monitors[i]->AddZones( n_zones, zones );
-        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name.c_str(), n_zones );
+        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name, n_zones );
     }
     if ( mysql_errno( &dbconn ) )
     {
@@ -2542,8 +2546,8 @@ Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
         int col = 0;
 
         int id = atoi(dbrow[col]); col++;
-        std::string name = dbrow[col]; col++;
-        std::string serverhost = dbrow[col]; col++;
+        const char *name = dbrow[col]; col++;
+        const char *serverhost = dbrow[col]; col++;
         std::string type = dbrow[col]; col++;
         int function = atoi(dbrow[col]); col++;
         int enabled = atoi(dbrow[col]); col++;
@@ -2571,7 +2575,7 @@ Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
         } else {
             v4l_captures_per_frame = config.captures_per_frame;
         }
-Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
+		Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
         col++;
 
         std::string protocol = dbrow[col]; col++;
@@ -2790,8 +2794,8 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
         }
         monitor = new Monitor(
             id,
-            name.c_str(),
-            serverhost.c_str(),
+            name,
+            serverhost,
             function,
             enabled,
             linked_monitors.c_str(),
@@ -2833,7 +2837,7 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
             n_zones = Zone::Load( monitor, zones );
             monitor->AddZones( n_zones, zones );
         }
-        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name.c_str(), n_zones );
+        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name, n_zones );
     }
     if ( mysql_errno( &dbconn ) )
     {
