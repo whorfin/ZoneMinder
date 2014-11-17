@@ -208,6 +208,7 @@ int main( int argc, char *argv[] )
 	sigaddset( &block_set, SIGUSR2 );
 
 	// PrimeCapture does not connect to remote, just sets up data structures, etc, I think.
+	// Unfortunatley it does the connection in ffmpeg and rtsp
 	if ( monitors[0]->PrimeCapture() < 0 )
 	{
         Error( "Failed to prime capture of initial monitor" );
@@ -228,8 +229,7 @@ int main( int argc, char *argv[] )
     int result = 0;
 	struct timeval now;
 	struct DeltaTimeval delta_time;
-	while( !zm_terminate )
-	{
+	while( !zm_terminate ) {
 		sigprocmask( SIG_BLOCK, &block_set, 0 );
 		for ( int i = 0; i < n_monitors; i++ )
 		{
@@ -267,13 +267,14 @@ int main( int argc, char *argv[] )
                     Error( "Failed to pre-capture monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
                     //zm_terminate = true;
                     //result = -1;
-					usleep( 1000000 );
+					usleep( 5000000 );
                     break;
 				}
 				if ( monitors[i]->Capture() < 0 )
 				{
                     Error( "Failed to capture image from monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
-                    zm_terminate = true;
+                    //zm_terminate = true;
+					usleep( 2000000 );
                     result = -1;
                     break;
 				}
@@ -299,7 +300,7 @@ int main( int argc, char *argv[] )
 			}
 		} // end foreach n_monitors
 		sigprocmask( SIG_UNBLOCK, &block_set, 0 );
-	}
+	} // end while ! zm_terminate
 	for ( int i = 0; i < n_monitors; i++ )
 	{
 		delete monitors[i];

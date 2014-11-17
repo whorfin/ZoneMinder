@@ -2889,21 +2889,20 @@ int Monitor::Capture()
         captureResult = 1;
     }
     
-    if ( captureResult == 1 )
-    {
+    if ( captureResult == 1 ) {
         
-	/* Deinterlacing */
-	if ( (deinterlacing & 0xff) == 1 ) {
-		capture_image->Deinterlace_Discard();
-	} else if ( (deinterlacing & 0xff) == 2 ) {
-		capture_image->Deinterlace_Linear();
-	} else if ( (deinterlacing & 0xff) == 3 ) {
-		capture_image->Deinterlace_Blend();
-	} else if ( (deinterlacing & 0xff) == 4 ) {
-		capture_image->Deinterlace_4Field( next_buffer.image, (deinterlacing>>8)&0xff );
-	} else if ( (deinterlacing & 0xff) == 5 ) {
-		capture_image->Deinterlace_Blend_CustomRatio( (deinterlacing>>8)&0xff );
-	}
+		/* Deinterlacing */
+		if ( (deinterlacing & 0xff) == 1 ) {
+			capture_image->Deinterlace_Discard();
+		} else if ( (deinterlacing & 0xff) == 2 ) {
+			capture_image->Deinterlace_Linear();
+		} else if ( (deinterlacing & 0xff) == 3 ) {
+			capture_image->Deinterlace_Blend();
+		} else if ( (deinterlacing & 0xff) == 4 ) {
+			capture_image->Deinterlace_4Field( next_buffer.image, (deinterlacing>>8)&0xff );
+		} else if ( (deinterlacing & 0xff) == 5 ) {
+			capture_image->Deinterlace_Blend_CustomRatio( (deinterlacing>>8)&0xff );
+		}
         
         
         if ( orientation != ROTATE_0 )
@@ -2931,8 +2930,6 @@ int Monitor::Capture()
             }
         }
 
-    }
-    if ( true ) {
 
         if ( capture_image->Size() != camera->ImageSize() )
         {
@@ -2991,7 +2988,7 @@ int Monitor::Capture()
             shared_data->action &= ~SET_SETTINGS;
         }
         return( 0 );
-    }
+    } // end if captureResult == 1
     shared_data->signal = false;
     return( -1 );
 }

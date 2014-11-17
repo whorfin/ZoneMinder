@@ -18,6 +18,7 @@
 // 
 
 #include "zm_remote_camera_http.h"
+#include "zm_rtsp_auth.h"
 
 #include "zm_mem_utils.h"
 
@@ -62,7 +63,7 @@ void RemoteCameraHttp::Initialise()
     {
         request = stringtf( "GET %s HTTP/%s\r\n", path.c_str(), config.http_version );
         request += stringtf( "User-Agent: %s/%s\r\n", config.http_ua, ZM_VERSION );
-        request += stringtf( "Host: %s\r\n", host .c_str());
+        request += stringtf( "Host: %s\r\n", host.c_str());
         if ( strcmp( config.http_version, "1.0" ) == 0 )
             request += stringtf( "Connection: Keep-Alive\r\n" );
         if ( !auth.empty() )
@@ -280,7 +281,22 @@ int RemoteCameraHttp::GetResponse()
                         status_code = atoi( status_expr->MatchString( 2 ) );
                         status_mesg = status_expr->MatchString( 3 );
 
-                        if ( status_code < 200 || status_code > 299 )
+						if ( status_code == 401 ) {
+							static Authenticator *Auth = new Authenticator( username, password );
+							std::string Header = header;
+				
+							Auth->checkAuthResponse(Header);
+							if ( Auth->RtspAuthMethod() == AUTH_DIGEST ) {
+								Debug( 2, "Need Digest Authentication" );
+								request = stringtf( "GET %s HTTP/%s\r\n", path.c_str(), config.http_version );
+								request += stringtf( "User-Agent: %s/%s\r\n", config.http_ua, ZM_VERSION );
+								request += stringtf( "Host: %s\r\n", host.c_str());
+								if ( strcmp( config.http_version, "1.0" ) == 0 )
+									request += stringtf( "Connection: Keep-Alive\r\n" );
+								request += Auth.getAuthHeader( 
+							} 
+
+                        } else if ( status_code < 200 || status_code > 299 )
                         {
                             Error( "Invalid response status %d: %s", status_code, status_mesg );
                             return( -1 );

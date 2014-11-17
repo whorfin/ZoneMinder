@@ -2283,7 +2283,7 @@ void Image::Fill( Rgb colour, int density, const Polygon &polygon )
 		}
 		qsort( active_edges, n_active_edges, sizeof(*active_edges), Edge::CompareX );
 #ifndef ZM_DBG_OFF
-	    if ( logLevel() >= Logger::DEBUG9 )
+	    if ( 0 && logLevel() >= Logger::DEBUG9 )
 		{
 			for ( int i = 0; i < n_active_edges; i++ )
 			{
