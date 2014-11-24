@@ -202,29 +202,25 @@ std::string Authenticator::computeDigestResponse(std::string &method, std::strin
     return( 0 );
 }
 
-void Authenticator::checkAuthResponse(std::string &response)
-{
-    std::string authLine;
-    StringVector lines = split( response, "\r\n" );
-    const char* authenticate_match = "WWW-Authenticate:";
-    size_t authenticate_match_len = strlen(authenticate_match);
+void Authenticator::checkAuthResponse(std::string &response) {
+	std::string authLine;
+	StringVector lines = split( response, "\r\n" );
+	const char* authenticate_match = "WWW-Authenticate:";
+	size_t authenticate_match_len = strlen(authenticate_match);
 
-    for ( size_t i = 0; i < lines.size(); i++ )
-    {
-        // stop at end of headers
-        if (lines[i].length()==0)
-            break;
+	for ( size_t i = 0; i < lines.size(); i++ ) {
+		// stop at end of headers
+		if (lines[i].length()==0)
+			break;
 
-        if (strncasecmp(lines[i].c_str(),authenticate_match,authenticate_match_len) == 0)
-        {
-            authLine = lines[i];
-            Debug( 2, "Found auth line at %d", i);
-            break;
-        }
-    }
-    if (!authLine.empty())
-    {
-        Debug( 2, "Analyze auth line %s", authLine.c_str());
-        authHandleHeader( trimSpaces(authLine.substr(authenticate_match_len,authLine.length()-authenticate_match_len)) );
-    }
+		if (strncasecmp(lines[i].c_str(),authenticate_match,authenticate_match_len) == 0) {
+			authLine = lines[i];
+			Debug( 2, "Found auth line at %d", i);
+			break;
+		}
+	}
+	if (!authLine.empty()) {
+		Debug( 2, "Analyze auth line %s", authLine.c_str());
+		authHandleHeader( trimSpaces(authLine.substr(authenticate_match_len,authLine.length()-authenticate_match_len)) );
+	}
 }

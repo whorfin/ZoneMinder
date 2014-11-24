@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-1) utopic; urgency=medium
+
+  * Merge other's fixes, and my digest auth code
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 20 Nov 2014 11:09:39 -0500
+
 zoneminder (1.29.0-iconnor2) utopic; urgency=medium
 
   * merge group filtering changes and other master fixes

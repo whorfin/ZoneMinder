@@ -31,9 +31,11 @@ if ( !empty($_REQUEST['group']) )
 	$sql .= " and find_in_set( Id, '".$row['MonitorIds']."' )";
 } else { 
 }
-if ( isset($_COOKIE['zmMontageHost']) )
-	$sql .= " and ServerHost='".$_COOKIE['zmMontageHost']."'";
+$hosts = dbFetchAll( 'SELECT DISTINCT ServerHost FROM Monitors', 'ServerHost' );
+if ( isset($_COOKIE['zmMontageHost']) and in_array( $_COOKIE['zmMontageHost'], $hosts ) )
+    $sql .= " and ServerHost='".$_COOKIE['zmMontageHost']."'";
 $sql .= " order by Sequence";
+array_unshift( $hosts, 'All' );
 
 $maxWidth = 0;
 $maxHeight = 0;
@@ -78,7 +80,6 @@ $layouts = array(
     'montage_4wide.css' => $SLANG['Mtg4widgrd'],
     'montage_3wide50enlarge.css' => $SLANG['Mtg3widgrx'],
 );
-$hosts = dbFetchAll( 'SELECT DISTINCT ServerHost FROM Monitors', 'ServerHost' );
 
 if ( isset($_COOKIE['zmMontageLayout']) )
     $layout = $_COOKIE['zmMontageLayout'];

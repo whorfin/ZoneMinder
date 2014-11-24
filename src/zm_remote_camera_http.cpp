@@ -305,8 +305,7 @@ int RemoteCameraHttp::GetResponse()
 								return( 0 );
 							} 
 
-                        } else if ( status_code < 200 || status_code > 299 )
-                        {
+                        } else if ( status_code < 200 || status_code > 299 ) {
                             Error( "Invalid response status %d: %s\n%s", status_code, status_mesg, (char *)buffer );
                             return( -1 );
                         }

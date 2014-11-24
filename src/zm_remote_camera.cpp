@@ -68,7 +68,6 @@ void RemoteCamera::Initialise()
 		authIndex = auth.rfind( ':' );
 		username = auth.substr(0,authIndex);
 		password = auth.substr( authIndex+1, auth.length() );
-		
 	}
 
     mNeedAuth = false;
