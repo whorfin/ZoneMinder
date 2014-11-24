@@ -605,33 +605,32 @@ function truncText( $text, $length, $deslash=1 )
     return( preg_replace( "/^(.{".$length.",}?)\b.*$/", "\\1&hellip;", ($deslash?stripslashes($text):$text) ) );       
 }               
 
-function buildSelect( $name, $contents, $behaviours=false )
+function buildSelect( $name, $contents, $behaviours=false, $selectedvalue=NULL )
 {
     $value = "";
-    if ( preg_match( "/^\s*(\w+)\s*(\[.*\])?\s*$/", $name, $matches ) && count($matches) > 2 )
-    {
-        $arr = $matches[1];
-        if ( isset($GLOBALS[$arr]) )
-            $value = $GLOBALS[$arr];
-        elseif ( isset($_REQUEST[$arr]) )
-            $value = $_REQUEST[$arr];
-        if ( !preg_match_all( "/\[\s*['\"]?(\w+)[\"']?\s*\]/", $matches[2], $matches ) )
-        {
-            Fatal( "Can't parse selector '$name'" );
-        }
-        for ( $i = 0; $i < count($matches[1]); $i++ )
-        {
-            $idx = $matches[1][$i];
-            $value = isset($value[$idx])?$value[$idx]:false;
-        }
-    }
-    else
-    {
-        if ( isset($GLOBALS[$name]) )
-            $value = $GLOBALS[$name];
-        elseif ( isset($_REQUEST[$name]) )
-            $value = $_REQUEST[$name];
-    }
+	if ( isset( $selectedvalue) ) {
+		$value = $selectedvalue;
+	} else {
+		if ( preg_match( "/^\s*(\w+)\s*(\[.*\])?\s*$/", $name, $matches ) && count($matches) > 2 ) {
+			$arr = $matches[1];
+			if ( isset($GLOBALS[$arr]) )
+				$value = $GLOBALS[$arr];
+			elseif ( isset($_REQUEST[$arr]) )
+				$value = $_REQUEST[$arr];
+			if ( !preg_match_all( "/\[\s*['\"]?(\w+)[\"']?\s*\]/", $matches[2], $matches ) ) {
+				Fatal( "Can't parse selector '$name'" );
+			}
+			for ( $i = 0; $i < count($matches[1]); $i++ ) {
+				$idx = $matches[1][$i];
+				$value = isset($value[$idx])?$value[$idx]:false;
+			}
+		} else {
+			if ( isset($GLOBALS[$name]) )
+				$value = $GLOBALS[$name];
+			elseif ( isset($_REQUEST[$name]) )
+				$value = $_REQUEST[$name];
+		}
+	}
     ob_start();
     $behaviourText = "";
     if ( !empty($behaviours) )

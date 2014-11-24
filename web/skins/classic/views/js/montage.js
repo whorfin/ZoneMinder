@@ -122,6 +122,7 @@ function selectLayout( element )
 function selectHost( element )
 {
     Cookie.write( 'zmMontageHost', $(element).get('value'), { duration: 10*365 } );
+	location.reload();
 }
 
 function changeScale()

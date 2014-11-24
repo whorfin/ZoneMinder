@@ -32,10 +32,14 @@ if ( !empty($_REQUEST['group']) )
 } else { 
 }
 $hosts = dbFetchAll( 'SELECT DISTINCT ServerHost FROM Monitors', 'ServerHost' );
-if ( isset($_COOKIE['zmMontageHost']) and in_array( $_COOKIE['zmMontageHost'], $hosts ) )
+$host = '';
+if ( isset($_COOKIE['zmMontageHost']) and in_array( $_COOKIE['zmMontageHost'], $hosts ) ) {
     $sql .= " and ServerHost='".$_COOKIE['zmMontageHost']."'";
+	$host = $_COOKIE['zmMontageHost'];
+}
 $sql .= " order by Sequence";
 array_unshift( $hosts, 'All' );
+$hosts = array_combine( $hosts, $hosts );
 
 $maxWidth = 0;
 $maxHeight = 0;
@@ -102,9 +106,9 @@ if ( $showControl )
       </div>
       <h2><?= $SLANG['Montage'] ?></h2>
       <div id="headerControl">
-        <span id="scaleControl"><?= $SLANG['Scale'] ?>: <?= buildSelect( "scale", $scales, "changeScale( this );" ); ?></span> 
-        <label for="layout"><?= $SLANG['Layout'] ?>:</label><?= buildSelect( "layout", $layouts, 'selectLayout( this )' )?>
-		<label for="Host"><?= $SLANG['Host'] ?>:</label><?= buildSelect( "host", $hosts, 'selectHost(this)' ) ?>
+        <span id="scaleControl"><?= $SLANG['Scale'] ?>: <?= buildSelect( "scale", $scales, 'changeScale(this);', $scale ); ?></span> 
+        <label for="layout"><?= $SLANG['Layout'] ?>:</label><?= buildSelect( "layout", $layouts, 'selectLayout(this);', $layout ); ?>
+		<label for="Host"><?= $SLANG['Host'] ?>:</label><?= buildSelect( "host", $hosts, 'selectHost(this);', $host ); ?>
       </div>
     </div>
     <div id="content">
