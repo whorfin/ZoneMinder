@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-3) utopic; urgency=medium
+
+  * Merge flat skin
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 24 Nov 2014 18:43:11 -0500
+
 zoneminder (1.29.0-utopic-1) utopic; urgency=medium
 
   * Merge other's fixes, and my digest auth code
