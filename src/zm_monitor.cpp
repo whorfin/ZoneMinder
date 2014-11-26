@@ -444,6 +444,7 @@ Monitor::Monitor(
     }
 
 	// Will this not happen everytime a monitor is instantiated?  Seems like all the calls to the Monitor constructor pass a zero for n_zones, then load zones after..
+if ( 0 ) {
     if ( !n_zones ) {
 		Debug( 1, "Monitor %s has no zones, adding one.", name );
         n_zones = 1;
@@ -451,6 +452,7 @@ Monitor::Monitor(
         Coord coords[4] = { Coord( 0, 0 ), Coord( width-1, 0 ), Coord( width-1, height-1 ), Coord( 0, height-1 ) };
         zones[0] = new Zone( this, 0, "All", Zone::ACTIVE, Polygon( sizeof(coords)/sizeof(*coords), coords ), RGB_RED, Zone::BLOBS );
     }
+}
     start_time = last_fps_time = time( 0 );
 
     event = 0;
@@ -1741,6 +1743,15 @@ void Monitor::ReloadZones()
     delete[] zones;
     zones = 0;
     n_zones = Zone::Load( this, zones );
+	if ( n_zones == 0 ) {
+		Warning( "Reloading zones for monitor %s, got %d zones, adding one", name );
+        n_zones = 1;
+        zones = new Zone *[1];
+        Coord coords[4] = { Coord( 0, 0 ), Coord( width-1, 0 ), Coord( width-1, height-1 ), Coord( 0, height-1 ) };
+        zones[0] = new Zone( this, 0, "All", Zone::ACTIVE, Polygon( sizeof(coords)/sizeof(*coords), coords ), RGB_RED, Zone::BLOBS );
+	} else {
+		Debug( 1, "Reloading zones for monitor %s, got %d zones", name, n_zones );
+	}
     //DumpZoneImage();
 }
 

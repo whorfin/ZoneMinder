@@ -105,6 +105,7 @@ int main( int argc, char *argv[] )
 	if ( monitor )
 	{
 		Info( "In mode %d/%d, warming up", monitor->GetFunction(), monitor->Enabled() );
+		monitor->ReloadZones();
 
 		if ( config.opt_frame_server )
 		{
