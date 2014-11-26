@@ -46,6 +46,9 @@ if ( false )
     ob_end_clean();
 }
 
+require_once( 'includes/config.php' );
+require_once( 'includes/logger.php' );
+
 if ( isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == 'on' )
 {
     $protocol = 'https';
@@ -73,7 +76,7 @@ if ( isset($_GET['css']) )
 elseif ( isset($_COOKIE['zmCSS']) )
     $css = $_COOKIE['zmCSS'];
 elseif ZM_CSS_DEFAULT
-	$skin = ZM_CSS_DEFAULT
+	$css = ZM_CSS_DEFAULT
 else
     $css = "classic";
 
@@ -99,8 +102,6 @@ if ( !isset($_SESSION['css']) || isset($_REQUEST['css']) ) {
     setcookie( "zmCSS", $css, time()+3600*24*30*12*10 );
 }
 
-require_once( 'includes/config.php' );
-require_once( 'includes/logger.php' );
 
 if ( ZM_OPT_USE_AUTH )
     if ( isset( $_SESSION['user'] ) )
