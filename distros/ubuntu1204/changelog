@@ -1,3 +1,9 @@
+zoneminder (1.29.0-trusty-6) trusty; urgency=medium
+
+  * New options under System tab SKIN_DEFAULT and CSS_DEFAULT, warning, you will need to run zmupdate.pl -f to reset your config.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 26 Nov 2014 16:47:54 -0500
+
 zoneminder (1.29.0-utopic-5) utopic; urgency=medium
 
   * Don't load zones automatically, except in zma which is the only process that uses them. This seems to speed up zms and zmc startup a lot
