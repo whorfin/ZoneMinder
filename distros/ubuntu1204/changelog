@@ -1,3 +1,9 @@
+zoneminder (1.29.0-trusty-7) trusty; urgency=medium
+
+  * Merge digest auth for simple http
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 28 Nov 2014 16:48:57 -0500
+
 zoneminder (1.29.0-trusty-6) trusty; urgency=medium
 
   * New options under System tab SKIN_DEFAULT and CSS_DEFAULT, warning, you will need to run zmupdate.pl -f to reset your config.
