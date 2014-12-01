@@ -1,3 +1,9 @@
+zoneminder (1.29.0-trusty-8) trusty; urgency=medium
+
+  * Merge master, including mem leak fixes, and a fix for rtsp for Foscam and many other cameras.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Sat, 29 Nov 2014 10:26:40 -0500
+
 zoneminder (1.29.0-trusty-7) trusty; urgency=medium
 
   * Merge digest auth for simple http
