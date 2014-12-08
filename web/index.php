@@ -102,7 +102,6 @@ if ( !isset($_SESSION['css']) || isset($_REQUEST['css']) ) {
     setcookie( "zmCSS", $css, time()+3600*24*30*12*10 );
 }
 
-
 if ( ZM_OPT_USE_AUTH )
     if ( isset( $_SESSION['user'] ) )
         $user = $_SESSION['user'];
