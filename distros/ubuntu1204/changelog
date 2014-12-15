@@ -1,3 +1,9 @@
+zoneminder (1.29.0-trusty-11) trusty; urgency=medium
+
+  * Merge security fixes
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 12 Dec 2014 09:50:46 -0500
+
 zoneminder (1.29.0-utopic-9) utopic; urgency=medium
 
   * Merge more flat skin removal, and knnniggett's rtsp fixes
