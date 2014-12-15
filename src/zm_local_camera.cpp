@@ -2081,7 +2081,7 @@ int LocalCamera::Capture( Image &image )
 #if HAVE_LIBSWSCALE
 		if(conversion_type == 1) {
 			
-			Debug( 9, "Calling sws_scale to perform the conversion" );
+			Debug( 9, "Calling sws_scale to perform the conversion capture linesize: %d height: %d picutre linesize:%d", capturePictures[capture_frame]->linesize, height, tmpPicture->linesize );
 			/* Use swscale to convert the image directly into the shared memory */
 			avpicture_fill( (AVPicture *)tmpPicture, directbuffer, imagePixFormat, width, height );
 			sws_scale( imgConversionContext, capturePictures[capture_frame]->data, capturePictures[capture_frame]->linesize, 0, height, tmpPicture->data, tmpPicture->linesize );
