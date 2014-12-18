@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-12) utopic; urgency=medium
+
+  * merge master which does redirect to login page better.  Also ubuntu package build improvements
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 18 Dec 2014 09:36:09 -0500
+
 zoneminder (1.29.0-utopic-11) utopic; urgency=medium
 
   * Merge security fixes
