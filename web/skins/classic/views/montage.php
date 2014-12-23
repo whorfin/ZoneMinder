@@ -85,6 +85,7 @@ $layouts = array(
     'montage_3wide50enlarge.css' => $SLANG['Mtg3widgrx'],
 );
 
+$layout = 'montage_freeform.css';
 if ( isset($_COOKIE['zmMontageLayout']) )
     $layout = $_COOKIE['zmMontageLayout'];
 

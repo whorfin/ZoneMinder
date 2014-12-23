@@ -1,4 +1,4 @@
-zoneminder (1.29.0-utopic-12) utopic; urgency=medium
+zoneminder (1.29.0-trusty-12) trusty; urgency=medium
 
   * merge master which does redirect to login page better.  Also ubuntu package build improvements
 
