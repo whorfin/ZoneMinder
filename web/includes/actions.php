@@ -277,11 +277,6 @@ if ( !empty($action) )
                     zmaControl( $monitor, "stop" );
                     zmcControl( $monitor, $restart?"restart":"" );
                     zmaControl( $monitor, "start" );
-					if ( $monitor['Controllable'] ) {
-						require_once( 'control_functions.php' );
-						sendControlCommand( $mid, 'quit' );
-					} 
-					$ctrlCommand = ZM_PATH_BIN."/zmcontrol.pl --id=$mid --command=quit";
                 }
                 $refreshParent = true;
             }
@@ -548,6 +543,10 @@ if ( !empty($action) )
 						zmaControl( $monitor, "start" );
 					}  
                 }
+				if ( $monitor['Controllable'] ) {
+					require_once( 'control_functions.php' );
+					sendControlCommand( $mid, 'quit' );
+				} 
                 //daemonControl( 'restart', 'zmwatch.pl' );
                 $refreshParent = true;
             }
