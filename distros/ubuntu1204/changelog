@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-13) utopic; urgency=medium
+
+  * Fix in getNearEvents when viewing an event. Merge master.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 02 Jan 2015 12:50:51 -0500
+
 zoneminder (1.29.0-trusty-12) trusty; urgency=medium
 
   * merge master which does redirect to login page better.  Also ubuntu package build improvements
