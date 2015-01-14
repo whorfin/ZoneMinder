@@ -4012,7 +4012,7 @@ void MonitorStream::runStream()
         monitor->SingleImage( scale );
         return;
     }
-    char *swap_path;
+    char *swap_path = 0;
 	int lock_fd = 0;
 	last_reduction_time = -1;
     bool buffered_playback = false;
@@ -4363,6 +4363,7 @@ void MonitorStream::runStream()
             }
         }
     }
+	if ( swap_path ) free( swap_path );
 }
 
 void Monitor::SingleImage( int scale)
