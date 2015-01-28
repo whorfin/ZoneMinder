@@ -1,3 +1,9 @@
+zoneminder (1.29.0-trusty-17) trusty; urgency=medium
+
+  * fixes for RTSP streams that timeout
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 28 Jan 2015 12:37:43 -0500
+
 zoneminder (1.29.0-trusty-16) trusty; urgency=medium
 
   * fix a memleak

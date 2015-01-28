@@ -1,3 +1,15 @@
+zoneminder (1.29.0-utopic-18) utopic; urgency=medium
+
+  * RTSP Timeout fixes
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 28 Jan 2015 13:49:16 -0500
+
+zoneminder (1.29.0-utopic-17) utopic; urgency=medium
+
+  * Merge master, use new split-up debian build
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 26 Jan 2015 11:21:07 -0500
+
 zoneminder (1.28.0+nmu1) testing; urgency=medium
 
   * Non-maintainer upload
