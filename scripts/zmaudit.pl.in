@@ -137,6 +137,9 @@ MAIN: while( $loop ) {
     my $eventSelectSql = "select Id, (unix_timestamp() - unix_timestamp(StartTime)) as Age from Events where MonitorId = ? order by Id";
     my $eventSelectSth = $dbh->prepare_cached( $eventSelectSql ) or Fatal( "Can't prepare '$eventSelectSql': ".$dbh->errstr() );
 
+    my $event_ExistsSql = 'SELECT Id FROM Events WHERE MonitorId = ? AND Id = ?';
+    my $event_ExistsSth = $dbh->prepare_cached( $eventExistsSql ) or Fatal( "Can't prepare '$eventExistsSql': ".$dbh->errstr() );
+
     $cleaned = 0;
 	my $res = $monitorSelectSth->execute( ) or Fatal( "Can't execute: ".$monitorSelectSth->errstr() );
     while( my $monitor = $monitorSelectSth->fetchrow_hashref() )
@@ -144,6 +147,12 @@ MAIN: while( $loop ) {
         Debug( "Found database monitor '$monitor->{Id}'" );
         my $db_events = {};
 		$db_monitors->{$monitor->{Id}} = $monitor;
+		if ( $Config{ZM_SERVER_HOST} ) {
+			if ( $db_monitors->{$monitor->{Id}}->{ServerHost} ne $Config{ZM_SERVER_HOST} ) {
+				Debug( "Skipping since it has handled by " . $db_monitors->{$monitor->{Id}}->{ServerHost} . "\n" );
+				next;
+			} # end if same serverhost
+		} # end if  there is a defined serverhost
         my $res = $eventSelectSth->execute( $monitor->{Id} ) or Fatal( "Can't execute: ".$eventSelectSth->errstr() );
         while ( my $event = $eventSelectSth->fetchrow_hashref() )
         {
@@ -234,31 +243,29 @@ MAIN: while( $loop ) {
     redo MAIN if ( $cleaned );
 
     $cleaned = 0;
-    while ( my ( $fs_monitor, $fs_events ) = each(%$fs_monitors) )
-    {
-        if ( my $db_events = $db_events{$fs_monitor} )
-        {
-            if ( $fs_events )
-            {
-                while ( my ( $fs_event, $age ) = each(%$fs_events ) )
-                {
-                    if ( !defined($db_events->{$fs_event}) && ($age < 0 || ($age > MIN_AGE)) )
-                    {
-                        aud_print( "Filesystem event '$fs_monitor/$fs_event' does not exist in database" );
-                        if ( confirm() )
-                        {
-                            deleteEventFiles( $fs_event, $fs_monitor );
-                            $cleaned = 1;
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
+    while ( my ( $fs_monitor, $fs_events ) = each(%$fs_monitors) ) {
+        if ( my $db_events = $db_events{$fs_monitor} ) {
+            if ( ! $fs_events ) {
+				Debug("No fs events for monitor $fs_monitor");
+				next;
+			} # end if ! fs_events
+
+			while ( my ( $fs_event, $age ) = each(%$fs_events ) ) {
+				if ( !defined($db_events->{$fs_event}) && ($age < 0 || ($age > MIN_AGE)) ) {
+					# Since all this processing could take a long time, we need to double check that it doesn't exist in the db.
+					my $rv = $EventExistsSth->execute( $fs_monitor, $fs_event );
+					if ( ! $EventExistsSth->fetchall_arrayref() ) {
+						aud_print( "Filesystem event '$fs_monitor / $fs_event' does not exist in database" );
+						if ( confirm() ) {
+							deleteEventFiles( $fs_event, $fs_monitor );
+							$cleaned = 1;
+						}
+					} # Event really does not exist in the db.
+				}
+			}
+        } elsif ( ! $db_monitors->{$monitor} ) {
             aud_print( "Filesystem monitor '$fs_monitor' does not exist in database" );
-            if ( confirm() )
-            {
+            if ( confirm() ) {
                 my $command = "rm -rf $fs_monitor";
                 executeShellCommand( $command );
                 $cleaned = 1;
@@ -302,7 +309,7 @@ MAIN: while( $loop ) {
                 {
                     if ( !defined($fs_events->{$db_event}) && ($age > MIN_AGE) )
                     {
-                        aud_print( "Database event '$db_monitor/$db_event' does not exist in filesystem" );
+                        aud_print( "Database event '$db_monitor / $db_event' does not exist in filesystem" );
                         if ( confirm() )
                         {
                             my $res = $deleteEventSth->execute( $db_event ) or Fatal( "Can't execute: ".$deleteEventSth->errstr() );
