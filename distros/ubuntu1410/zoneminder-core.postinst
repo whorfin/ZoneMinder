@@ -34,11 +34,7 @@ if [ "$1" = "configure" ] || [ "$1" = "reconfigure" ]; then
 
     # Prevent ZM_DB_HOST to be empty if user selected the 'unix socket' method
     if test -z $dbc_dbserver; then
-	if test -z $ZM_DB_HOST; then
-		dbc_dbserver_override=$ZM_DB_HOST
-	else
-		dbc_dbserver_override="localhost"
-	fi
+	dbc_dbserver_override="localhost"
     else
         dbc_dbserver_override=$dbc_dbserver
     fi
