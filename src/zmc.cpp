@@ -19,7 +19,11 @@
 
 #include <getopt.h>
 #include <signal.h>
+#if defined(BSD)
+#include <values.h>
+#else
 #include <limits.h>
+#endif
 
 #include "zm.h"
 #include "zm_db.h"
@@ -41,6 +45,7 @@ void Usage()
 	fprintf( stderr, "  -f, --file <file_path>                   : For local images, jpg file to access.\n" );
 	fprintf( stderr, "  -m, --monitor <monitor_id>               : For sources associated with a single monitor\n" );
 	fprintf( stderr, "  -h, --help                               : This screen\n" );
+	fprintf( stderr, "  -v, --version                            : Report the installed version of ZoneMinder\n" );
 	exit( 0 );
 }
 
@@ -67,6 +72,7 @@ int main( int argc, char *argv[] )
 	 	{"file", 1, 0, 'f'},
 		{"monitor", 1, 0, 'm'},
 		{"help", 0, 0, 'h'},
+		{"version", 0, 0, 'v'},
 		{0, 0, 0, 0}
 	};
 
@@ -74,7 +80,7 @@ int main( int argc, char *argv[] )
 	{
 		int option_index = 0;
 
-		int c = getopt_long (argc, argv, "d:H:P:p:f:m:h", long_options, &option_index);
+		int c = getopt_long (argc, argv, "d:H:P:p:f:m:h:v", long_options, &option_index);
 		if (c == -1)
 		{
 			break;
@@ -104,6 +110,9 @@ int main( int argc, char *argv[] )
 			case '?':
 				Usage();
 				break;
+			case 'v':
+				cout << ZM_VERSION << "\n";
+				exit(0);
 			default:
 				//fprintf( stderr, "?? getopt returned character code 0%o ??\n", c );
 				break;
@@ -207,6 +216,8 @@ int main( int argc, char *argv[] )
 	sigaddset( &block_set, SIGUSR1 );
 	sigaddset( &block_set, SIGUSR2 );
 
+	// PrimeCapture does not connect to remote, just sets up data structures, etc, I think.
+	// Unfortunatley it does the connection in ffmpeg and rtsp
 	if ( monitors[0]->PrimeCapture() < 0 )
 	{
         Error( "Failed to prime capture of initial monitor" );
@@ -227,8 +238,7 @@ int main( int argc, char *argv[] )
     int result = 0;
 	struct timeval now;
 	struct DeltaTimeval delta_time;
-	while( !zm_terminate )
-	{
+	while( !zm_terminate ) {
 		sigprocmask( SIG_BLOCK, &block_set, 0 );
 		for ( int i = 0; i < n_monitors; i++ )
 		{
@@ -259,18 +269,21 @@ int main( int argc, char *argv[] )
 
 			if ( next_delays[i] <= min_delay || next_delays[i] <= 0 )
 			{
-				while ( monitors[i]->PreCapture() < 0 )
-				{
+				// PreCapture does connection, so failures should come back here.  We loop, with sleeping until this succeeds
+				// We can get away with this for local cameras because they don't do anything for PreCapture
+				// remote http does Connect in here, so that's good.
+				while ( monitors[i]->PreCapture() < 0 ) {
                     Error( "Failed to pre-capture monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
                     //zm_terminate = true;
                     //result = -1;
-					usleep( 1000000 );
+					usleep( 5000000 );
                     break;
 				}
 				if ( monitors[i]->Capture() < 0 )
 				{
                     Error( "Failed to capture image from monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
-                    zm_terminate = true;
+                    //zm_terminate = true;
+					usleep( 2000000 );
                     result = -1;
                     break;
 				}
@@ -296,16 +309,19 @@ int main( int argc, char *argv[] )
 			}
 		} // end foreach n_monitors
 		sigprocmask( SIG_UNBLOCK, &block_set, 0 );
-	}
+	} // end while ! zm_terminate
 	for ( int i = 0; i < n_monitors; i++ )
 	{
 		delete monitors[i];
 	}
-    delete monitors;
+	delete [] monitors;
 	delete [] alarm_capture_delays;
 	delete [] capture_delays;
 	delete [] next_delays;
 	delete [] last_capture_times;
+
+	logTerm();
+	zmDbClose();
 
 	return( result );
 }

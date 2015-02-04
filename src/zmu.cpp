@@ -138,6 +138,12 @@ bool ValidateAccess( User *user, int mon_id, int function )
 
 int main( int argc, char *argv[] )
 {
+	if ( access(ZM_CONFIG, R_OK) != 0 )
+	{
+		fprintf( stderr, "Can't open %s: %s\n", ZM_CONFIG, strerror(errno) );
+		exit( -1 );
+	}
+
 	self = argv[0];
 
 	srand( getpid() * time( 0 ) );
@@ -716,7 +722,7 @@ int main( int argc, char *argv[] )
 					if ( function > 1 )
 					{
 						Monitor *monitor = Monitor::Load( mon_id, false, Monitor::QUERY );
-						if ( monitor )
+						if ( monitor && monitor->connect() )
 						{
 							struct timeval tv = monitor->GetTimestamp();
 							printf( "%4d%5d%6d%9d%11ld.%02ld%6d%6d%8d%8.2f\n",
@@ -754,6 +760,9 @@ int main( int argc, char *argv[] )
 		}
 	}
 	delete user;
+
+	logTerm();
+	zmDbClose();
 
 	return( 0 );
 }

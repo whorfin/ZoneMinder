@@ -20,6 +20,7 @@
 #include "zm_remote_camera.h"
 
 #include "zm_utils.h"
+#include "zm_rtsp_auth.h"
 
 RemoteCamera::RemoteCamera( int p_id, const std::string &p_protocol, const std::string &p_host, const std::string &p_port, const std::string &p_path, int p_width, int p_height, int p_colours, int p_brightness, int p_contrast, int p_hue, int p_colour, bool p_capture ) :
     Camera( p_id, REMOTE_SRC, p_width, p_height, p_colours, ZM_SUBPIX_ORDER_DEFAULT_FOR_COLOUR(p_colours), p_brightness, p_contrast, p_hue, p_colour, p_capture ),
@@ -63,7 +64,14 @@ void RemoteCamera::Initialise()
         auth = host.substr( 0, authIndex );
         host.erase( 0, authIndex+1 );
 		auth64 = base64Encode( auth );
+
+		authIndex = auth.rfind( ':' );
+		username = auth.substr(0,authIndex);
+		password = auth.substr( authIndex+1, auth.length() );
 	}
+
+    mNeedAuth = false;
+	mAuthenticator = new Authenticator(username,password);
 
 	struct addrinfo hints;
 	memset(&hints, 0, sizeof(hints));

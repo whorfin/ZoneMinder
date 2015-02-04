@@ -69,6 +69,7 @@ delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 my $report = 0;
 my $interactive = 0;
 my $continuous = 0;
+my $version;
 
 sub usage
 {
@@ -78,6 +79,7 @@ Parameters are :-
 -r, --report                    - Just report don't actually do anything
 -i, --interactive               - Ask before applying any changes
 -c, --continuous                - Run continuously
+-v, --version					- Print the installed version of ZoneMinder
 ");
     exit( -1 );
 }
@@ -89,14 +91,18 @@ sub deleteSwapImage();
 logInit();
 logSetSignal();
 
-if ( !GetOptions( 'report'=>\$report, 'interactive'=>\$interactive, 'continuous'=>\$continuous ) )
+if ( !GetOptions( report=>\$report, interactive=>\$interactive, continuous=>\$continuous, version=>\$version ) )
 {
     usage();
 }
 
+if ( $version ) {
+	print( ZoneMinder::Base::ZM_VERSION . "\n");
+	exit(0);
+}
 if ( ($report + $interactive + $continuous) > 1 )
 {
-    print( STDERR "Error, only option may be specified\n" );
+    print( STDERR "Error, only one option may be specified\n" );
     usage();
 }
 
@@ -111,14 +117,28 @@ my $swap_image_path = $Config{ZM_PATH_SWAP};
 
 my $loop = 1;
 my $cleaned = 0;
-MAIN: while( $loop )
-{
-    my $db_monitors;
+MAIN: while( $loop ) {
+	while ( ! ( $dbh and $dbh->ping() ) ) {
+		$dbh = zmDbConnect();
+
+		last if $dbh;
+		if ( $continuous ) {
+			# if we are running continuously, then just skip to the next interval, otherwise we are a one off run, so wait a second and retry until someone kills us.
+			sleep( $Config{ZM_AUDIT_CHECK_INTERVAL} );
+		} else {
+			sleep 1;
+		} # end if
+	} # end while can't connect to the db
+
 	my %db_events;
-	my $monitorSelectSql = "select * from Monitors order by Id asc";
+	my $db_monitors;
+    my $monitorSelectSql = "select Id,ServerHost from Monitors order by Id ASC";
     my $monitorSelectSth = $dbh->prepare_cached( $monitorSelectSql ) or Fatal( "Can't prepare '$monitorSelectSql': ".$dbh->errstr() );
     my $eventSelectSql = "select Id, (unix_timestamp() - unix_timestamp(StartTime)) as Age from Events where MonitorId = ? order by Id";
     my $eventSelectSth = $dbh->prepare_cached( $eventSelectSql ) or Fatal( "Can't prepare '$eventSelectSql': ".$dbh->errstr() );
+
+    my $eventExistsSql = 'SELECT Id FROM Events WHERE MonitorId = ? AND Id = ?';
+    my $eventExistsSth = $dbh->prepare_cached( $eventExistsSql ) or Fatal( "Can't prepare '$eventExistsSql': ".$dbh->errstr() );
 
     $cleaned = 0;
 	my $res = $monitorSelectSth->execute( ) or Fatal( "Can't execute: ".$monitorSelectSth->errstr() );
@@ -127,6 +147,12 @@ MAIN: while( $loop )
         Debug( "Found database monitor '$monitor->{Id}'" );
         my $db_events = {};
 		$db_monitors->{$monitor->{Id}} = $monitor;
+		if ( $Config{ZM_SERVER_HOST} ) {
+			if ( $db_monitors->{$monitor->{Id}}->{ServerHost} ne $Config{ZM_SERVER_HOST} ) {
+				Debug( "Skipping since it has handled by " . $db_monitors->{$monitor->{Id}}->{ServerHost} . "\n" );
+				next;
+			} # end if same serverhost
+		} # end if  there is a defined serverhost
         my $res = $eventSelectSth->execute( $monitor->{Id} ) or Fatal( "Can't execute: ".$eventSelectSth->errstr() );
         while ( my $event = $eventSelectSth->fetchrow_hashref() )
         {
@@ -134,9 +160,7 @@ MAIN: while( $loop )
         }
 		$db_events{$monitor->{Id}} = $db_events;
         Debug( "Got ".int(keys(%$db_events))." events\n" );
-        $eventSelectSth->finish();
     }
-    $monitorSelectSth->finish();
 
     my $fs_monitors;
     foreach my $monitor ( <[0-9]*> )
@@ -217,31 +241,29 @@ MAIN: while( $loop )
     redo MAIN if ( $cleaned );
 
     $cleaned = 0;
-    while ( my ( $fs_monitor, $fs_events ) = each(%$fs_monitors) )
-    {
-        if ( my $db_events = $db_events{$fs_monitor} )
-        {
-            if ( $fs_events )
-            {
-                while ( my ( $fs_event, $age ) = each(%$fs_events ) )
-                {
-                    if ( !defined($db_events->{$fs_event}) && ($age < 0 || ($age > MIN_AGE)) )
-                    {
-                        aud_print( "Filesystem event '$fs_monitor/$fs_event' does not exist in database" );
-                        if ( confirm() )
-                        {
-                            deleteEventFiles( $fs_event, $fs_monitor );
-                            $cleaned = 1;
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
+    while ( my ( $fs_monitor, $fs_events ) = each(%$fs_monitors) ) {
+        if ( my $db_events = $db_events{$fs_monitor} ) {
+            if ( ! $fs_events ) {
+				Debug("No fs events for monitor $fs_monitor");
+				next;
+			} # end if ! fs_events
+
+			while ( my ( $fs_event, $age ) = each(%$fs_events ) ) {
+				if ( !defined($db_events->{$fs_event}) && ($age < 0 || ($age > MIN_AGE)) ) {
+					# Since all this processing could take a long time, we need to double check that it doesn't exist in the db.
+					my $rv = $eventExistsSth->execute( $fs_monitor, $fs_event );
+					if ( ! $eventExistsSth->fetchall_arrayref() ) {
+						aud_print( "Filesystem event '$fs_monitor / $fs_event' does not exist in database" );
+						if ( confirm() ) {
+							deleteEventFiles( $fs_event, $fs_monitor );
+							$cleaned = 1;
+						}
+					} # Event really does not exist in the db.
+				}
+			}
+        } elsif ( ! $db_monitors->{$fs_monitor} ) {
             aud_print( "Filesystem monitor '$fs_monitor' does not exist in database" );
-            if ( confirm() )
-            {
+            if ( confirm() ) {
                 my $command = "rm -rf $fs_monitor";
                 executeShellCommand( $command );
                 $cleaned = 1;
@@ -285,7 +307,7 @@ MAIN: while( $loop )
                 {
                     if ( !defined($fs_events->{$db_event}) && ($age > MIN_AGE) )
                     {
-                        aud_print( "Database event '$db_monitor/$db_event' does not exist in filesystem" );
+                        aud_print( "Database event '$db_monitor / $db_event' does not exist in filesystem" );
                         if ( confirm() )
                         {
                             my $res = $deleteEventSth->execute( $db_event ) or Fatal( "Can't execute: ".$deleteEventSth->errstr() );
@@ -324,7 +346,6 @@ MAIN: while( $loop )
             $cleaned = 1;
         }
     }
-    $selectOrphanedEventsSth->finish();
     redo MAIN if ( $cleaned );
 
     # Remove empty events (with no frames)
@@ -341,7 +362,6 @@ MAIN: while( $loop )
             $cleaned = 1;
         }
     }
-    $selectEmptyEventsSth->finish();
     redo MAIN if ( $cleaned );
 
     # Remove orphaned frame records
@@ -358,7 +378,6 @@ MAIN: while( $loop )
             $cleaned = 1;
         }
     }
-    $selectOrphanedFramesSth->finish();
     redo MAIN if ( $cleaned );
 
     # Remove orphaned stats records
@@ -375,7 +394,6 @@ MAIN: while( $loop )
             $cleaned = 1;
         }
     }
-    $selectOrphanedStatsSth->finish();
     redo MAIN if ( $cleaned );
 
     # New audit to close any events that were left open for longer than MIN_AGE seconds
@@ -392,7 +410,6 @@ MAIN: while( $loop )
             $res = $updateUnclosedEventsSth->execute( sprintf( "%s%d%s", $event->{Prefix}, $event->{Id}, RECOVER_TAG ), $event->{EndTime}, $event->{Length}, $event->{Frames}, $event->{AlarmFrames}, $event->{TotScore}, $event->{AlarmFrames}?int($event->{TotScore}/$event->{AlarmFrames}):0, $event->{MaxScore}, RECOVER_TEXT, $event->{Id} ) or Fatal( "Can't execute: ".$updateUnclosedEventsSth->errstr() );
         }
     }
-    $selectUnclosedEventsSth->finish();
 
     # Now delete any old image files
     if ( my @old_files = grep { -M > $max_image_age } <$image_path/*.{jpg,gif,wbmp}> )
@@ -418,7 +435,6 @@ MAIN: while( $loop )
             $res = $selectLogRowCountSth->execute() or Fatal( "Can't execute: ".$selectLogRowCountSth->errstr() );
             my $row = $selectLogRowCountSth->fetchrow_hashref();
             my $logRows = $row->{Rows};
-            $selectLogRowCountSth->finish();
             if ( $logRows > $Config{ZM_LOG_DATABASE_LIMIT} )
             {
                 my $deleteLogByRowsSql = "delete low_priority from Logs order by TimeKey asc limit ?";

@@ -1,50 +1,110 @@
-zoneminder (1.28.0-16) trusty; urgency=medium
+zoneminder (1.29.0-trusty-17) trusty; urgency=medium
 
-  * merge recent changes in master
+  * fixes for RTSP streams that timeout
 
- -- Isaac Connor <iconnor@connortechnology.com>  Fri, 26 Sep 2014 10:39:44 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 28 Jan 2015 12:37:43 -0500
 
-zoneminder (1.28.0-15) trusty; urgency=medium
+zoneminder (1.29.0-trusty-16) trusty; urgency=medium
 
-  * fix v4l parsing
+  * fix a memleak
 
- -- Isaac Connor <iconnor@connortechnology.com>  Sun, 07 Sep 2014 17:51:11 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 13 Jan 2015 16:59:48 -0500
 
-zoneminder (1.28.0-14) precise; urgency=medium
+zoneminder (1.29.0-trusty-15) trusty; urgency=medium
 
-  * put the actual sizes in the error message when captured size != expected size
+  * merge recent master changes, small performance improvement in streaming
 
- -- Isaac Connor <iconnor@connortechnology.com>  Fri, 05 Sep 2014 10:07:31 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 13 Jan 2015 15:23:38 -0500
 
-zoneminder (1.28.0-13) precise; urgency=medium
+zoneminder (1.29.0-utopic-13) utopic; urgency=medium
 
-  * include Recording host in getStreamSrc
+  * Fix in getNearEvents when viewing an event. Merge master.
 
- -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Sep 2014 10:48:09 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 02 Jan 2015 12:50:51 -0500
 
-zoneminder (1.28.0-12) precise; urgency=medium
+zoneminder (1.29.0-trusty-12) trusty; urgency=medium
 
-  * add Host filter to montage.  Will default to all Hosts
+  * merge master which does redirect to login page better.  Also ubuntu package build improvements
 
- -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Sep 2014 10:36:01 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 18 Dec 2014 09:36:09 -0500
 
-zoneminder (1.28.0-11) precise; urgency=medium
+zoneminder (1.29.0-utopic-11) utopic; urgency=medium
 
-  * db update fix, first version on ppa
+  * Merge security fixes
 
- -- Isaac Connor <iconnor@connortechnology.com>  Wed, 03 Sep 2014 16:05:04 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 12 Dec 2014 09:50:46 -0500
 
-zoneminder (1.28.0-10) trusty; urgency=medium
+zoneminder (1.29.0-utopic-9) utopic; urgency=medium
 
-  * make zmc wait on failure to pre-capture
+  * Merge more flat skin removal, and knnniggett's rtsp fixes
 
- -- Isaac Connor <iconnor@connortechnology.com>  Wed, 27 Aug 2014 09:50:04 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 04 Dec 2014 11:10:58 -0500
 
-zoneminder (1.28.0-9) trusty; urgency=medium
+zoneminder (1.29.0-trusty-8) trusty; urgency=medium
 
-  * minor
+  * Merge master, including mem leak fixes, and a fix for rtsp for Foscam and many other cameras.
 
- -- Isaac Connor <iconnor@connortechnology.com>  Tue, 19 Aug 2014 09:18:28 -0400
+ -- Isaac Connor <iconnor@connortechnology.com>  Sat, 29 Nov 2014 10:26:40 -0500
+
+zoneminder (1.29.0-trusty-7) trusty; urgency=medium
+
+  * Merge digest auth for simple http
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 28 Nov 2014 16:48:57 -0500
+
+zoneminder (1.29.0-trusty-6) trusty; urgency=medium
+
+  * New options under System tab SKIN_DEFAULT and CSS_DEFAULT, warning, you will need to run zmupdate.pl -f to reset your config.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 26 Nov 2014 16:47:54 -0500
+
+zoneminder (1.29.0-utopic-5) utopic; urgency=medium
+
+  * Don't load zones automatically, except in zma which is the only process that uses them. This seems to speed up zms and zmc startup a lot
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 26 Nov 2014 16:06:22 -0500
+
+zoneminder (1.29.0-utopic-3) utopic; urgency=medium
+
+  * Merge flat skin
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 24 Nov 2014 18:43:11 -0500
+
+zoneminder (1.29.0-utopic-1) utopic; urgency=medium
+
+  * Merge other's fixes, and my digest auth code
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 20 Nov 2014 11:09:39 -0500
+
+zoneminder (1.29.0-iconnor2) utopic; urgency=medium
+
+  * merge group filtering changes and other master fixes
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 13 Nov 2014 12:17:49 -0500
+
+zoneminder (1.29.0-iconnor1) trusty; urgency=medium
+
+  * Merge 1.28
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 20 Oct 2014 15:35:19 -0400
+
+zoneminder (1.28.0+1-trusty-SNAPSHOT2014121201) trusty; urgency=medium
+
+  * Merge of security fixes and a few other things. See github for more info.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 12 Dec 2014 16:38:36 -0500
+
+zoneminder (1.28.0-trusty) trusty; urgency=medium
+
+  * Release
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Fri, 17 Oct 2014 09:25:55 -0400
+
+zoneminder (1.27.99+1-trusty-SNAPSHOT2014101401) trusty; urgency=medium
+
+  * Several PR merges in big push for 1.28.0
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 14 Oct 2014 09:28:29 -0400
 
 zoneminder (1.27.99+1-trusty-SNAPSHOT2014092601) trusty; urgency=medium
 

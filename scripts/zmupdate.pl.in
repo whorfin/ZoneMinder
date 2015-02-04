@@ -86,9 +86,11 @@ Parameters are :-
 -c, --check					  - Check for updated versions of ZoneMinder
 -f, --freshen					- Freshen the configuration in the database. Equivalent of old zmconfig.pl -noi
 -v<version>, --version=<version> - Force upgrade to the current version from <version>
--u<dbuser>, --user=<dbuser>	  - Alternate DB user with privileges to alter DB
--p<dbpass>, --pass=<dbpass>	  - Password of alternate DB user with privileges to alter DB
--d<dir>,--dir=<dir>			  - Directory containing update files if not in default build location
+-u<dbuser>, --user=<dbuser>      - Alternate DB user with privileges to alter DB
+-p<dbpass>, --pass=<dbpass>      - Password of alternate DB user with privileges to alter DB
+-d<dir>,--dir=<dir>              - Directory containing update files if not in default build location
+-interactive					 - interact with the user
+-nointeractive                   - do not interact with the user
 ");
 	exit( -1 );
 }
@@ -314,7 +316,7 @@ if ( $freshen )
 	saveConfigToDB();
 }
 
-# Only do the innoDB if we are interactive
+# Don't do innoDB upgrade if not interactive
 if ( $interactive ) {
 	# Now check for MyISAM Tables
 	my @MyISAM_Tables;
@@ -333,18 +335,18 @@ if ( $interactive ) {
 		my $response = <STDIN>;
 		chomp( $response );
 		if ( $response =~ /^[yY]$/ ) {
+			$dbh->do(q|SET sql_mode='traditional'|); # Elevate warnings to errors
 			print "\nConverting MyISAM tables to InnoDB. Please wait.\n";
 			foreach (@MyISAM_Tables) {
-				$dbh->do(q|SET sql_mode='traditional'|); # Elevate warnings to errors
 				my $sql = "ALTER TABLE $_ ENGINE = InnoDB";
 				my $sth = $dbh->prepare_cached( $sql ) or die( "Can't prepare '$sql': ".$dbh->errstr() );
 				my $res = $sth->execute() or die( "Can't execute: ".$sth->errstr() );
 				$sth->finish();
-				$dbh->do(q|SET sql_mode=''|); # Set mode back to default
 			}
+			$dbh->do(q|SET sql_mode=''|); # Set mode back to default
 		}
 	}
-}
+} # end if interactive
 
 if ( $version )
 {

@@ -32,6 +32,7 @@ void Usage()
 	fprintf( stderr, "Options:\n" );
 	fprintf( stderr, "  -m, --monitor <monitor_id>   : Specify which monitor to use\n" );
 	fprintf( stderr, "  -h, --help                   : This screen\n" );
+	fprintf( stderr, "  -v, --version                : Report the installed version of ZoneMinder\n" );		
 	exit( 0 );
 }
 
@@ -46,6 +47,7 @@ int main( int argc, char *argv[] )
 	static struct option long_options[] = {
 		{"monitor", 1, 0, 'm'},
 		{"help", 0, 0, 'h'},
+		{"version", 0, 0, 'v'},
 		{0, 0, 0, 0}
 	};
 
@@ -53,7 +55,7 @@ int main( int argc, char *argv[] )
 	{
 		int option_index = 0;
 
-		int c = getopt_long (argc, argv, "m:h", long_options, &option_index);
+		int c = getopt_long (argc, argv, "m:h:v", long_options, &option_index);
 		if (c == -1)
 		{
 			break;
@@ -68,6 +70,9 @@ int main( int argc, char *argv[] )
 			case '?':
 				Usage();
 				break;
+			case 'v':
+				cout << ZM_VERSION << "\n";
+				exit(0);
 			default:
 				//fprintf( stderr, "?? getopt returned character code 0%o ??\n", c );
 				break;
@@ -105,6 +110,7 @@ int main( int argc, char *argv[] )
 	if ( monitor )
 	{
 		Info( "In mode %d/%d, warming up", monitor->GetFunction(), monitor->Enabled() );
+		monitor->ReloadZones();
 
 		if ( config.opt_frame_server )
 		{
@@ -139,5 +145,7 @@ int main( int argc, char *argv[] )
 	{
 		fprintf( stderr, "Can't find monitor with id of %d\n", id );
 	}
+	logTerm();
+	zmDbClose();
 	return( 0 );
 }

@@ -327,10 +327,16 @@ Monitor::Monitor(
     last_motion_score(0),
     camera( p_camera ),
     n_zones( p_n_zones ),
-    zones( p_zones )
+    zones( p_zones ),
+    timestamps( 0 ),
+    images( 0 )
 {
     strncpy( name, p_name, sizeof(name) );
-    strncpy( serverhost, p_serverhost, sizeof(serverhost) );
+    if ( p_serverhost ) {
+		strncpy( serverhost, p_serverhost, sizeof(serverhost) );
+	} else {
+		*serverhost = '\0';
+	}
 
     strncpy( event_prefix, p_event_prefix, sizeof(event_prefix) );
     strncpy( label_format, p_label_format, sizeof(label_format) );
@@ -430,16 +436,17 @@ Monitor::Monitor(
     {
         if ( purpose != QUERY )
         {
-            Error( "Shared data not initialised by capture daemon" );
+            Error( "Shared data not initialised by capture daemon for monitor %s", name );
             exit( -1 );
         }
         else
         {
-            Warning( "Shared data not initialised by capture daemon, some query functions may not be available or produce invalid results" );
+            Warning( "Shared data not initialised by capture daemon, some query functions may not be available or produce invalid results for monitor %s", name );
         }
     }
 
 	// Will this not happen everytime a monitor is instantiated?  Seems like all the calls to the Monitor constructor pass a zero for n_zones, then load zones after..
+if ( 0 ) {
     if ( !n_zones ) {
 		Debug( 1, "Monitor %s has no zones, adding one.", name );
         n_zones = 1;
@@ -447,6 +454,7 @@ Monitor::Monitor(
         Coord coords[4] = { Coord( 0, 0 ), Coord( width-1, 0 ), Coord( width-1, height-1 ), Coord( 0, height-1 ) };
         zones[0] = new Zone( this, 0, "All", Zone::ACTIVE, Polygon( sizeof(coords)/sizeof(*coords), coords ), RGB_RED, Zone::BLOBS );
     }
+}
     start_time = last_fps_time = time( 0 );
 
     event = 0;
@@ -581,6 +589,14 @@ bool Monitor::connect() {
 
 Monitor::~Monitor()
 {
+	if ( timestamps ) {
+		delete[] timestamps;
+		timestamps = 0;
+	}
+	if ( images ) {
+		delete[] images;
+		images = 0;
+	}
 	if ( mem_ptr ) {
 		if ( event )
 			Info( "%s: %03d - Closing event %d, shutting down", name, image_count, event->Id() );
@@ -1248,8 +1264,6 @@ bool Monitor::Analyse()
     }
 
     static bool static_undef = true;
-    static struct timeval **timestamps;
-    static Image **images;
     static int last_section_mod = 0;
     static bool last_signal;
 
@@ -1737,6 +1751,15 @@ void Monitor::ReloadZones()
     delete[] zones;
     zones = 0;
     n_zones = Zone::Load( this, zones );
+	if ( n_zones == 0 ) {
+		Warning( "Reloading zones for monitor %s, got %d zones, adding one", name );
+        n_zones = 1;
+        zones = new Zone *[1];
+        Coord coords[4] = { Coord( 0, 0 ), Coord( width-1, 0 ), Coord( width-1, height-1 ), Coord( 0, height-1 ) };
+        zones[0] = new Zone( this, 0, "All", Zone::ACTIVE, Polygon( sizeof(coords)/sizeof(*coords), coords ), RGB_RED, Zone::BLOBS );
+	} else {
+		Debug( 1, "Reloading zones for monitor %s, got %d zones", name, n_zones );
+	}
     //DumpZoneImage();
 }
 
@@ -2069,8 +2092,8 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
         int col = 0;
 
         int id = atoi(dbrow[col]); col++;
-        std::string name = dbrow[col]; col++;
-		std::string serverhost = dbrow[col]; col++;
+        const char *name = dbrow[col]; col++;
+		const char *serverhost = dbrow[col]; col++;
         int function = atoi(dbrow[col]); col++;
         int enabled = atoi(dbrow[col]); col++;
         const char *linked_monitors = dbrow[col]; col++;
@@ -2169,8 +2192,8 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
 
         monitors[i] = new Monitor(
             id,
-            name.c_str(),
-			serverhost.c_str(),
+            name,
+			serverhost,
             function,
             enabled,
             linked_monitors,
@@ -2207,7 +2230,7 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
         monitors[i]->AddZones( n_zones, zones );
-        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name.c_str(), n_zones );
+        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name, n_zones );
     }
     if ( mysql_errno( &dbconn ) )
     {
@@ -2542,8 +2565,8 @@ Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
         int col = 0;
 
         int id = atoi(dbrow[col]); col++;
-        std::string name = dbrow[col]; col++;
-        std::string serverhost = dbrow[col]; col++;
+        const char *name = dbrow[col]; col++;
+        const char *serverhost = dbrow[col]; col++;
         std::string type = dbrow[col]; col++;
         int function = atoi(dbrow[col]); col++;
         int enabled = atoi(dbrow[col]); col++;
@@ -2571,7 +2594,7 @@ Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
         } else {
             v4l_captures_per_frame = config.captures_per_frame;
         }
-Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
+		Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
         col++;
 
         std::string protocol = dbrow[col]; col++;
@@ -2790,8 +2813,8 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
         }
         monitor = new Monitor(
             id,
-            name.c_str(),
-            serverhost.c_str(),
+            name,
+            serverhost,
             function,
             enabled,
             linked_monitors.c_str(),
@@ -2833,7 +2856,7 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
             n_zones = Zone::Load( monitor, zones );
             monitor->AddZones( n_zones, zones );
         }
-        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name.c_str(), n_zones );
+        Debug( 1, "Loaded monitor %d(%s), %d zones", id, name, n_zones );
     }
     if ( mysql_errno( &dbconn ) )
     {
@@ -2885,21 +2908,20 @@ int Monitor::Capture()
         captureResult = 1;
     }
     
-    if ( captureResult == 1 )
-    {
+    if ( captureResult == 1 ) {
         
-	/* Deinterlacing */
-	if ( (deinterlacing & 0xff) == 1 ) {
-		capture_image->Deinterlace_Discard();
-	} else if ( (deinterlacing & 0xff) == 2 ) {
-		capture_image->Deinterlace_Linear();
-	} else if ( (deinterlacing & 0xff) == 3 ) {
-		capture_image->Deinterlace_Blend();
-	} else if ( (deinterlacing & 0xff) == 4 ) {
-		capture_image->Deinterlace_4Field( next_buffer.image, (deinterlacing>>8)&0xff );
-	} else if ( (deinterlacing & 0xff) == 5 ) {
-		capture_image->Deinterlace_Blend_CustomRatio( (deinterlacing>>8)&0xff );
-	}
+		/* Deinterlacing */
+		if ( (deinterlacing & 0xff) == 1 ) {
+			capture_image->Deinterlace_Discard();
+		} else if ( (deinterlacing & 0xff) == 2 ) {
+			capture_image->Deinterlace_Linear();
+		} else if ( (deinterlacing & 0xff) == 3 ) {
+			capture_image->Deinterlace_Blend();
+		} else if ( (deinterlacing & 0xff) == 4 ) {
+			capture_image->Deinterlace_4Field( next_buffer.image, (deinterlacing>>8)&0xff );
+		} else if ( (deinterlacing & 0xff) == 5 ) {
+			capture_image->Deinterlace_Blend_CustomRatio( (deinterlacing>>8)&0xff );
+		}
         
         
         if ( orientation != ROTATE_0 )
@@ -2927,8 +2949,6 @@ int Monitor::Capture()
             }
         }
 
-    }
-    if ( true ) {
 
         if ( capture_image->Size() != camera->ImageSize() )
         {
@@ -2987,7 +3007,7 @@ int Monitor::Capture()
             shared_data->action &= ~SET_SETTINGS;
         }
         return( 0 );
-    }
+    } // end if captureResult == 1
     shared_data->signal = false;
     return( -1 );
 }
@@ -3992,32 +4012,37 @@ void MonitorStream::runStream()
         monitor->SingleImage( scale );
         return;
     }
-	char swap_path[PATH_MAX] = "";
+    char *swap_path = 0;
 	int lock_fd = 0;
 	last_reduction_time = -1;
     bool buffered_playback = false;
 	char sock_path_lock[PATH_MAX];
 	sock_path_lock[0] = 0;
  
-	if (connkey)
-	{
+	if (connkey) {
+
 		if ( connkey && playback_buffer > 0 ) {
-			Debug( 2, "Checking swap image location" );
-			Debug( 3, "Checking swap image path" );
-			strncpy( swap_path, config.path_swap, sizeof(swap_path) );
-			if ( checkSwapPath( swap_path, false ) )
-			{
-				snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
-				if ( checkSwapPath( swap_path, true ) )
-				{
-					snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
-					if ( checkSwapPath( swap_path, true ) )
-					{
-						buffered_playback = true;
+			int swap_path_length = strlen(config.path_swap)+1; // +1 for NULL terminator
+			if ( swap_path_length + 15 > PATH_MAX ) {
+				// 15 is for /zmswap-whatever, assuming max 6 digits for monitor id
+				Error( "Swap Path is too long. %d > %d ", swap_path_length+15, PATH_MAX );
+			} else {
+				swap_path = (char *)malloc( swap_path_length+15 );
+
+				Debug( 3, "Checking swap image path %s", config.path_swap );
+				strncpy( swap_path, config.path_swap, swap_path_length );
+				if ( checkSwapPath( swap_path, false ) ) {
+					snprintf( &(swap_path[swap_path_length]), sizeof(swap_path)-swap_path_length, "/zmswap-m%d", monitor->Id() );
+					if ( checkSwapPath( swap_path, true ) ) {
+						snprintf( &(swap_path[swap_path_length]), sizeof(swap_path)-swap_path_length, "/zmswap-q%06d", connkey );
+						if ( checkSwapPath( swap_path, true ) ) {
+							buffered_playback = true;
+						}
 					}
 				}
-			}
-		}
+			} // swap_path_length is ok
+
+		} // end if connkey && playback_buffer > 0 )
 		snprintf( sock_path_lock, sizeof(sock_path_lock), "%s/zms-%06d.lock", config.path_socks, connkey);
 
 		lock_fd = open(sock_path_lock, O_CREAT|O_WRONLY, S_IRUSR | S_IWUSR);
@@ -4338,6 +4363,7 @@ void MonitorStream::runStream()
             }
         }
     }
+	if ( swap_path ) free( swap_path );
 }
 
 void Monitor::SingleImage( int scale)

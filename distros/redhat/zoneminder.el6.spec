@@ -1,14 +1,10 @@
-%define cambrev 0.931
-%define moorev 1.3.2
-%define jscrev 1.0
-
 %define zmuid $(id -un)
 %define zmgid $(id -gn)
 %define zmuid_final apache
 %define zmgid_final apache
 
 Name:       zoneminder
-Version:    1.27
+Version:    1.28.0
 Release:    1%{?dist}
 Summary:    A camera monitoring and analysis tool
 Group:      System Environment/Daemons
@@ -20,25 +16,8 @@ URL:        http://www.zoneminder.com/
 
 #Source0: https://github.com/ZoneMinder/ZoneMinder/archive/v%{version}.tar.gz
 Source0:    ZoneMinder-%{version}.tar.gz
-Source1:    jscalendar-%{jscrev}.zip
-#Source1:    http://downloads.sourceforge.net/jscalendar/jscalendar-%{jscrev}.zip
 
-# Mootools is currently bundled in the zoneminder tarball
-#Source2:    mootools-core-%{moorev}-full-compat-yc.js
-#Source2:    http://mootools.net/download/get/mootools-core-%{moorev}-full-compat-yc.js
-
-Source3:   cambozola-%{cambrev}.tar.gz
-#Source3:   http://www.andywilcock.com/code/cambozola/cambozola-%{cambrev}.tar.gz
-
-#Patch1:     zoneminder-1.26.4-dbinstall.patch
-Patch2:     zoneminder-runlevel.patch
-#Patch3:    zoneminder-1.25.0-installfix.patch
-Patch4:    zoneminder-1.26.0-defaults.patch
-
-# BuildRoot is depreciated and ignored in EPEL6
-#BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-
-BuildRequires:  automake gnutls-devel bzip2-devel libtool
+BuildRequires:  cmake gnutls-devel bzip2-devel
 BuildRequires:  mysql-devel pcre-devel libjpeg-turbo-devel
 BuildRequires:  perl(Archive::Tar) perl(Archive::Zip)
 BuildRequires:  perl(Date::Manip) perl(DBD::mysql)
@@ -47,13 +26,15 @@ BuildRequires:  perl(MIME::Entity) perl(MIME::Lite)
 BuildRequires:  perl(PHP::Serialization) perl(Sys::Mmap)
 BuildRequires:  perl(Time::HiRes) perl(Net::SFTP::Foreign)
 BuildRequires:  perl(Expect) perl(X10::ActiveHome) perl(Astro::SunTime)
-BuildRequires:  libcurl-devel vlc-devel polkit-devel ffmpeg-devel >= 0.4.9
+BuildRequires:  libcurl-devel vlc-devel ffmpeg-devel polkit-devel
+# cmake needs the following installed at build time due to the way it auto-detects certain parameters
+BuildRequires:  httpd ffmpeg
 
-Requires:   httpd php php-mysql mysql-server libjpeg-turbo polkit
+Requires:   httpd php php-mysql mysql-server libjpeg-turbo polkit net-tools
 Requires:   perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires:   perl(DBD::mysql) perl(Archive::Tar) perl(Archive::Zip)
 Requires:   perl(MIME::Entity) perl(MIME::Lite) perl(Net::SMTP) perl(Net::FTP)
-Requires:   libcurl vlc-core ffmpeg >= 0.4.9
+Requires:   libcurl vlc-core ffmpeg
 
 Requires(post): /sbin/chkconfig
 Requires(post): /usr/bin/checkmodule
@@ -80,111 +61,25 @@ too much degradation of performance.
 %prep
 %setup -q -n ZoneMinder-%{version}
 
-# Unpack jscalendar and move some files around
-%setup -q -D -T -a 1 -n ZoneMinder-%{version}
-mkdir jscalendar-doc
-pushd jscalendar-%{jscrev}
-mv *html *php doc/* README ../jscalendar-doc
-rmdir doc
-popd
-
-# Unpack Cambozola and move some files around
-%setup -q -D -T -a 3 -n ZoneMinder-%{version}
-mkdir cambozola-doc
-pushd cambozola-%{cambrev}
-mv application.properties build.xml dist.sh *html LICENSE testPages/* ../cambozola-doc
-rmdir testPages
-popd
-
-#%patch1 -p0 -b .dbinstall
-%patch2 -p0 -b .runlevel
-#%patch3 -p0 -b .installfix
-%patch4 -p0
+# Change the following default values
+./utils/zmeditconfigdata.sh ZM_PATH_ZMS /cgi-bin/zm/nph-zms
+./utils/zmeditconfigdata.sh ZM_OPT_CAMBOZOLA yes
+./utils/zmeditconfigdata.sh ZM_PATH_SWAP /dev/shm
+./utils/zmeditconfigdata.sh ZM_UPLOAD_FTP_LOC_DIR /var/spool/zoneminder-upload
+./utils/zmeditconfigdata.sh ZM_OPT_CONTROL yes
+./utils/zmeditconfigdata.sh ZM_CHECK_FOR_UPDATES no
+./utils/zmeditconfigdata.sh ZM_DYN_SHOW_DONATE_REMINDER no
 
 %build
-libtoolize --force
-aclocal
-autoheader
-automake --force-missing --add-missing
-autoconf
-
-OPTS=""
-%ifnarch %{ix86} x86_64
-    OPTS="$OPTS --disable-crashtrace"
-%endif
-
-%configure \
-    --with-libarch=%{_lib} \
-%ifarch %{ix86} %{x8664}
-	--enable-crashtrace \
-%else
-	--disable-crashtrace \
-%endif
-    --with-mysql=%{_prefix} \
-    --with-ffmpeg=%{_prefix} \
-    --with-webdir=%{_datadir}/%{name}/www \
-    --with-cgidir=%{_libexecdir}/%{name}/cgi-bin \
-    --with-webuser=%{zmuid} \
-    --with-webgroup=%{zmgid} \
-    --enable-mmap=yes \
-    --disable-debug \
-    --with-webhost=zm.local \
-    ZM_SSL_LIB="gnutls" \
-    ZM_RUNDIR=/var/run/zoneminder \
-    ZM_TMPDIR=/var/lib/zoneminder/temp \
-%ifarch x86_64
-    CXXFLAGS="-D__STDC_CONSTANT_MACROS -msse2" \
-%else
-    CXXFLAGS="-D__STDC_CONSTANT_MACROS" \
-%endif
-    --with-extralibs=""
+# Have to override CMAKE_INSTALL_LIBDIR for cmake < 2.8.7 due to this bug:
+# https://bugzilla.redhat.com/show_bug.cgi?id=795542
+%cmake -DZM_TARGET_DISTRO="el6" -DCMAKE_INSTALL_LIBDIR:PATH=%{_lib} -DZM_PERL_SUBPREFIX=`x="%{perl_vendorlib}" ; echo ${x#"%{_prefix}"}` .
 
 make %{?_smp_mflags}
-%{__perl} -pi -e 's/(ZM_WEB_USER=).*$/${1}%{zmuid_final}/;' \
-          -e 's/(ZM_WEB_GROUP=).*$/${1}%{zmgid_final}/;' zm.conf
 
 %install
-install -d %{buildroot}/%{_localstatedir}/run
-install -d %{buildroot}/etc/logrotate.d
-
-make install DESTDIR=%{buildroot} \
-    INSTALLDIRS=vendor
-
-rm -rf %{buildroot}/%{perl_vendorarch} %{buildroot}/%{perl_archlib}
-
-install -m 755 -d %{buildroot}/%{_localstatedir}/log/zoneminder
-for dir in events images temp
-do
-    install -m 755 -d %{buildroot}/%{_localstatedir}/lib/zoneminder/$dir
-    if [ -d %{buildroot}/%{_datadir}/zoneminder/www/$dir ]; then
-	    rmdir %{buildroot}/%{_datadir}/%{name}/www/$dir
-    fi
-    ln -sf ../../../..%{_localstatedir}/lib/zoneminder/$dir %{buildroot}/%{_datadir}/%{name}/www/$dir
-done
-install -m 755 -d %{buildroot}/%{_localstatedir}/lib/zoneminder/sock
-install -m 755 -d %{buildroot}/%{_localstatedir}/lib/zoneminder/swap
-install -m 755 -d %{buildroot}/%{_localstatedir}/spool/zoneminder-upload
-
-install -D -m 755 scripts/zm %{buildroot}/%{_initrddir}/zoneminder
-install -D -m 644 distros/redhat/zoneminder.conf %{buildroot}/%{_sysconfdir}/httpd/conf.d/zoneminder.conf
-install -D -m 755 distros/redhat/redalert.wav %{buildroot}/%{_datadir}/%{name}/www/sounds/redalert.wav
-install distros/redhat/zm-logrotate_d $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/%{name}
-
-# Install jscalendar
-install -d -m 755 %{buildroot}/%{_datadir}/%{name}/www/jscalendar
-cp -rp jscalendar-%{jscrev}/* %{buildroot}/%{_datadir}/%{name}/www/jscalendar
-
-# Install Cambozola
-cp -rp cambozola-%{cambrev}/dist/cambozola.jar %{buildroot}/%{_datadir}/%{name}/www/
-rm -rf cambozola-%{cambrev}
-
-# Install mootools
-pushd %{buildroot}/%{_datadir}/%{name}/www
-#install -m 644 %{Source2} mootools-core-%{moorev}-full-compat-yc.js
-#ln -s mootools-core-%{moorev}-full-compat-yc.js mootools.js
-ln -f -s tools/mootools/mootools-core-%{moorev}-yc.js mootools-core.js
-ln -f -s tools/mootools/mootools-more-%{moorev}.1-yc.js mootools-more.js
-popd
+export DESTDIR=%{buildroot}
+make install
 
 %post
 /sbin/chkconfig --add zoneminder
@@ -218,10 +113,13 @@ if [ $1 -ge 1 ]; then
     /sbin/service zoneminder condrestart > /dev/null 2>&1 || :
 fi
 
+# Remove the doc folder. 
+rm -rf %{_docdir}/%{name}-%{version}
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS BUGS ChangeLog COPYING LICENSE NEWS README.md distros/redhat/README.CentOS jscalendar-doc cambozola-doc distros/redhat/local_zoneminder.te
+%doc AUTHORS BUGS ChangeLog COPYING LICENSE NEWS README.md distros/redhat/README.CentOS distros/redhat/jscalendar-doc
+%doc distros/redhat/cambozola-doc distros/redhat/local_zoneminder.te
 %config %attr(640,root,%{zmgid_final}) %{_sysconfdir}/zm.conf
 %config(noreplace) %attr(644,root,root) %{_sysconfdir}/httpd/conf.d/zoneminder.conf
 %config(noreplace) /etc/logrotate.d/%{name}
@@ -234,8 +132,6 @@ fi
 %{_bindir}/zmdc.pl
 %{_bindir}/zmf
 %{_bindir}/zmfilter.pl
-# zmfix removed from zoneminder 1.26.6
-#%attr(4755,root,root) %{_bindir}/zmfix
 %{_bindir}/zmpkg.pl
 %{_bindir}/zmstreamer
 %{_bindir}/zmtrack.pl
@@ -249,6 +145,7 @@ fi
 %{_bindir}/zmx10.pl
 
 %{perl_vendorlib}/ZoneMinder*
+%{perl_vendorlib}/%{_arch}-linux-thread-multi/auto/ZoneMinder*
 %{_mandir}/man*/*
 %dir %{_libexecdir}/%{name}
 %{_libexecdir}/%{name}/cgi-bin
@@ -268,14 +165,25 @@ fi
 %dir %attr(755,%{zmuid_final},%{zmgid_final}) %{_localstatedir}/log/zoneminder
 %dir %attr(755,%{zmuid_final},%{zmgid_final}) %{_localstatedir}/spool/zoneminder-upload
 
-
 %changelog
+* Sun Oct 5 2014 Andrew Bauer <knnniggett@users.sourceforge.net> - 1.28.0 
+- Bump version for 1.28.0 release.
+
+* Fri Mar 14 2014 Andrew Bauer <knnniggett@users.sourceforge.net> - 1.27 
+- Tweak build requirements for cmake
+
 * Sat Feb 01 2014 Andrew Bauer <knnniggett@users.sourceforge.net> - 1.27
 - Add zmcamtool.pl. Bump version for 1.27 release. 
 
 * Mon Dec 16 2013 Andrew Bauer <knnniggett@users.sourceforge.net> - 1.26.5
 - This is a bug fixe release
 - RTSP fixes, cmake enhancements, couple other misc fixes
+
+* Sat Oct 19 2013 Andrew Bauer <knnniggett@users.sourceforge.net> - 1.26.4
+- Streamline the cmake build. Move much code into cmakelist.txt file.
+
+* Mon Oct 07 2013 Andrew Bauer <knnniggett@users.sourceforge.net> - 1.26.4
+- Initial cmake build.
 
 * Sun Oct 06 2013 Andrew Bauer <knnniggett@users.sourceforge.net> - 1.26.4
 - All files are now part of the zoneminder source tree. Update specfile accordingly.

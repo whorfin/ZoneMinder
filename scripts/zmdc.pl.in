@@ -49,7 +49,7 @@ use ZoneMinder;
 use POSIX;
 use Socket;
 use IO::Handle;
-use Data::Dumper;
+#use Data::Dumper;
 
 use constant SOCK_FILE => $Config{ZM_PATH_SOCKS}.'/zmdc.sock';
 
@@ -78,7 +78,7 @@ sub Usage
 Usage: zmdc.pl <command> [daemon [options]]
 Parameters are :-
 <command>           - One of 'startup|shutdown|status|check|logrot' or
-                      'start|stop|restart|reload'.
+                      'start|stop|restart|reload|version'.
 [daemon [options]]  - Daemon name and options, required for second group of commands
 ");     
     exit( -1 );
@@ -90,7 +90,11 @@ if( !$command )
     print( STDERR "No command given\n" );
     Usage();
 }
-my $needs_daemon = $command !~ /(?:startup|shutdown|status|check|logrot)/;
+if ( $command eq 'version' ) {
+	print ZoneMinder::Base::ZM_VERSION."\n";
+	exit( 0 );
+}
+my $needs_daemon = $command !~ /(?:startup|shutdown|status|check|logrot|version)/;
 my $daemon = shift( @ARGV );
 if( $needs_daemon && !$daemon )
 {
@@ -214,7 +218,7 @@ use ZoneMinder;
 use POSIX;
 use Socket;
 use IO::Handle;
-use Data::Dumper;
+#use Data::Dumper;
 
 our %cmd_hash;
 our %pid_hash;
