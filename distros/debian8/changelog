@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-20) utopic; urgency=medium
+
+  * zmaudit.pl improvements - double check db before deleting fs event
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 04 Feb 2015 11:09:22 -0500
+
 zoneminder (1.29.0-utopic-18) utopic; urgency=medium
 
   * RTSP Timeout fixes
