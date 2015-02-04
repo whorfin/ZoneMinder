@@ -1,4 +1,4 @@
-zoneminder (1.29.0-utopic-20) utopic; urgency=medium
+zoneminder (1.29.0-trusty-20) trusty; urgency=medium
 
   * zmaudit.pl improvements - double check db before deleting fs event
 

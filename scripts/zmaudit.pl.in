@@ -137,8 +137,8 @@ MAIN: while( $loop ) {
     my $eventSelectSql = "select Id, (unix_timestamp() - unix_timestamp(StartTime)) as Age from Events where MonitorId = ? order by Id";
     my $eventSelectSth = $dbh->prepare_cached( $eventSelectSql ) or Fatal( "Can't prepare '$eventSelectSql': ".$dbh->errstr() );
 
-    my $event_ExistsSql = 'SELECT Id FROM Events WHERE MonitorId = ? AND Id = ?';
-    my $event_ExistsSth = $dbh->prepare_cached( $eventExistsSql ) or Fatal( "Can't prepare '$eventExistsSql': ".$dbh->errstr() );
+    my $eventExistsSql = 'SELECT Id FROM Events WHERE MonitorId = ? AND Id = ?';
+    my $eventExistsSth = $dbh->prepare_cached( $eventExistsSql ) or Fatal( "Can't prepare '$eventExistsSql': ".$dbh->errstr() );
 
     $cleaned = 0;
 	my $res = $monitorSelectSth->execute( ) or Fatal( "Can't execute: ".$monitorSelectSth->errstr() );
@@ -251,8 +251,8 @@ MAIN: while( $loop ) {
 			while ( my ( $fs_event, $age ) = each(%$fs_events ) ) {
 				if ( !defined($db_events->{$fs_event}) && ($age < 0 || ($age > MIN_AGE)) ) {
 					# Since all this processing could take a long time, we need to double check that it doesn't exist in the db.
-					my $rv = $EventExistsSth->execute( $fs_monitor, $fs_event );
-					if ( ! $EventExistsSth->fetchall_arrayref() ) {
+					my $rv = $eventExistsSth->execute( $fs_monitor, $fs_event );
+					if ( ! $eventExistsSth->fetchall_arrayref() ) {
 						aud_print( "Filesystem event '$fs_monitor / $fs_event' does not exist in database" );
 						if ( confirm() ) {
 							deleteEventFiles( $fs_event, $fs_monitor );
@@ -261,7 +261,7 @@ MAIN: while( $loop ) {
 					} # Event really does not exist in the db.
 				}
 			}
-        } elsif ( ! $db_monitors->{$monitor} ) {
+        } elsif ( ! $db_monitors->{$fs_monitor} ) {
             aud_print( "Filesystem monitor '$fs_monitor' does not exist in database" );
             if ( confirm() ) {
                 my $command = "rm -rf $fs_monitor";
