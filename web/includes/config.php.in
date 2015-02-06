@@ -141,7 +141,7 @@ function loadConfig( $defineConsts=true )
     $config = array();
     $configCat = array();
 
-    $result = $dbConn->query( 'select * from Config order by Id asc' );
+    $result = $dbConn->query( 'SELECT * FROM Config' );
     if ( !$result )
         echo mysql_error();
     $monitors = array();
