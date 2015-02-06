@@ -1,0 +1,22 @@
+=head2 Thu Sep 18 20:27:50 2014: C<Module> L<ZoneMinder|ZoneMinder>
+
+=over 4
+
+=item *
+
+C<installed into: /usr/share/perl/5.14.2>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 1.28.0>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+
