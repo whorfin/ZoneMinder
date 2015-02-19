@@ -66,6 +66,7 @@ if ( isset($_REQUEST['filter']['terms']) )
 $attrTypes = array(
     'MonitorId'   => $SLANG['AttrMonitorId'],
     'MonitorName' => $SLANG['AttrMonitorName'],
+    'ServerHost'  => $SLANG['AttrServerHost'],
     'Id'          => $SLANG['AttrId'],
     'Name'        => $SLANG['AttrName'],
     'Cause'       => $SLANG['AttrCause'],
