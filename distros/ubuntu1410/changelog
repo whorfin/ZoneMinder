@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-21) utopic; urgency=medium
+
+  * updates from master, improve monitor probing and support TRENDnet cameras
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 17 Feb 2015 14:18:52 -0500
+
 zoneminder (1.29.0-wheezy-20) wheezy; urgency=medium
 
   * zmaudit.pl improvements - double check db before deleting fs event
