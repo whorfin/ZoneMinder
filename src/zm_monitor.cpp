@@ -4012,32 +4012,37 @@ void MonitorStream::runStream()
         monitor->SingleImage( scale );
         return;
     }
-	char swap_path[PATH_MAX] = "";
+    char *swap_path = 0;
 	int lock_fd = 0;
 	last_reduction_time = -1;
     bool buffered_playback = false;
 	char sock_path_lock[PATH_MAX];
 	sock_path_lock[0] = 0;
  
-	if (connkey)
-	{
+	if (connkey) {
+
 		if ( connkey && playback_buffer > 0 ) {
-			Debug( 2, "Checking swap image location" );
-			Debug( 3, "Checking swap image path" );
-			strncpy( swap_path, config.path_swap, sizeof(swap_path) );
-			if ( checkSwapPath( swap_path, false ) )
-			{
-				snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-m%d", monitor->Id() );
-				if ( checkSwapPath( swap_path, true ) )
-				{
-					snprintf( &(swap_path[strlen(swap_path)]), sizeof(swap_path)-strlen(swap_path), "/zmswap-q%06d", connkey );
-					if ( checkSwapPath( swap_path, true ) )
-					{
-						buffered_playback = true;
+			int swap_path_length = strlen(config.path_swap)+1; // +1 for NULL terminator
+			if ( swap_path_length + 15 > PATH_MAX ) {
+				// 15 is for /zmswap-whatever, assuming max 6 digits for monitor id
+				Error( "Swap Path is too long. %d > %d ", swap_path_length+15, PATH_MAX );
+			} else {
+				swap_path = (char *)malloc( swap_path_length+15 );
+
+				Debug( 3, "Checking swap image path %s", config.path_swap );
+				strncpy( swap_path, config.path_swap, swap_path_length );
+				if ( checkSwapPath( swap_path, false ) ) {
+					snprintf( &(swap_path[swap_path_length]), sizeof(swap_path)-swap_path_length, "/zmswap-m%d", monitor->Id() );
+					if ( checkSwapPath( swap_path, true ) ) {
+						snprintf( &(swap_path[swap_path_length]), sizeof(swap_path)-swap_path_length, "/zmswap-q%06d", connkey );
+						if ( checkSwapPath( swap_path, true ) ) {
+							buffered_playback = true;
+						}
 					}
 				}
-			}
-		}
+			} // swap_path_length is ok
+
+		} // end if connkey && playback_buffer > 0 )
 		snprintf( sock_path_lock, sizeof(sock_path_lock), "%s/zms-%06d.lock", config.path_socks, connkey);
 
 		lock_fd = open(sock_path_lock, O_CREAT|O_WRONLY, S_IRUSR | S_IWUSR);
@@ -4358,6 +4363,7 @@ void MonitorStream::runStream()
             }
         }
     }
+	if ( swap_path ) free( swap_path );
 }
 
 void Monitor::SingleImage( int scale)

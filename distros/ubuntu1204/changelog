@@ -1,3 +1,21 @@
+zoneminder (1.29.0-trusty-17) trusty; urgency=medium
+
+  * fixes for RTSP streams that timeout
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Wed, 28 Jan 2015 12:37:43 -0500
+
+zoneminder (1.29.0-trusty-16) trusty; urgency=medium
+
+  * fix a memleak
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 13 Jan 2015 16:59:48 -0500
+
+zoneminder (1.29.0-trusty-15) trusty; urgency=medium
+
+  * merge recent master changes, small performance improvement in streaming
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 13 Jan 2015 15:23:38 -0500
+
 zoneminder (1.29.0-utopic-14) utopic; urgency=medium
 
   * merge recent improvements in master including better log messages, -v, --version command line arguments

@@ -1,0 +1,31 @@
+zoneminder (1.28.0-12) wheezy; urgency=low
+
+  * Non-maintainer upload.
+  * first pi build
+
+ --  <pi@pvrpi>  Thu, 11 Sep 2014 15:01:38 +0000
+
+zoneminder (1.27.99+1-testing-SNAPSHOT2014072901) testing; urgency=medium
+
+  * improve error messages
+  * Make zmupdate re-run the most recent patch so that people running the daily builds get their db updates
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 29 Jul 2014 14:50:20 -0400
+
+zoneminder (1.27.0+1-testing-v4ltomonitor-1) testing; urgency=high
+
+  * A 'minor' release focusing on performance improvement and bug fixes.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Sun, 22 Sep 2013 09:36:42 +0800
+
+zoneminder (1.26.0-1) unstable; urgency=low
+
+  * Bump version #'s to 1.26 to match new release of ZM
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 13 Aug 2013 13:32:15 -0400
+
+zoneminder (1.25.1-1) unstable; urgency=low
+
+  * Initial Version.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 29 Apr 2013 12:38:00 -0400
