@@ -1,3 +1,9 @@
+zoneminder (1.29.0-trusty-21) trusty; urgency=medium
+
+  * deleteEvent improvemetns
+
+ -- Isaac Connor <iconnor@testing.internal.point-one.com>  Fri, 06 Feb 2015 12:11:20 -0500
+
 zoneminder (1.29.0-wheezy-20) wheezy; urgency=medium
 
   * zmaudit.pl improvements - double check db before deleting fs event
