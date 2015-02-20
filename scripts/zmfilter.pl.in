@@ -353,7 +353,7 @@ sub getFilters
                             $value = "'$temp_value'";
                         } elsif ( $filter_expr->{terms}[$i]->{attr} eq 'ServerHost' ) {
 							if ( $temp_value eq 'ZM_SERVER_HOST' ) {
-								$value = ZM_SERVER_HOST;
+								$value = "'$Config{ZM_SERVER_HOST}'";
 							} else {
 								$value = "'$temp_value'";
 							}
