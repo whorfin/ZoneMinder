@@ -1409,6 +1409,9 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                     case 'MonitorName':
                         $filter['sql'] .= 'M.'.preg_replace( '/^Monitor/', '', $filter['terms'][$i]['attr'] );
                         break;
+                    case 'ServerHost':
+                        $filter['sql'] .= 'M.ServerHost';
+                        break;
                     case 'DateTime':
                         $filter['sql'] .= "E.StartTime";
                         break;
@@ -1456,6 +1459,12 @@ function parseFilter( &$filter, $saveToSession=false, $querySep='&amp;' )
                         case 'Notes':
                             $value = dbEscape($value);
                             break;
+						case 'ServerHost':
+							if ( $value == 'ZM_SERVER_HOST' ) {
+								$value = ZM_SERVER_HOST;
+							} else {
+								$value = dbEscape($value);
+							}
                         case 'DateTime':
                             $value = "'".strftime( STRF_FMT_DATETIME_DB, strtotime( $value ) )."'";
                             break;
