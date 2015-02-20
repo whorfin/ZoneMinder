@@ -113,6 +113,7 @@ $sort_fields = array(
     'Cause'       => $SLANG['AttrCause'],
     'Notes'       => $SLANG['AttrNotes'],
     'MonitorName' => $SLANG['AttrMonitorName'],
+    'ServerHost'  => $SLANG['AttrServerHost'],
     'DateTime'    => $SLANG['AttrDateTime'],
     'Length'      => $SLANG['AttrDuration'],
     'Frames'      => $SLANG['AttrFrames'],
