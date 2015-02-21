@@ -289,12 +289,17 @@ AC_ARG_ENABLE(onvif,
     probe for ONVIF compliant cameras on your network and allow you the option to auto-configure them as
     monitors in zoneminder. This option is EXPERIMENTAL and may not work with all cameras that claim to 
     be ONVIF compliant.
-    e.g. --enable-debug=yes or --disable-debug])
+    e.g. --enable-onvif=yes or --disable-onvif])
 )
 AM_CONDITIONAL([COND_ONVIF], [test "$enable_onvif" = yes])
 
 # Compiler
 AC_LANG_CPLUSPLUS
+if test "$ENABLE_ONVIF" == "yes"; then
+  AC_SUBST(ZM_HAS_ONVIF,1)
+else
+  AC_SUBST(ZM_HAS_ONVIF,0)
+fi
 
 # Checks for programs.
 AC_PROG_CXX
