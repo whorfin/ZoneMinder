@@ -1,8 +1,20 @@
-zoneminder (1.29.0-trusty-21) trusty; urgency=medium
+zoneminder (1.29.0-trusty-22ubuntu1) UNRELEASED; urgency=medium
 
-  * deleteEvent improvemetns
+  * more onvif merges, fix to zmfilter
 
- -- Isaac Connor <iconnor@testing.internal.point-one.com>  Fri, 06 Feb 2015 12:11:20 -0500
+ -- Isaac Connor <iconnor@testing.internal.point-one.com>  Sat, 21 Feb 2015 16:17:01 -0500
+
+zoneminder (1.29.0-trusty-22) trusty; urgency=medium
+
+  * updates from master: merge onvif, default to classic if skin not defined.
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Thu, 19 Feb 2015 18:14:58 -0500
+
+zoneminder (1.29.0-utopic-21) utopic; urgency=medium
+
+  * updates from master, improve monitor probing and support TRENDnet cameras
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Tue, 17 Feb 2015 14:18:52 -0500
 
 zoneminder (1.29.0-wheezy-20) wheezy; urgency=medium
 

@@ -263,6 +263,23 @@ function probeWansview( $ip )
     return( $camera );
 }
 
+function probeTRENDnet( $ip ) {
+	$camera = array(
+			'model'   => "TRENDnet Camera",
+			'monitor' => array(
+				'Type'     => 'Remote',
+				'Protocol' => 'http',
+				'Host'     => 'admin:123456@'.$ip,
+				'Port'     => 80,
+				'Path'     => '/GetData.cgi?CH=0',
+				'Width'    => 640,
+				'Height'   => 480,
+				'Palette'  => 3
+				),
+			);
+	return( $camera );
+} # end function probeTRENDnet
+
 $monitors = array();
 foreach ( dbFetchAll( "select Id, Name, Host from Monitors where Type = 'Remote' order by Host" ) as $monitor )
 {
@@ -281,6 +298,7 @@ $macBases = array(
     '00:40:8c' => array( 'type'=>'Axis', 'probeFunc'=>'probeAxis' ),
     '00:80:f0' => array( 'type'=>'Panasonic','probeFunc'=>'probePana' ),
     '00:0f:7c' => array( 'type'=>'ACTi','probeFunc'=>'probeACTi' ),
+	'00:14:d1' => array( 'type'=>'TRENDnet','probeFunc'=>'probeTRENDnet' ),
     '00:02:d1' => array( 'type'=>'Vivotek','probeFunc'=>'probeVivotek' ),
     '7c:dd:90' => array( 'type'=>'Wansview','probeFunc'=>'probeWansview' ),
     '78:a5:dd' => array( 'type'=>'Wansview','probeFunc'=>'probeWansview' )
@@ -290,11 +308,25 @@ unset($output);
 // Calling arp without the full path was reported to fail on some systems
 // Use the builtin unix command "type" to tell us where the command is
 $command = "type -p arp";
+$arp_command = '';
 $result = exec( escapeshellcmd($command), $output, $status );
-if ( $status )
-    Fatal( "Unable to determine path for arp command, type -p arp returned '$status'" );
+if ( $status ) {
+	Warning( "Unable to determine path for arp command, type -p arp returned '$status'" );
+	$command = "which arp";
+	$result = exec( escapeshellcmd($command), $output, $status );
+	if ( $status ) {
+		Warning( "Unable to determine path for arp command, which arp returned '$status'" );
+		if ( file_exists( '/usr/sbin/arp' ) ) {
+			$arp_command = '/usr/sbin/arp';
+		}
+	} else {
+		$arp_command = $output[0];
+	}
+} else {
+	$arp_command = $output[0];
+}
 // Now that we know where arp is, call it using the full path
-$command = $output[0]." -a";
+$command = $arp_command." -a";
 unset($output);
 $result = exec( escapeshellcmd($command), $output, $status );
 if ( $status )
