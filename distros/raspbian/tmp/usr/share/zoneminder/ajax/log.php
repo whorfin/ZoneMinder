@@ -10,7 +10,8 @@ switch ( $_REQUEST['task'] )
             logInit( array( 'id' => "web_js" ) );
 
             $string = $_POST['message'];
-            $file = preg_replace( '/\w+:\/\/\w+\//', '', $_POST['file'] );
+
+            $file = !empty($_POST['file']) ? preg_replace( '/\w+:\/\/\w+\//', '', $_POST['file'] ) : '';
             if ( !empty( $_POST['line'] ) )
                 $line = $_POST['line'];
             else
@@ -39,9 +40,8 @@ switch ( $_REQUEST['task'] )
 
         $filterFields = array( 'Component', 'Pid', 'Level', 'File', 'Line' );
 
-        //$filterSql = $filter?' where 
-        $total = dbFetchOne( "select count(*) as Total from Logs", 'Total' );
-        $sql = "select * from Logs";
+        $total = dbFetchOne( "SELECT count(*) AS Total FROM Logs", 'Total' );
+        $sql = 'SELECT * FROM Logs';
         $where = array();
 		$values = array();
         if ( $minTime ) {
@@ -61,11 +61,10 @@ switch ( $_REQUEST['task'] )
 			}
 		}
         if ( count($where) )
-            $sql.= " where ".join( " and ", $where );
+            $sql.= ' WHERE '.join( ' AND ', $where );
         $sql .= " order by ".$sortField." ".$sortOrder." limit ".$limit;
         $logs = array();
-        foreach ( dbFetchAll( $sql, NULL, $values ) as $log )
-        {
+        foreach ( dbFetchAll( $sql, NULL, $values ) as $log ) {
             $log['DateTime'] = preg_replace( '/^\d+/', strftime( "%Y-%m-%d %H:%M:%S", intval($log['TimeKey']) ), $log['TimeKey'] );
             $logs[] = $log;
         }
@@ -83,15 +82,15 @@ switch ( $_REQUEST['task'] )
 		}
         foreach( $filterFields as $field )
         {
-            $sql = "select distinct $field from Logs where not isnull($field)";
+            $sql = "SELECT DISTINCT $field FROM Logs WHERE NOT isnull($field)";
             $fieldWhere = array_diff_key( $where, array( $field=>true ) );
 			$fieldValues = array_diff_key( $values, array( $field=>true ) );
             if ( count($fieldWhere) )
-                $sql.= " and ".join( " and ", $fieldWhere );
-            $sql.= " order by $field asc";
+                $sql.= " AND ".join( ' AND ', $fieldWhere );
+            $sql.= " ORDER BY $field ASC";
             if ( $field == 'Level' )
             {
-                foreach( dbFetchAll( $sql, $field, $fieldValues ) as $value )
+                foreach( dbFetchAll( $sql, $field, array_values($fieldValues) ) as $value )
                     if ( $value <= Logger::INFO )
                         $options[$field][$value] = Logger::$codes[$value];
                     else
@@ -99,15 +98,15 @@ switch ( $_REQUEST['task'] )
             }
             else
             {
-                foreach( dbFetchAll( $sql, $field, $fieldValues ) as $value )
+                foreach( dbFetchAll( $sql, $field, array_values( $fieldValues ) ) as $value )
                     if ( $value != '' )
                         $options[$field][] = $value;
             }
         }
         if ( count($filter) )
         {
-            $sql = "select count(*) as Available from Logs where ".join( " and ", $where );
-            $available = dbFetchOne( $sql, 'Available', $values );
+            $sql = "SELECT count(*) AS Available FROM Logs WHERE ".join( ' AND ', $where );
+            $available = dbFetchOne( $sql, 'Available', array_values($values) );
         }
         ajaxResponse( array(
             'updated' => preg_match( '/%/', DATE_FMT_CONSOLE_LONG )?strftime( DATE_FMT_CONSOLE_LONG ):date( DATE_FMT_CONSOLE_LONG ), 
@@ -189,9 +188,9 @@ switch ( $_REQUEST['task'] )
         }
         $exportKey = substr(md5(rand()),0,8);
         $exportFile = "zm-log.$exportExt";
-        $exportPath = "temp/zm-log-$exportKey.$exportExt";
+        $exportPath = ZM_PATH_SWAP."/zm-log-$exportKey.$exportExt";
         if ( !($exportFP = fopen( $exportPath, "w" )) )
-            Fatal( "Unable to open log export file $exportFile" );
+            Fatal( "Unable to open log export file $exportPath" );
         $logs = array();
         foreach ( dbFetchAll( $sql, NULL, $values ) as $log )
         {

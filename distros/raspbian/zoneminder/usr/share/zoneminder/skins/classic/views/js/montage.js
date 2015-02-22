@@ -113,7 +113,7 @@ function Monitor( index, id, connKey )
 
 function selectLayout( element )
 {
-    var cssFile = skinPath+'/views/css/'+$(element).get('value');
+	var cssFile = skinPath+'/css/'+Cookie.read('zmCSS')+'/views/'+$(element).get('value');
     if ( $('dynamicStyles') )
         $('dynamicStyles').destroy();
     new Asset.css( cssFile, { id: 'dynamicStyles' } );
@@ -122,6 +122,7 @@ function selectLayout( element )
 function selectHost( element )
 {
     Cookie.write( 'zmMontageHost', $(element).get('value'), { duration: 10*365 } );
+	location.reload();
 }
 
 function changeScale()
