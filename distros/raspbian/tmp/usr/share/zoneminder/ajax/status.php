@@ -283,9 +283,9 @@ function collectData()
                 $limit = validInt($_REQUEST['count']);
 			$limit_offset="";
 			if ( !empty($_REQUEST['offset']) )
-                $limit_offset = validInt($_REQUEST['offset']) . ", ";
-            if ( !empty( $limit ) )
-                $sql .= " limit ".$limit_offset . $limit;
+				$limit_offset = validInt($_REQUEST['offset']) . ", ";
+			if ( !empty( $limit ) )
+                $sql .= " limit ".$limit_offset.$limit;
             if ( isset($limit) && $limit == 1 ) {
                 if ( $sqlData = dbFetchOne( $sql, NULL, $values ) ) {
                     foreach ( $postFuncs as $element=>$func )
@@ -397,7 +397,7 @@ function getNearEvents()
     else
         $midSql = '';
 
-    $sql = "select E.* as Id from Events as E inner join Monitors as M on E.MonitorId = M.Id where ".dbEscape($sortColumn)." ".($sortOrder=='asc'?'<=':'>=')." '".$event[$_REQUEST['sort_field']]."'".$_REQUEST['filter']['sql'].$midSql." order by $sortColumn ".($sortOrder=='asc'?'desc':'asc');
+    $sql = "select E.* from Events as E inner join Monitors as M on E.MonitorId = M.Id where $sortColumn ".($sortOrder=='asc'?'<=':'>=')." '".$event[$_REQUEST['sort_field']]."'".$_REQUEST['filter']['sql'].$midSql." order by $sortColumn ".($sortOrder=='asc'?'desc':'asc');
     $result = dbQuery( $sql );
     while ( $id = dbFetchNext( $result, 'Id' ) )
     {
@@ -408,7 +408,7 @@ function getNearEvents()
         }
     }
 
-    $sql = "select E.* as Id from Events as E inner join Monitors as M on E.MonitorId = M.Id where $sortColumn ".($sortOrder=='asc'?'>=':'<=')." '".$event[$_REQUEST['sort_field']]."'".$_REQUEST['filter']['sql'].$midSql." order by $sortColumn $sortOrder";
+    $sql = "select E.* from Events as E inner join Monitors as M on E.MonitorId = M.Id where $sortColumn ".($sortOrder=='asc'?'>=':'<=')." '".$event[$_REQUEST['sort_field']]."'".$_REQUEST['filter']['sql'].$midSql." order by $sortColumn $sortOrder";
     $result = dbQuery( $sql );
     while ( $id = dbFetchNext( $result, 'Id' ) )
     {

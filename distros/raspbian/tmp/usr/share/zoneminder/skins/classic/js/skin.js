@@ -27,8 +27,8 @@ var popupSizes = {
     'bandwidth':    { 'width': 300, 'height': 120 },
     'console':      { 'width': 750, 'height': 312 },
     'control':      { 'width': 380, 'height': 480 },
-    'controlcaps':  { 'width': 780, 'height': 320 },
-    'controlcap':   { 'width': 400, 'height': 400 },
+    'controlcaps':  { 'width': 880, 'height': 920 },
+    'controlcap':   { 'width': 800, 'height': 400 },
     'cycle':        { 'addWidth': 32, 'minWidth': 384, 'addHeight': 62 },
     'device':       { 'width': 260, 'height': 150 },
     'devices':      { 'width': 400, 'height': 240 },
@@ -48,11 +48,12 @@ var popupSizes = {
     'log':          { 'width': 1080, 'height': 720 },
     'login':        { 'width': 720, 'height': 480 },
     'logout':       { 'width': 260, 'height': 100 },
-    'monitor':      { 'width': 450, 'height': 440 },
+    'monitor':      { 'width': 600, 'height': 670 },
     'monitorpreset':{ 'width': 440, 'height': 200 },
     'monitorprobe': { 'width': 500, 'height': 240 },
     'monitorselect':{ 'width': 160, 'height': 200 },
     'montage':      { 'width': -1, 'height': -1 },
+    'onvifprobe':   { 'width': 500, 'height': 300 },
     'optionhelp':   { 'width': 400, 'height': 320 },
     'options':      { 'width': 1000, 'height': 660 },
     'preset':       { 'width': 300, 'height': 120 },
@@ -70,6 +71,21 @@ var popupSizes = {
 };
 
 var popupOptions = "resizable,scrollbars,status=no";
+
+function checkSize() {
+    if (window.outerHeight) {
+        var w = window.outerWidth;
+        var prevW = w;
+        var h = window.outerHeight;
+        var prevH = h;
+        if (h > screen.availHeight)
+            h  = screen.availHeight;
+        if (w > screen.availWidth)
+            w  = screen.availWidth;
+        if (w != prevW || h != prevH)
+            window.resizeTo(w,h);
+    }
+}
 
 // Deprecated
 function newWindow( url, name, width, height )
@@ -291,3 +307,5 @@ if ( focusWindow )
 {
     windowToFront();
 }
+window.addEvent( 'domready', checkSize);
+
