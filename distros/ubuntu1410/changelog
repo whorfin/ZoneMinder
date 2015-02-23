@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-23) utopic; urgency=medium
+
+  * rtsp fix
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Sun, 22 Feb 2015 15:16:46 -0500
+
 zoneminder (1.29.0-utopic-22) utopic; urgency=medium
 
   * updates from master: merge onvif, default to classic if skin not defined.
