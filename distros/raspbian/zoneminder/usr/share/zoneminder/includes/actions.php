@@ -175,40 +175,7 @@ if ( !empty($action) )
             $monitor = dbFetchOne( "select C.*,M.* from Monitors as M inner join Controls as C on (M.ControlId = C.Id) where M.Id = ?", NULL, array($mid) );
 
             $ctrlCommand = buildControlCommand( $monitor );
-
-            if ( $ctrlCommand )
-            {
-                $socket = socket_create( AF_UNIX, SOCK_STREAM, 0 );
-                if ( $socket < 0 )
-                {
-                    Fatal( "socket_create() failed: ".socket_strerror($socket) );
-                }
-                $sockFile = ZM_PATH_SOCKS.'/zmcontrol-'.$monitor['Id'].'.sock';
-                if ( @socket_connect( $socket, $sockFile ) )
-                {
-                    $options = array();
-                    foreach ( explode( " ", $ctrlCommand ) as $option )
-                    {
-                        if ( preg_match( '/--([^=]+)(?:=(.+))?/', $option, $matches ) )
-                        {
-                            $options[$matches[1]] = $matches[2]?$matches[2]:1;
-                        }
-                    }
-                    $optionString = jsonEncode( $options );
-                    if ( !socket_write( $socket, $optionString ) )
-                    {
-                        Fatal( "Can't write to control socket: ".socket_strerror(socket_last_error($socket)) );
-                    }
-                    socket_close( $socket );
-                }
-                else
-                {
-                    $ctrlCommand .= " --id=".$monitor['Id'];
-
-                    // Can't connect so use script
-                    $ctrlOutput = exec( escapeshellcmd( $ctrlCommand ) );
-                }
-            }
+			sendControlCommand( $monitor['Id'], $ctrlCommand );
         }
         elseif ( $action == "settings" )
         {
@@ -293,8 +260,7 @@ if ( !empty($action) )
             $monitor = dbFetchOne( "SELECT * FROM Monitors WHERE Id=?", NULL, array($mid) );
 
             $newFunction = validStr($_REQUEST['newFunction']);
-            $newEnabled = validStr($_REQUEST['newEnabled']);
-            if ($newEnabled != "1") $newEnabled = "0";
+			$newEnabled = isset( $_REQUEST['newEnabled'] ) and $_REQUEST['newEnabled'] != "1" ? "0" : "1";
             $oldFunction = $monitor['Function'];
             $oldEnabled = $monitor['Enabled'];
             if ( $newFunction != $oldFunction || $newEnabled != $oldEnabled )
@@ -576,6 +542,10 @@ if ( !empty($action) )
 						zmaControl( $monitor, "start" );
 					}  
                 }
+				if ( $monitor['Controllable'] ) {
+					require_once( 'control_functions.php' );
+					sendControlCommand( $mid, 'quit' );
+				} 
                 //daemonControl( 'restart', 'zmwatch.pl' );
                 $refreshParent = true;
             }
@@ -610,9 +580,10 @@ if ( !empty($action) )
                             // well time out before completing, in which case zmaudit will still tidy up
                             if ( !ZM_OPT_FAST_DELETE )
                             {
-                                $markEids = dbFetchAll( "select Id from Events where MonitorId=?", 'Id', array($markMid) );
+								// Slight hack, we maybe should load *, but we happen to know that the deleteEvent function uses Id and StartTime.
+                                $markEids = dbFetchAll( "SELECT Id,StartTime FROM Events WHERE MonitorId=?", NULL, array($markMid) );
                                 foreach( $markEids as $markEid )
-                                    deleteEvent( $markEid );
+                                    deleteEvent( $markEid, $markMid );
 
                                 deletePath( ZM_DIR_EVENTS."/".basename($monitor['Name']) );
                                 deletePath( ZM_DIR_EVENTS."/".$monitor['Id'] ); // I'm trusting the Id.  
@@ -661,21 +632,14 @@ if ( !empty($action) )
     }
 
     // System view actions
-    if ( canView( 'System' ) )
-    {
-        if ( $action == "setgroup" )
-        {
-            if ( !empty($_REQUEST['gid']) )
-            {
-                setcookie( "zmGroup", validInt($_REQUEST['gid']), time()+3600*24*30*12*10 );
-            }
-            else
-            {
-                setcookie( "zmGroup", "", time()-3600*24*2 );
-            }
-            $refreshParent = true;
-        }
-    }
+	if ( $action == "setgroup" ) {
+		if ( !empty($_REQUEST['gid']) ) {
+			setcookie( "zmGroup", validInt($_REQUEST['gid']), time()+3600*24*30*12*10 );
+		} else {
+			setcookie( "zmGroup", "", time()-3600*24*2 );
+		}
+		$refreshParent = true;
+	}
 
     // System edit actions
     if ( canEdit( 'System' ) )
@@ -868,14 +832,14 @@ if ( !empty($action) )
         }
         elseif ( $action == "group" )
         {
-            if ( !empty($_REQUEST['gid']) )
-            {
-            dbQuery( "update Groups set Name=?, MonitorIds=? WHERE Id=?", array($_REQUEST['newGroup']['Name'], join(',',$_REQUEST['newGroup']['MonitorIds']), $_REQUEST['gid']) );
-            }
-            else
-            {
-            dbQuery( "insert into Groups set Name=?, MonitorIds=?", array( $_REQUEST['newGroup']['Name'], join(',',$_REQUEST['newGroup']['MonitorIds'])) );
-            }
+			# Should probably verfy that each monitor id is a valid monitor, that we have access to. HOwever at the moment, you have to have System permissions to do this
+			$monitors = empty( $_POST['newGroup']['MonitorIds'] ) ? NULL : implode(',', $_POST['newGroup']['MonitorIds']);
+			if ( !empty($_POST['gid']) ) {
+				dbQuery( "UPDATE Groups SET Name=?, MonitorIds=? WHERE Id=?", array($_POST['newGroup']['Name'], $monitors, $_POST['gid']) );
+			} else {
+				dbQuery( "INSERT INTO Groups SET Name=?, MonitorIds=?", array( $_POST['newGroup']['Name'], $monitors ) );
+			}
+
             $refreshParent = true;
             $view = 'none';
         }

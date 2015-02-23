@@ -3,7 +3,7 @@ Source: zoneminder
 Version: 1.28.0-12
 Architecture: armhf
 Maintainer: Isaac Connor <iconnor@connortechnology.com>
-Installed-Size: 1422
+Installed-Size: 1451
 Depends: zoneminder (= 1.28.0-12)
 Section: net
 Priority: optional

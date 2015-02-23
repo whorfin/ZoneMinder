@@ -97,6 +97,7 @@ protected:
 
 #if ZM_HAS_V4L2
 	static V4L2Data         v4l2_data;
+    struct v4l2_capability vid_cap;
 #endif // ZM_HAS_V4L2
 #if ZM_HAS_V4L1
 	static V4L1Data         v4l1_data;
