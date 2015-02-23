@@ -1,4 +1,4 @@
-zoneminder (1.29.0-trusty-22ubuntu1) UNRELEASED; urgency=medium
+zoneminder (1.29.0-trusty-23) trusty; urgency=medium
 
   * more onvif merges, fix to zmfilter
 
