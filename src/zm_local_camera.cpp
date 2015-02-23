@@ -808,8 +808,12 @@ void LocalCamera::Initialise()
                 v4l2_data.reqbufs.count = 1;
 			}
         } else {
-			// Why 8?
-            v4l2_data.reqbufs.count = 8;
+			if ( vid_cap.capabilities & V4L2_CAP_STREAMING ) {
+				// Why 8?
+				v4l2_data.reqbufs.count = 8;
+			} else {
+				v4l2_data.reqbufs.count = 1;
+			}
 		}
 		Debug( 3, "Request buffers count is %d", v4l2_data.reqbufs.count );
 
