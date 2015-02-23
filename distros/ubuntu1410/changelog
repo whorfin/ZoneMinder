@@ -1,10 +1,10 @@
-zoneminder (1.29.0-utopic-23) utopic; urgency=medium
+zoneminder (1.29.0-trusty-23) trusty; urgency=medium
 
-  * rtsp fix
+  * more onvif merges, fix to zmfilter
 
- -- Isaac Connor <iconnor@connortechnology.com>  Sun, 22 Feb 2015 15:16:46 -0500
+ -- Isaac Connor <iconnor@testing.internal.point-one.com>  Sat, 21 Feb 2015 16:17:01 -0500
 
-zoneminder (1.29.0-utopic-22) utopic; urgency=medium
+zoneminder (1.29.0-trusty-22) trusty; urgency=medium
 
   * updates from master: merge onvif, default to classic if skin not defined.
 
