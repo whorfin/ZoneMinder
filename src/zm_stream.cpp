@@ -44,7 +44,10 @@ bool StreamBase::loadMonitor( int monitor_id )
         Fatal( "Unable to load monitor id %d for streaming", monitor_id );
         return( false );
     }
-	monitor->connect();
+	if ( ! monitor->connect() ) {
+        Fatal( "Unable to connect to zmc for monitor %d for streaming", monitor_id );
+        return( false );
+	} 
     return( true );
 }
 

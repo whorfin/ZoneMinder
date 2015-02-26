@@ -23,7 +23,7 @@
 //
 define( "ZM_CONFIG", "/etc/zm/zm.conf" );               // Path to config file
 // Define, and override any given in config file
-define( "ZM_VERSION", "1.28.0" );               // Version
+define( "ZM_VERSION", "1.29.0" );               // Version
 
 $configFile = ZM_CONFIG;
 $localConfigFile = basename($configFile);
@@ -141,7 +141,7 @@ function loadConfig( $defineConsts=true )
     $config = array();
     $configCat = array();
 
-    $result = $dbConn->query( 'select * from Config order by Id asc' );
+    $result = $dbConn->query( 'SELECT * FROM Config' );
     if ( !$result )
         echo mysql_error();
     $monitors = array();

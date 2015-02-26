@@ -1,3 +1,9 @@
+zoneminder (1.29.0-utopic-24) utopic; urgency=medium
+
+  * merge local_raw
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 23 Feb 2015 17:49:36 -0500
+
 zoneminder (1.29.0-trusty-23) trusty; urgency=medium
 
   * more onvif merges, fix to zmfilter

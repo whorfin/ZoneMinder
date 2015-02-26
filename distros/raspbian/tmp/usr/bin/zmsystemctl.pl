@@ -35,10 +35,10 @@ use ZoneMinder::Logger qw(:all);
 
 my $command = $ARGV[0];
 
-if ( (scalar(@ARGV) == 1) && ($command =~ /^(start|stop|restart)$/ )) {
+if ( (scalar(@ARGV) == 1) && ($command =~ /^(start|stop|restart|version)$/ )) {
 	$command = $1;
 } else {
-	die(" USAGE: zmsystemctl.pl <start|stop|restart>\n");
+	die(" USAGE: zmsystemctl.pl <start|stop|restart|version>\n");
 }
 
 my $path = qx(which systemctl);
@@ -50,5 +50,5 @@ if ( !$path || $status ) {
 }
 
 Info( "Redirecting command through systemctl\n" );
-exec("$path $command zoneminder");
+exec("$path $command zoneminder-core");
 

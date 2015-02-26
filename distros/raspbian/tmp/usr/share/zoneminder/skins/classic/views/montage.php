@@ -31,9 +31,15 @@ if ( !empty($_REQUEST['group']) )
 	$sql .= " and find_in_set( Id, '".$row['MonitorIds']."' )";
 } else { 
 }
-if ( isset($_COOKIE['zmMontageHost']) )
-	$sql .= " and ServerHost='".$_COOKIE['zmMontageHost']."'";
+$hosts = dbFetchAll( 'SELECT DISTINCT ServerHost FROM Monitors', 'ServerHost' );
+$host = '';
+if ( isset($_COOKIE['zmMontageHost']) and in_array( $_COOKIE['zmMontageHost'], $hosts ) ) {
+    $sql .= " and ServerHost='".$_COOKIE['zmMontageHost']."'";
+	$host = $_COOKIE['zmMontageHost'];
+}
 $sql .= " order by Sequence";
+array_unshift( $hosts, 'All' );
+$hosts = array_combine( $hosts, $hosts );
 
 $maxWidth = 0;
 $maxHeight = 0;
@@ -78,8 +84,8 @@ $layouts = array(
     'montage_4wide.css' => $SLANG['Mtg4widgrd'],
     'montage_3wide50enlarge.css' => $SLANG['Mtg3widgrx'],
 );
-$hosts = dbFetchAll( 'SELECT DISTINCT ServerHost FROM Monitors', 'ServerHost' );
 
+$layout = 'montage_freeform.css';
 if ( isset($_COOKIE['zmMontageLayout']) )
     $layout = $_COOKIE['zmMontageLayout'];
 
@@ -93,17 +99,17 @@ xhtmlHeaders(__FILE__, $SLANG['Montage'] );
 if ( $showControl )
 {
 ?>
-        <a href="#" onclick="createPopup( '?view=control', 'zmControl', 'control' )"><?= $SLANG['Control'] ?></a>
+        <a href="#" onclick="createPopup( '?view=control', 'zmControl', 'control' )"><?php echo $SLANG['Control'] ?></a>
 <?php
 }
 ?>
-        <a href="#" onclick="closeWindow()"><?= $SLANG['Close'] ?></a>
+        <a href="#" onclick="closeWindow()"><?php echo $SLANG['Close'] ?></a>
       </div>
-      <h2><?= $SLANG['Montage'] ?></h2>
+      <h2><?php echo $SLANG['Montage'] ?></h2>
       <div id="headerControl">
-        <span id="scaleControl"><?= $SLANG['Scale'] ?>: <?= buildSelect( "scale", $scales, "changeScale( this );" ); ?></span> 
-        <label for="layout"><?= $SLANG['Layout'] ?>:</label><?= buildSelect( "layout", $layouts, 'selectLayout( this )' )?>
-		<label for="Host"><?= $SLANG['Host'] ?>:</label><?= buildSelect( "host", $hosts, 'selectHost(this)' ) ?>
+        <span id="scaleControl"><?php echo $SLANG['Scale'] ?>: <?php echo buildSelect( "scale", $scales, 'changeScale(this);', $scale ); ?></span> 
+        <label for="layout"><?php echo $SLANG['Layout'] ?>:</label><?php echo buildSelect( "layout", $layouts, 'selectLayout(this);', $layout ); ?>
+		<label for="Host"><?php echo $SLANG['Host'] ?>:</label><?php echo buildSelect( "host", $hosts, 'selectHost(this);', $host ); ?>
       </div>
     </div>
     <div id="content">
@@ -115,9 +121,9 @@ foreach ( $monitors as $monitor )
     if ( !isset( $scale ) )
         $scale = reScale( SCALE_BASE, $monitor['DefaultScale'], ZM_WEB_DEFAULT_SCALE );
 ?>
-        <div id="monitorFrame<?= $monitor['index'] ?>" class="monitorFrame">
-          <div id="monitor<?= $monitor['index'] ?>" class="monitor idle">
-            <div id="imageFeed<?= $monitor['index'] ?>" class="imageFeed" onclick="createPopup( '?view=watch&amp;mid=<?= $monitor['Id'] ?>', 'zmWatch<?= $monitor['Id'] ?>', 'watch', <?= $monitor['scaleWidth'] ?>, <?= $monitor['scaleHeight'] ?> );">
+        <div id="monitorFrame<?php echo $monitor['index'] ?>" class="monitorFrame">
+          <div id="monitor<?php echo $monitor['index'] ?>" class="monitor idle">
+            <div id="imageFeed<?php echo $monitor['index'] ?>" class="imageFeed" onclick="createPopup( '?view=watch&amp;mid=<?php echo $monitor['Id'] ?>', 'zmWatch<?php echo $monitor['Id'] ?>', 'watch', <?php echo $monitor['scaleWidth'] ?>, <?php echo $monitor['scaleHeight'] ?> );">
 <?php
 if ( ZM_WEB_STREAM_METHOD == 'mpeg' && ZM_MPEG_LIVE_FORMAT )
 {
@@ -142,7 +148,7 @@ else
     if ( !ZM_WEB_COMPACT_MONTAGE )
     {
 ?>
-            <div id="monitorState<?= $monitor['index'] ?>" class="monitorState idle"><?= $SLANG['State'] ?>:&nbsp;<span id="stateValue<?= $monitor['index'] ?>"></span>&nbsp;-&nbsp;<span id="fpsValue<?= $monitor['index'] ?>"></span>&nbsp;fps</div>
+            <div id="monitorState<?php echo $monitor['index'] ?>" class="monitorState idle"><?php echo $SLANG['State'] ?>:&nbsp;<span id="stateValue<?php echo $monitor['index'] ?>"></span>&nbsp;-&nbsp;<span id="fpsValue<?php echo $monitor['index'] ?>"></span>&nbsp;fps</div>
 <?php
     }
 ?>

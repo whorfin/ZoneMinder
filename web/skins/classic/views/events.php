@@ -32,7 +32,7 @@ if ( !empty($_REQUEST['execute']) )
 $countSql = "select count(E.Id) as EventCount from Monitors as M inner join Events as E on (M.Id = E.MonitorId) where";
 $eventsSql = "select E.Id,E.MonitorId,M.Name As MonitorName,M.Width,M.Height,M.DefaultScale,E.Name,E.Cause,E.Notes,E.StartTime,E.Length,E.Frames,E.AlarmFrames,E.TotScore,E.AvgScore,E.MaxScore,E.Archived from Monitors as M inner join Events as E on (M.Id = E.MonitorId) where";
 if ( $user['MonitorIds'] ) {
-	$user_monitor_ids = " M.Id in (".join( ",", preg_split( '/["\'\s]*,["\'\s]*/', $user['MonitorIds'] ) ).")";
+	$user_monitor_ids = ' M.Id in ('.$user['MonitorIds'].')';
 	$countSql .= $user_monitor_ids;
 	$eventsSql .= $user_monitor_ids;
 } else {

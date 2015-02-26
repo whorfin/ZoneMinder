@@ -656,15 +656,30 @@ LocalCamera::~LocalCamera()
 
 void LocalCamera::Initialise()
 {
+	Debug( 3, "In Initialise" );
 #if HAVE_LIBSWSCALE
     if ( logDebugging() )
         av_log_set_level( AV_LOG_DEBUG );
     else
         av_log_set_level( AV_LOG_QUIET );
+	Debug( 3, "Done setting up logging" );
 #endif // HAVE_LIBSWSCALE
 
     struct stat st; 
 
+	Debug( 3, "Stat video device" );
+	if ( device.empty() ) {
+		Fatal("Empty device?!");
+	} else {
+		Debug(3, "non-empty device");
+	}
+
+	if ( ! device.c_str() ) {
+		Fatal("Empty device.c_str?!");
+	} else {
+		Debug(3, "Good device?!");
+	}
+	Debug( 3, "Stat video device %s", device.c_str() );
     if ( stat( device.c_str(), &st ) < 0 )
 		Fatal( "Failed to stat video device %s: %s", device.c_str(), strerror(errno) );
 
@@ -680,8 +695,6 @@ void LocalCamera::Initialise()
     Debug( 2, "V4L2 support enabled, using V4L%d api", v4l_version );
     if ( v4l_version == 2 )
     {
-        struct v4l2_capability vid_cap;
-
         Debug( 3, "Checking video device capabilities" );
         if ( vidioctl( vid_fd, VIDIOC_QUERYCAP, &vid_cap ) < 0 )
             Fatal( "Failed to query video device: %s", strerror(errno) );
@@ -689,8 +702,8 @@ void LocalCamera::Initialise()
         if ( !(vid_cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) )
             Fatal( "Video device is not video capture device" );
 
-        if ( !(vid_cap.capabilities & V4L2_CAP_STREAMING) )
-            Fatal( "Video device does not support streaming i/o" );
+        if ( !(vid_cap.capabilities & V4L2_CAP_STREAMING) && !(vid_cap.capabilities & V4L2_CAP_READWRITE) )
+            Fatal( "Video device does not support streaming i/o or read/write" );
 
         Debug( 3, "Setting up video format" );
 
@@ -789,66 +802,81 @@ void LocalCamera::Initialise()
         memset( &v4l2_data.reqbufs, 0, sizeof(v4l2_data.reqbufs) );
         if ( channel_count > 1 ) {
 			Debug( 3, "Channel count is %d", channel_count );
-            if ( v4l_multi_buffer ){
+            if ( v4l_multi_buffer ) {
                 v4l2_data.reqbufs.count = 2*channel_count;
             } else {
                 v4l2_data.reqbufs.count = 1;
 			}
         } else {
-            v4l2_data.reqbufs.count = 8;
+			if ( vid_cap.capabilities & V4L2_CAP_STREAMING ) {
+				// Why 8?
+				v4l2_data.reqbufs.count = 8;
+			} else {
+				v4l2_data.reqbufs.count = 1;
+			}
 		}
 		Debug( 3, "Request buffers count is %d", v4l2_data.reqbufs.count );
 
         v4l2_data.reqbufs.type = v4l2_data.fmt.type;
         v4l2_data.reqbufs.memory = V4L2_MEMORY_MMAP;
+		Debug( 3, "Request buffers count is %d", v4l2_data.reqbufs.count );
 
-        if ( vidioctl( vid_fd, VIDIOC_REQBUFS, &v4l2_data.reqbufs ) < 0 )
-        {
-            if ( errno == EINVAL )
-            {
-                Fatal( "Unable to initialise memory mapping, unsupported in device" );
-            }
-            else
-            {
-                Fatal( "Unable to initialise memory mapping: %s", strerror(errno) );
-            }
-        }
+        if ( vid_cap.capabilities & V4L2_CAP_STREAMING ) {
+			if ( vidioctl( vid_fd, VIDIOC_REQBUFS, &v4l2_data.reqbufs ) < 0 )
+			{
+				if ( errno == EINVAL )
+				{
+					Fatal( "Unable to initialise memory mapping, unsupported in device" );
+				}
+				else
+				{
+					Fatal( "Unable to initialise memory mapping: %s", strerror(errno) );
+				}
+			}
 
-        if ( v4l2_data.reqbufs.count < (v4l_multi_buffer?2:1) )
-            Fatal( "Insufficient buffer memory %d on video device", v4l2_data.reqbufs.count );
+			if ( v4l2_data.reqbufs.count < (v4l_multi_buffer?2:1) )
+				Fatal( "Insufficient buffer memory %d on video device", v4l2_data.reqbufs.count );
 
-		Debug( 3, "Setting up data buffers: Channels %d MultiBuffer %d Buffers: %d", channel_count, v4l_multi_buffer, v4l2_data.reqbufs.count );
+			Debug( 3, "Setting up data buffers: Channels %d MultiBuffer %d Buffers: %d", channel_count, v4l_multi_buffer, v4l2_data.reqbufs.count );
 
-        v4l2_data.buffers = new V4L2MappedBuffer[v4l2_data.reqbufs.count];
+		} // end if Streaming
+			v4l2_data.buffers = new V4L2MappedBuffer[v4l2_data.reqbufs.count];
 #if HAVE_LIBSWSCALE
         capturePictures = new AVFrame *[v4l2_data.reqbufs.count];
 #endif // HAVE_LIBSWSCALE
         for ( unsigned int i = 0; i < v4l2_data.reqbufs.count; i++ )
         {
-            struct v4l2_buffer vid_buf;
+			if ( vid_cap.capabilities & V4L2_CAP_STREAMING ) {
+				struct v4l2_buffer vid_buf;
 
-            memset( &vid_buf, 0, sizeof(vid_buf) );
+				memset( &vid_buf, 0, sizeof(vid_buf) );
 
-            //vid_buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            vid_buf.type = v4l2_data.fmt.type;
-            //vid_buf.memory = V4L2_MEMORY_MMAP;
-            vid_buf.memory = v4l2_data.reqbufs.memory;
-            vid_buf.index = i;
+				//vid_buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+				vid_buf.type = v4l2_data.fmt.type;
+				//vid_buf.memory = V4L2_MEMORY_MMAP;
+				vid_buf.memory = v4l2_data.reqbufs.memory;
+				vid_buf.index = i;
+				Debug( 3, "Setup buffer %d", i );
 
-            if ( vidioctl( vid_fd, VIDIOC_QUERYBUF, &vid_buf ) < 0 )
-                Fatal( "Unable to query video buffer: %s", strerror(errno) );
+				if ( vidioctl( vid_fd, VIDIOC_QUERYBUF, &vid_buf ) < 0 )
+					Fatal( "Unable to query video buffer: %s", strerror(errno) );
 
-            v4l2_data.buffers[i].length = vid_buf.length;
-            v4l2_data.buffers[i].start = mmap( NULL, vid_buf.length, PROT_READ|PROT_WRITE, MAP_SHARED, vid_fd, vid_buf.m.offset );
+				v4l2_data.buffers[i].length = vid_buf.length;
+				v4l2_data.buffers[i].start = mmap( NULL, vid_buf.length, PROT_READ|PROT_WRITE, MAP_SHARED, vid_fd, vid_buf.m.offset );
 
-            if ( v4l2_data.buffers[i].start == MAP_FAILED )
-                Fatal( "Can't map video buffer %d (%d bytes) to memory: %s(%d)", i, vid_buf.length, strerror(errno), errno );
+				if ( v4l2_data.buffers[i].start == MAP_FAILED )
+					Fatal( "Can't map video buffer %d (%d bytes) to memory: %s(%d)", i, vid_buf.length, strerror(errno), errno );
+			} else {
+				v4l2_data.buffers[i].length = v4l2_data.fmt.fmt.pix.sizeimage;
+				v4l2_data.buffers[i].start = malloc( v4l2_data.fmt.fmt.pix.sizeimage );
+			} // end if STREAMING
 
 #if HAVE_LIBSWSCALE
 		capturePictures[i] = avcodec_alloc_frame();
 		if ( !capturePictures[i] )
 			Fatal( "Could not allocate picture" );
 		avpicture_fill( (AVPicture *)capturePictures[i], (uint8_t*)v4l2_data.buffers[i].start, capturePixFormat, v4l2_data.fmt.fmt.pix.width, v4l2_data.fmt.fmt.pix.height );
+        Debug( 3, "Setup swsacle buffer %d", i );
 #endif // HAVE_LIBSWSCALE
         }
 
@@ -1059,12 +1087,14 @@ void LocalCamera::Terminate()
 #if ZM_HAS_V4L2
     if ( v4l_version == 2 )
     {
-        Debug( 3, "Terminating video stream" );
-        //enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-       // enum v4l2_buf_type type = v4l2_data.fmt.type;
-        enum v4l2_buf_type type = (v4l2_buf_type)v4l2_data.fmt.type;
-        if ( vidioctl( vid_fd, VIDIOC_STREAMOFF, &type ) < 0 )
-            Error( "Failed to stop capture stream: %s", strerror(errno) );
+        if ( !(vid_cap.capabilities & V4L2_CAP_STREAMING) ) {
+			Debug( 3, "Terminating video stream" );
+			//enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		   // enum v4l2_buf_type type = v4l2_data.fmt.type;
+			enum v4l2_buf_type type = (v4l2_buf_type)v4l2_data.fmt.type;
+			if ( vidioctl( vid_fd, VIDIOC_STREAMOFF, &type ) < 0 )
+				Error( "Failed to stop capture stream: %s", strerror(errno) );
+		} // if V4L2_CAP_STREAMING
 
         Debug( 3, "Unmapping video buffers" );
         for ( unsigned int i = 0; i < v4l2_data.reqbufs.count; i++ ) {
@@ -1926,12 +1956,12 @@ int LocalCamera::Contrast( int p_contrast )
 
 int LocalCamera::PrimeCapture()
 {
+    Debug( 2, "Aout to init" );
     Initialise();
 
     Debug( 2, "Priming capture" );
 #if ZM_HAS_V4L2
-    if ( v4l_version == 2 )
-    {
+    if ( v4l_version == 2 && (vid_cap.capabilities & V4L2_CAP_STREAMING) ) {
         Debug( 3, "Queueing buffers" );
         for ( unsigned int frame = 0; frame < v4l2_data.reqbufs.count; frame++ )
         {
@@ -2001,44 +2031,50 @@ int LocalCamera::Capture( Image &image )
     if ( channel_prime )
     {
 #if ZM_HAS_V4L2
-        if ( v4l_version == 2 )
-        {
-            static struct v4l2_buffer vid_buf;
+        if ( v4l_version == 2 ) {
+			static struct v4l2_buffer vid_buf;
 
-            memset( &vid_buf, 0, sizeof(vid_buf) );
+			memset( &vid_buf, 0, sizeof(vid_buf) );
 
-            vid_buf.type = v4l2_data.fmt.type;
-            //vid_buf.memory = V4L2_MEMORY_MMAP;
-            vid_buf.memory = v4l2_data.reqbufs.memory;
+			vid_buf.type = v4l2_data.fmt.type;
+			//vid_buf.memory = V4L2_MEMORY_MMAP;
+			vid_buf.memory = v4l2_data.reqbufs.memory;
 
-            Debug( 3, "Capturing %d frames", captures_per_frame );
-            while ( captures_per_frame )
-            {
-                if ( vidioctl( vid_fd, VIDIOC_DQBUF, &vid_buf ) < 0 )
-                {
-                    if ( errno == EIO )
-                        Warning( "Capture failure, possible signal loss?: %s", strerror(errno) )
-                    else
-                        Error( "Unable to capture frame %d: %s", vid_buf.index, strerror(errno) )
-                    return( -1 );
-                }
+			Debug( 3, "Capturing %d frames", captures_per_frame );
+			while ( captures_per_frame ) {
+				if ( vid_cap.capabilities & V4L2_CAP_STREAMING) {
+					if ( vidioctl( vid_fd, VIDIOC_DQBUF, &vid_buf ) < 0 ) {
+						if ( errno == EIO )
+							Warning( "Capture failure, possible signal loss?: %s", strerror(errno) )
+						else
+							Error( "Unable to capture frame %d: %s", vid_buf.index, strerror(errno) )
+						return( -1 );
+					}
 
-                v4l2_data.bufptr = &vid_buf;
-                capture_frame = v4l2_data.bufptr->index;
-                if ( --captures_per_frame )
-                {
-                    if ( vidioctl( vid_fd, VIDIOC_QBUF, &vid_buf ) < 0 )
-                    {
-                        Error( "Unable to requeue buffer %d: %s", vid_buf.index, strerror(errno) );
-                        return( -1 );
-                    }
-                }
-            }
+					v4l2_data.bufptr = &vid_buf;
+					capture_frame = v4l2_data.bufptr->index;
+					if ( --captures_per_frame ) {
+						if ( vidioctl( vid_fd, VIDIOC_QBUF, &vid_buf ) < 0 ) {
+							Error( "Unable to requeue buffer %d: %s", vid_buf.index, strerror(errno) );
+							return( -1 );
+						}
+					}
+				} else {
+					v4l2_data.bufptr = &vid_buf;
+					capture_frame = v4l2_data.bufptr->index = 0;
+					captures_per_frame -= 1;
+					Debug( 3, "Reading frame of size %d", v4l2_data.fmt.fmt.pix.sizeimage );
+					read( vid_fd, (unsigned char *)v4l2_data.buffers[0].start, v4l2_data.fmt.fmt.pix.sizeimage );
+				}
+				} // end while (captures_per_frame)
 
-            Debug( 3, "Captured frame %d/%d from channel %d", capture_frame, v4l2_data.bufptr->sequence, channel );
-
-            buffer = (unsigned char *)v4l2_data.buffers[v4l2_data.bufptr->index].start;
-            buffer_bytesused = v4l2_data.bufptr->bytesused;
+			if ( vid_cap.capabilities & V4L2_CAP_STREAMING) {
+				Debug( 3, "Captured frame %d/%d from channel %d", capture_frame, v4l2_data.bufptr->sequence, channel );
+				buffer = (unsigned char *)v4l2_data.buffers[v4l2_data.bufptr->index].start;
+				buffer_bytesused = v4l2_data.bufptr->bytesused;
+			} else {
+				buffer = (unsigned char *)v4l2_data.buffers[0].start;
+			}
 
             if((v4l2_data.fmt.fmt.pix.width * v4l2_data.fmt.fmt.pix.height) !=  (width * height)) {
                     Fatal("Captured image dimensions differ: V4L2: %dx%d monitor: %dx%d",v4l2_data.fmt.fmt.pix.width,v4l2_data.fmt.fmt.pix.height,width,height);
@@ -2146,16 +2182,18 @@ int LocalCamera::PostCapture()
                     return( -1 );
                 }
             }
-			if ( v4l2_data.bufptr ) {
-				Debug( 3, "Requeueing buffer %d", v4l2_data.bufptr->index );
-				if ( vidioctl( vid_fd, VIDIOC_QBUF, v4l2_data.bufptr ) < 0 )
-				{
-					Error( "Unable to requeue buffer %d: %s", v4l2_data.bufptr->index, strerror(errno) )
-						return( -1 );
+			if ( vid_cap.capabilities & V4L2_CAP_STREAMING ) {
+				if ( v4l2_data.bufptr ) {
+					Debug( 3, "Requeueing buffer %d", v4l2_data.bufptr->index );
+					if ( vidioctl( vid_fd, VIDIOC_QBUF, v4l2_data.bufptr ) < 0 )
+					{
+						Error( "Unable to requeue buffer %d: %s", v4l2_data.bufptr->index, strerror(errno) )
+							return( -1 );
+					}
+				} else {
+					Error( "Unable to requeue buffer due to not v4l2_data" )
 				}
-			} else {
-                Error( "Unable to requeue buffer due to not v4l2_data" )
-			}
+			} // end if STRAMING
         }
 #endif // ZM_HAS_V4L2
 #if ZM_HAS_V4L1
