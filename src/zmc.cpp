@@ -273,7 +273,7 @@ int main( int argc, char *argv[] )
 				// We can get away with this for local cameras because they don't do anything for PreCapture
 				// remote http does Connect in here, so that's good.
 				while ( monitors[i]->PreCapture() < 0 ) {
-                    Error( "Failed to pre-capture monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
+                    Error( "Failed to pre-capture monitor %d %d (%d/%d)", monitors[i]->Id(), monitors[i]->Name(), i+1, n_monitors );
                     //zm_terminate = true;
                     //result = -1;
 					usleep( 5000000 );
@@ -281,7 +281,7 @@ int main( int argc, char *argv[] )
 				}
 				if ( monitors[i]->Capture() < 0 )
 				{
-                    Error( "Failed to capture image from monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
+                    Error( "Failed to capture image from monitor %d %s (%d/%d)", monitors[i]->Id(), monitors[i]->Name(), i+1, n_monitors );
                     //zm_terminate = true;
 					usleep( 2000000 );
                     result = -1;
@@ -289,7 +289,7 @@ int main( int argc, char *argv[] )
 				}
 				if ( monitors[i]->PostCapture() < 0 )
 				{
-                    Error( "Failed to post-capture monitor %d (%d/%d)", monitors[i]->Id(), i, n_monitors );
+                    Error( "Failed to post-capture monitor %d %s (%d/%d)", monitors[i]->Id(), monitors[i]->Name(), i+1, n_monitors );
                     zm_terminate = true;
                     result = -1;
                     break;

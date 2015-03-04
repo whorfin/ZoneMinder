@@ -1,3 +1,9 @@
+zoneminder (1.29.0-vivid-25) vivid; urgency=medium
+
+  * some change to ReadData
+
+ -- Isaac Connor <iconnor@connortechnology.com>  Mon, 02 Mar 2015 12:57:16 -0500
+
 zoneminder (1.29.0-utopic-24) utopic; urgency=medium
 
   * merge local_raw
