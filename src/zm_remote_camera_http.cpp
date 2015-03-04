@@ -156,7 +156,8 @@ int RemoteCameraHttp::ReadData( Buffer &buffer, int bytes_expected )
     if( n_found == 0 )
     {
         Warning( "Select timed out" );
-        Disconnect();
+		// Why are we disconnecting?  It's just a timeout, meaning that data wasn't available.
+        //Disconnect();
         return( 0 );
     }
     else if ( n_found < 0)
@@ -181,8 +182,10 @@ int RemoteCameraHttp::ReadData( Buffer &buffer, int bytes_expected )
 
         if ( total_bytes_to_read == 0 )
         {
-            Debug( 3, "Socket closed" );
-            Disconnect();
+			// This is not true, it just means there was no data ready.
+            //Debug( 3, "Socket closed" );
+            Debug( 3, "No data available at this time." );
+            //Disconnect();
             return( 0 );
         }
     }
@@ -1060,7 +1063,8 @@ int RemoteCameraHttp::GetResponse()
                             int buffer_len = ReadData( buffer );
                             if ( buffer_len == 0 )
                             {
-                                Error( "Connection dropped by remote end" );
+								// Not true, could be timeout or just no data available.
+                                Debug( 4, "No data available" );
                                 return( 0 );
                             }
                             else if ( buffer_len < 0 )
