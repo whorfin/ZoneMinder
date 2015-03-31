@@ -571,7 +571,7 @@ void Logger::logPrint( bool hex, const char * const file, const int line, const 
         if ( level <= mFileLevel )
         {
             fprintf( mLogFileFP, "%s", logString );
-            if ( mFlush )
+            //if ( mFlush )
                 fflush( mLogFileFP );
         }
         *syslogEnd = '\0';

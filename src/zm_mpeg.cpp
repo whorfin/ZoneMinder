@@ -112,7 +112,7 @@ void VideoStream::SetupFormat( )
 	
 	if(filename)
 	{
-		snprintf( s->filename, sizeof(s->filename), filename );
+		snprintf( s->filename, sizeof(s->filename), "%s", filename );
 	}
 	
 	ofc = s;

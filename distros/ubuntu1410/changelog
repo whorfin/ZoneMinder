@@ -1,3 +1,9 @@
+zoneminder (1.29.0-trusty-27) trusty; urgency=medium
+
+  * fflush logs, merge master.
+
+ -- Isaac Connor <iconnor@testing.internal.point-one.com>  Mon, 30 Mar 2015 19:28:05 -0400
+
 zoneminder (1.29.0-vivid-26) vivid; urgency=medium
 
   *  logging improvements, merge RedData changes
