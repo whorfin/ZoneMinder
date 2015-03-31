@@ -277,6 +277,12 @@ int main( int argc, char *argv[] )
                     //zm_terminate = true;
                     //result = -1;
 					usleep( 5000000 );
+					    if ( monitors[0]->PrimeCapture() < 0 )
+						{
+							Error( "Failed to re-prime capture of initial monitor" );
+							exit( -1 );
+						}
+
                     break;
 				}
 				if ( monitors[i]->Capture() < 0 )
