@@ -54,7 +54,7 @@ sub new
 	return $self;
 }
 
-sub open()
+sub open
 {
 	my $self = shift;
 	my $device = new Device::SerialPort( $self->{path} );
@@ -78,14 +78,14 @@ sub open()
 	$self->{state} = 'connected';
 }
 
-sub close()
+sub close
 {
 	my $self = shift;
 	$self->{device}->close();
 	$self->{state} = 'closed';
 }
 
-sub read()
+sub read
 {
 	my $self = shift;
 	my $buffer = $self->{device}->lookfor();
@@ -97,7 +97,7 @@ sub read()
 	return( $buffer );
 }
 
-sub write()
+sub write
 {
 	my $self = shift;
 	my $buffer = shift;
