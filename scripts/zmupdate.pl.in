@@ -123,10 +123,8 @@ $Config{ZM_DB_PASS} = $dbPass;
 if ( ! ($check || $freshen || $rename || $zoneFix || $migrateEvents || $version) ) {
     if ( $Config{ZM_DYN_DB_VERSION} ) {
         $version = $Config{ZM_DYN_DB_VERSION};
-    }
-    else
-    {
-        print( STDERR "Please give a valid option\n" );
+    } else {
+        print( STDERR "No DB Version. Please give a valid option\n" );
         pod2usage(-exitstatus => -1);
     }
 }
