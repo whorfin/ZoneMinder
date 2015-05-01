@@ -191,11 +191,14 @@ int RemoteCameraRtsp::PrimeCapture()
 #endif
         Panic( "Can't open codec" );
 
-    // Allocate space for the native video frame
+    // Allocate space for the native video frame and converted video frame
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 28, 1)
     mRawFrame = avcodec_alloc_frame();
-
-    // Allocate space for the converted video frame
     mFrame = avcodec_alloc_frame();
+#else 
+    mRawFrame = av_frame_alloc();
+    mFrame = av_frame_alloc();
+#endif
     
 	if(mRawFrame == NULL || mFrame == NULL)
 		Fatal( "Unable to allocate frame(s)");
