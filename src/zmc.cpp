@@ -23,8 +23,6 @@
 #include <limits.h>
 #else
 #include <values.h>
-#else
-#include <limits.h>
 #endif
 
 #if !defined(MAXINT)
