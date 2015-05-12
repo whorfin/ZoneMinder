@@ -46,12 +46,12 @@ use Device::SerialPort;
 
 sub new
 {
-	my $class = shift;
-	my %params = @_;
-	my $self = ZoneMinder::Trigger::Channel->new;
-	$self->{path} = $params{path};
-	bless( $self, $class );
-	return $self;
+    my $class = shift;
+    my %params = @_;
+    my $self = ZoneMinder::Trigger::Channel->new;
+    $self->{path} = $params{path};
+    bless( $self, $class );
+    return $self;
 }
 
 sub open
@@ -80,36 +80,42 @@ sub open
 
 sub close
 {
-	my $self = shift;
-	$self->{device}->close();
-	$self->{state} = 'closed';
+    my $self = shift;
+    $self->{device}->close();
+    $self->{state} = 'closed';
 }
 
 sub read
 {
-	my $self = shift;
-	my $buffer = $self->{device}->lookfor();
-	if ( !$buffer || !length($buffer) )
-	{
-		return( undef );
-	}
-	Debug( "Read '$buffer' (".length($buffer)." bytes)\n" );
-	return( $buffer );
+    my $self = shift;
+    my $buffer = $self->{device}->lookfor();
+    if ( !$buffer || !length($buffer) )
+    {
+        return( undef );
+    }
+    Debug( "Read '$buffer' (".length($buffer)." bytes)\n" );
+    return( $buffer );
 }
 
 sub write
 {
-	my $self = shift;
-	my $buffer = shift;
-	my $nbytes = $self->{device}->write( $buffer );
-	$self->{device}->write_drain();
-	if ( !defined( $nbytes) || $nbytes < length($buffer) )
-	{
-		Error( "Unable to write buffer '".$buffer.", expected ".length($buffer)." bytes, sent ".$nbytes.": $!\n" );
-		return( undef );
-	}
-	Debug( "Wrote '$buffer' ($nbytes bytes)\n" );
-	return( !undef );
+    my $self = shift;
+    my $buffer = shift;
+    my $nbytes = $self->{device}->write( $buffer );
+    $self->{device}->write_drain();
+    if ( !defined( $nbytes) || $nbytes < length($buffer) )
+    {
+        Error( "Unable to write buffer '".$buffer
+               .", expected "
+               .length($buffer)
+               ." bytes, sent "
+               .$nbytes
+               .": $!\n"
+        );
+        return( undef );
+    }
+    Debug( "Wrote '$buffer' ($nbytes bytes)\n" );
+    return( !undef );
 }
 
 1;
