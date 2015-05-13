@@ -56,8 +56,8 @@ use bytes;
 #
 # ==========================================================================
 
-use constant MIN_AGE => 300; # Minimum age when we will delete anything
-use constant MAX_AGED_DIRS => 10; # Number of event dirs to check age on
+use constant MIN_AGE => 604800; # Minimum age when we will delete anything
+use constant MAX_AGED_DIRS => 100; # Number of event dirs to check age on
 use constant RECOVER_TAG => "(r)"; # Tag to append to event name when recovered
 use constant RECOVER_TEXT => "Recovered."; # Text to append to event notes when recovered
 
