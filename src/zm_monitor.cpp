@@ -449,7 +449,7 @@ Monitor::Monitor(
         }
     }
 
-	// Will this not happen everytime a monitor is instantiated?  Seems like all the calls to the Monitor constructor pass a zero for n_zones, then load zones after..
+	// Will this not happen every time a monitor is instantiated?  Seems like all the calls to the Monitor constructor pass a zero for n_zones, then load zones after..
 if ( 0 ) {
     if ( !n_zones ) {
 		Debug( 1, "Monitor %s has no zones, adding one.", name );
@@ -3136,7 +3136,7 @@ bool Monitor::closeEvent()
  * comparing it with ZM_COLOUR_RGB24 or ZM_COLOUR_RGB32 is the way ), and then
  * manage che check using RGB_VAL_RED() and so on macros instead of just RED().
  *
- * Be carefull that in 32 bit images we need to check also where the alpha channel is, so,
+ * Be careful that in 32 bit images we need to check also where the alpha channel is, so,
  * (RGBA and BGRA) or (ABGR and ARGB) aren't the same!
  *
  * To check black pixels in 32 bit images i can do a more efficient way using 
@@ -4320,7 +4320,7 @@ void MonitorStream::runStream()
         }
         if ( (TV_2_FLOAT( now ) - last_frame_sent) > max_secs_since_last_sent_frame )
         {
-            Error( "Terminating, last frame sent time %f secs more than maximum of %f", TV_2_FLOAT( now ) - last_frame_sent, max_secs_since_last_sent_frame );
+            Error( "Terminating, last frame sent time %d, %f secs more than maximum of %f", now.tv_sec, TV_2_FLOAT( now ) - last_frame_sent, max_secs_since_last_sent_frame );
             break;
         }
     }
