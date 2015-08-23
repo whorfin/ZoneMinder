@@ -34,6 +34,9 @@
 #ifdef __FreeBSD__
 #include <sys/thr.h>
 #endif
+#ifdef SOLARIS
+#include <libgen.h>	// basename()
+#endif
 
 bool Logger::smInitialised = false;
 Logger *Logger::smInstance = 0;
@@ -503,7 +506,7 @@ void Logger::logPrint( bool hex, const char * const filepath, const int line, co
         va_list         argPtr;
         struct timeval  timeVal;
 
-        const char * const file = basename(filepath);
+        const char * const file = basename((char *)filepath);
         
         if ( level < PANIC || level > DEBUG9 )
             Panic( "Invalid logger level %d", level );

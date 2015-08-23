@@ -70,6 +70,22 @@ include (CheckTypeSize)
 include (CheckStructHasMember)
 include (CheckSendfile)
 
+# Check Solaris Sendfile as cmake checker is somewhat broken
+if (SOLARIS AND NOT HAVE_SENDFILE4_SUPPORT)
+    SET(CMAKE_REQUIRED_LIBRARIES -lsendfile)
+    set(FIND_LIBRARY_USE_LIB64_PATHS)
+    find_library(SOLARIS_SENDFILE_LIBRARIES NAMES sendfile)
+    if(SOLARIS_SENDFILE_LIBRARIES)
+	include(CheckLibraryExists)
+	check_library_exists(sendfile sendfile ${SOLARIS_SENDFILE_LIBRARIES} HAVE_SENDFILE4_SUPPORT_SOLARIS)
+	if(HAVE_SENDFILE4_SUPPORT_SOLARIS)
+	    message(STATUS "should find!!")
+	    add_definitions(-DHAVE_SENDFILE4_SUPPORT=1)
+	    message(STATUS "Sendfile support: Solaris sendfile()")
+	endif()
+    endif()
+endif()
+
 # Configuration options
 mark_as_advanced( 
     FORCE ZM_EXTRA_LIBS 
