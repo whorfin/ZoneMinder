@@ -31,11 +31,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_INSTALL_ALWAYS ON)
 
-<<<<<<< HEAD
-# Host OS Check [must do this early!]
-=======
 # Host OS Check
->>>>>>> upstream/master
 set(HOST_OS "")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	set(HOST_OS "linux")
@@ -56,10 +52,6 @@ if(NOT HOST_OS)
             "ZoneMinder was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 endif(NOT HOST_OS)
 
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/master
 # Default CLFAGS and CXXFLAGS:
 set(CMAKE_C_FLAGS_RELEASE "-Wall -D__STDC_CONSTANT_MACROS -O2")
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -D__STDC_CONSTANT_MACROS -O2")
