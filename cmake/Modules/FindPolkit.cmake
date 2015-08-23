@@ -19,12 +19,17 @@
     # use pkg-config to get the directories and then use these values
     # in the FIND_PATH() and FIND_LIBRARY() calls
     find_package(PkgConfig)
+<<<<<<< HEAD
     if (NOT SOLARIS)
 	pkg_check_modules(PC_POLKIT polkit-gobject-1)
 	#pkg_check_modules(PC_POLKIT_AGENT polkit-agent-1)
     elseif (SOLARIS)
 	pkg_check_modules(PC_POLKIT polkit)
     endif (NOT SOLARIS)
+=======
+    pkg_search_module(PC_POLKIT polkit-gobject-1 polkit)
+    #pkg_check_modules(PC_POLKIT_AGENT polkit-agent-1)
+>>>>>>> upstream/master
     set(POLKIT_DEFINITIONS ${PC_POLKIT_CFLAGS_OTHER})
     endif (NOT WIN32)
     # We must include glib paths too... which sucks balls
@@ -34,6 +39,7 @@
     PATH_SUFFIXES glib-2.0/include
     HINTS ${PC_POLKIT_INCLUDE_DIRS}
     )
+<<<<<<< HEAD
     if(SOLARIS)
 	find_path( POLKIT_INCLUDE_DIR
 	NAMES libpolkit/libpolkit.h
@@ -62,6 +68,24 @@
 	HINTS ${PC_POLKIT_LIBDIR}
 	)
     endif(SOLARIS)
+=======
+    find_path( POLKIT_INCLUDE_DIR
+    NAMES polkit/polkit.h libpolkit/libpolkit.h
+    PATH_SUFFIXES polkit-1 polkit
+    HINTS ${PC_POLKIT_INCLUDE_DIRS}
+    )
+    #find_path( POLKIT_AGENT_INCLUDE_DIR
+    # NAMES polkitagent/polkitagent.h
+    # PATH_SUFFIXES polkit-1
+    # HINTS ${PC_POLKIT_AGENT_INCLUDE_DIRS}
+    #)
+    #set(POLKIT_INCLUDE_DIRS ${GLIB2_INCLUDE_DIR} ${_POLKIT_INCLUDE_DIR})
+    #set(POLKIT_AGENT_INCLUDE_DIRS ${GLIB2_INCLUDE_DIR} ${_POLKIT_AGENT_INCLUDE_DIR})
+    find_library( POLKIT_LIBRARIES
+    NAMES polkit-gobject-1 polkit
+    HINTS ${PC_POLKIT_LIBDIR}
+    )
+>>>>>>> upstream/master
     #find_library( POLKIT_AGENT_LIBRARY
     # NAMES polkit-agent-1
     # HINTS ${PC_POLKIT_AGENT_LIBDIR}

@@ -4,7 +4,9 @@
 #
 cmake_minimum_required (VERSION 2.6)
 project (zoneminder)
-set(zoneminder_VERSION "1.28.1")
+set(zoneminder_VERSION "1.28.104")
+# make API version a minor of ZM version
+set(zoneminder_API_VERSION "${zoneminder_VERSION}.1")
 
 # CMake does not allow out-of-source build if CMakeCache.exists 
 # in the source folder. Abort and notify the user
@@ -29,7 +31,11 @@ endif(NOT CMAKE_BUILD_TYPE)
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 #set(CMAKE_INSTALL_ALWAYS ON)
 
+<<<<<<< HEAD
 # Host OS Check [must do this early!]
+=======
+# Host OS Check
+>>>>>>> upstream/master
 set(HOST_OS "")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	set(HOST_OS "linux")
@@ -50,7 +56,10 @@ if(NOT HOST_OS)
             "ZoneMinder was unable to deterimine the host OS. Please report this. Value of CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 endif(NOT HOST_OS)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/master
 # Default CLFAGS and CXXFLAGS:
 set(CMAKE_C_FLAGS_RELEASE "-Wall -D__STDC_CONSTANT_MACROS -O2")
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -D__STDC_CONSTANT_MACROS -O2")
@@ -202,6 +211,16 @@ check_type_size("siginfo_t" HAVE_SIGINFO_T)
 check_type_size("ucontext_t" HAVE_UCONTEXT_T)
 
 # *** LIBRARY CHECKS ***
+
+if (UNIX)
+    include (CheckLibraryExists)
+    CHECK_LIBRARY_EXISTS(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
+    if(NOT HAVE_CLOCK_GETTIME)
+        message(FATAL_ERROR "clock_gettime not found")
+    else(NOT HAVE_CLOCK_GETTIME)
+        list(APPEND ZM_BIN_LIBS "-lrt")
+    endif(NOT HAVE_CLOCK_GETTIME)
+endif(UNIX)
 
 # zlib
 find_package(ZLIB)
@@ -371,7 +390,7 @@ if(NOT ZM_NO_FFMPEG)
 	if(AVFORMAT_LIBRARIES)
 		set(HAVE_LIBAVFORMAT 1)
 		list(APPEND ZM_BIN_LIBS "${AVFORMAT_LIBRARIES}")
-		find_path(AVFORMAT_INCLUDE_DIR "libavformat/avformat.h")
+		find_path(AVFORMAT_INCLUDE_DIR "libavformat/avformat.h" /usr/include/ffmpeg)
 		if(AVFORMAT_INCLUDE_DIR)
 			include_directories("${AVFORMAT_INCLUDE_DIR}")
 			set(CMAKE_REQUIRED_INCLUDES "${AVFORMAT_INCLUDE_DIR}")
@@ -388,7 +407,7 @@ if(NOT ZM_NO_FFMPEG)
 	if(AVCODEC_LIBRARIES)
 		set(HAVE_LIBAVCODEC 1)
 		list(APPEND ZM_BIN_LIBS "${AVCODEC_LIBRARIES}")
-		find_path(AVCODEC_INCLUDE_DIR "libavcodec/avcodec.h")
+		find_path(AVCODEC_INCLUDE_DIR "libavcodec/avcodec.h" /usr/include/ffmpeg)
 		if(AVCODEC_INCLUDE_DIR)
 			include_directories("${AVCODEC_INCLUDE_DIR}")
 			set(CMAKE_REQUIRED_INCLUDES "${AVCODEC_INCLUDE_DIR}")
@@ -405,7 +424,7 @@ if(NOT ZM_NO_FFMPEG)
 	if(AVDEVICE_LIBRARIES)
 		set(HAVE_LIBAVDEVICE 1)
 		list(APPEND ZM_BIN_LIBS "${AVDEVICE_LIBRARIES}")
-		find_path(AVDEVICE_INCLUDE_DIR "libavdevice/avdevice.h")
+		find_path(AVDEVICE_INCLUDE_DIR "libavdevice/avdevice.h" /usr/include/ffmpeg)
 		if(AVDEVICE_INCLUDE_DIR)
 			include_directories("${AVDEVICE_INCLUDE_DIR}")
 			set(CMAKE_REQUIRED_INCLUDES "${AVDEVICE_INCLUDE_DIR}")
@@ -422,7 +441,7 @@ if(NOT ZM_NO_FFMPEG)
 	if(AVUTIL_LIBRARIES)
 		set(HAVE_LIBAVUTIL 1)
 		list(APPEND ZM_BIN_LIBS "${AVUTIL_LIBRARIES}")
-		find_path(AVUTIL_INCLUDE_DIR "libavutil/avutil.h")
+		find_path(AVUTIL_INCLUDE_DIR "libavutil/avutil.h" /usr/include/ffmpeg)
 		if(AVUTIL_INCLUDE_DIR)
 			include_directories("${AVUTIL_INCLUDE_DIR}")
 			set(CMAKE_REQUIRED_INCLUDES "${AVUTIL_INCLUDE_DIR}")
@@ -440,7 +459,7 @@ if(NOT ZM_NO_FFMPEG)
 	if(SWSCALE_LIBRARIES)
 		set(HAVE_LIBSWSCALE 1)
 		list(APPEND ZM_BIN_LIBS "${SWSCALE_LIBRARIES}")
-		find_path(SWSCALE_INCLUDE_DIR "libswscale/swscale.h")
+		find_path(SWSCALE_INCLUDE_DIR "libswscale/swscale.h" /usr/include/ffmpeg)
 		if(SWSCALE_INCLUDE_DIR)
 			include_directories("${SWSCALE_INCLUDE_DIR}")
 			set(CMAKE_REQUIRED_INCLUDES "${SWSCALE_INCLUDE_DIR}")
@@ -453,7 +472,9 @@ if(NOT ZM_NO_FFMPEG)
 	endif(SWSCALE_LIBRARIES)
 
 	# Find the path to the ffmpeg executable
-	find_program(FFMPEG_EXECUTABLE ffmpeg PATH_SUFFIXES ffmpeg)
+	find_program(FFMPEG_EXECUTABLE 
+		NAMES ffmpeg avconv
+		PATH_SUFFIXES ffmpeg)
 	if(FFMPEG_EXECUTABLE)
 		set(PATH_FFMPEG "${FFMPEG_EXECUTABLE}")
 		set(OPT_FFMPEG "yes")
@@ -628,6 +649,7 @@ endif(NOT POLKIT_FOUND)
 set(ZM_PID "${ZM_RUNDIR}/zm.pid")
 set(ZM_CONFIG "${ZM_CONFIG_DIR}/zm.conf")
 set(VERSION "${zoneminder_VERSION}")
+set(API_VERSION "${zoneminder_API_VERSION}")
 set(PKGDATADIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/zoneminder")
 set(BINDIR "${CMAKE_INSTALL_FULL_BINDIR}")
 set(LIBDIR "${CMAKE_INSTALL_FULL_LIBDIR}")
@@ -648,6 +670,10 @@ configure_file(zm.conf.in "${CMAKE_CURRENT_BINARY_DIR}/zm.conf" @ONLY)
 configure_file(zoneminder-config.cmake "${CMAKE_CURRENT_BINARY_DIR}/config.h" @ONLY)
 configure_file(zmconfgen.pl.in "${CMAKE_CURRENT_BINARY_DIR}/zmconfgen.pl" @ONLY)
 configure_file(zmlinkcontent.sh.in "${CMAKE_CURRENT_BINARY_DIR}/zmlinkcontent.sh" @ONLY)
+
+# Create a target for man pages
+include(Pod2Man)
+ADD_MANPAGE_TARGET()
 
 # Process subdirectories
 add_subdirectory(src)

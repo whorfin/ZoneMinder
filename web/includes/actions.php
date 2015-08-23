@@ -421,7 +421,8 @@ if ( !empty($action) )
                 'Controllable' => 'toggle',
                 'TrackMotion' => 'toggle',
                 'Enabled' => 'toggle',
-                'DoNativeMotDet' => 'toggle'
+                'DoNativeMotDet' => 'toggle',
+                'Exif' => 'toggle'
             );
 
             $columns = getTableColumns( 'Monitors' );
@@ -624,20 +625,75 @@ if ( !empty($action) )
         }
     }
 
-    // System view actions
-	if ( $action == "setgroup" ) {
-		if ( !empty($_REQUEST['gid']) ) {
-			setcookie( "zmGroup", validInt($_REQUEST['gid']), time()+3600*24*30*12*10 );
-		} else {
-			setcookie( "zmGroup", "", time()-3600*24*2 );
-		}
-		$refreshParent = true;
-	}
+    // Group view actions
+    if ( canView( 'Groups' ) && $action == "setgroup" ) {
+        if ( !empty($_REQUEST['gid']) ) {
+            setcookie( "zmGroup", validInt($_REQUEST['gid']), time()+3600*24*30*12*10 );
+        } else {
+            setcookie( "zmGroup", "", time()-3600*24*2 );
+        }
+            $refreshParent = true;
+    }
+
+    // Group edit actions
+    if ( canEdit( 'Groups' ) ) {
+        if ( $action == "group" ) {
+            # Should probably verfy that each monitor id is a valid monitor, that we have access to. HOwever at the moment, you have to have System permissions to do this
+            $monitors = empty( $_POST['newGroup']['MonitorIds'] ) ? NULL : implode(',', $_POST['newGroup']['MonitorIds']);
+            if ( !empty($_POST['gid']) ) {
+                dbQuery( "UPDATE Groups SET Name=?, MonitorIds=? WHERE Id=?", array($_POST['newGroup']['Name'], $monitors, $_POST['gid']) );
+            } else {
+                dbQuery( "INSERT INTO Groups SET Name=?, MonitorIds=?", array( $_POST['newGroup']['Name'], $monitors ) );
+            }
+        $view = 'none';
+        }
+        if ( !empty($_REQUEST['gid']) && $action == "delete" ) {
+            dbQuery( "delete from Groups where Id = ?", array($_REQUEST['gid']) );
+            if ( isset($_COOKIE['zmGroup']) )
+            {
+                if ( $_REQUEST['gid'] == $_COOKIE['zmGroup'] )
+                {
+                    unset( $_COOKIE['zmGroup'] );
+                    setcookie( "zmGroup", "", time()-3600*24*2 );
+                    $refreshParent = true;
+                }
+             }
+        }
+        $refreshParent = true;
+    }
 
     // System edit actions
     if ( canEdit( 'System' ) )
     {
-        if ( $action == "version" && isset($_REQUEST['option']) )
+		if ( $_REQUEST['object'] == 'server' ) {
+
+			if ( $action == "save" ) {
+				if ( !empty($_REQUEST['id']) )
+					$dbServer = dbFetchOne( "SELECT * FROM Servers WHERE Id=?", NULL, array($_REQUEST['id']) );
+				else
+					$dbServer = array();
+
+				$types = array();
+				$changes = getFormChanges( $dbServer, $_REQUEST['newServer'], $types );
+
+				if ( count( $changes ) ) {
+					if ( !empty($_REQUEST['id']) ) {
+						dbQuery( "UPDATE Servers SET ".implode( ", ", $changes )." WHERE Id = ?", array($_REQUEST['id']) );
+					} else {
+						dbQuery( "INSERT INTO Servers set ".implode( ", ", $changes ) );
+					}
+					$refreshParent = true;
+				}
+				$view = 'none';
+			} else if ( $action == 'delete' ) {
+				if ( !empty($_REQUEST['markIds']) ) {
+					foreach( $_REQUEST['markIds'] as $Id )
+						dbQuery( "DELETE FROM Servers WHERE Id=?", array($Id) );
+				}
+                $refreshParent = true;
+			}
+
+        } else if ( $action == "version" && isset($_REQUEST['option']) )
         {
             $option = $_REQUEST['option'];
             switch( $option )
@@ -823,19 +879,6 @@ if ( !empty($action) )
                 dbQuery( "replace into States set Name=?, Definition=?", array( $_REQUEST['runState'],$definition) );
             }
         }
-        elseif ( $action == "group" )
-        {
-			# Should probably verfy that each monitor id is a valid monitor, that we have access to. HOwever at the moment, you have to have System permissions to do this
-			$monitors = empty( $_POST['newGroup']['MonitorIds'] ) ? NULL : implode(',', $_POST['newGroup']['MonitorIds']);
-			if ( !empty($_POST['gid']) ) {
-				dbQuery( "UPDATE Groups SET Name=?, MonitorIds=? WHERE Id=?", array($_POST['newGroup']['Name'], $monitors, $_POST['gid']) );
-			} else {
-				dbQuery( "INSERT INTO Groups SET Name=?, MonitorIds=?", array( $_POST['newGroup']['Name'], $monitors ) );
-			}
-
-            $refreshParent = true;
-            $view = 'none';
-        }
         elseif ( $action == "delete" )
         {
             if ( isset($_REQUEST['runState']) )
@@ -847,19 +890,6 @@ if ( !empty($action) )
                     dbQuery( "delete from Users where Id = ?", array($markUid) );
                 if ( $markUid == $user['Id'] )
                     userLogout();
-            }
-            if ( !empty($_REQUEST['gid']) )
-            {
-                dbQuery( "delete from Groups where Id = ?", array($_REQUEST['gid']) );
-                if ( isset($_COOKIE['zmGroup']) )
-                {
-                    if ( $_REQUEST['gid'] == $_COOKIE['zmGroup'] )
-                    {
-                        unset( $_COOKIE['zmGroup'] );
-                        setcookie( "zmGroup", "", time()-3600*24*2 );
-                        $refreshParent = true;
-                    }
-                }
             }
         }
     }

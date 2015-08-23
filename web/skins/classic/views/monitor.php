@@ -40,11 +40,19 @@ if ( isset($_REQUEST['tab']) )
 else
     $tab = "general";
 
+    if ( defined( 'ZM_SERVER_ID' ) ) {
+        $Server = dbFetchOne( 'SELECT * FROM Servers WHERE Id=?', NULL, array( ZM_SERVER_ID ) );
+	}
+	if ( ! $Server ) {
+        $Server = array( 'Id' => '' );
+    }
+
 if ( ! empty($_REQUEST['mid']) ) {
     $monitor = dbFetchMonitor( $_REQUEST['mid'] );
     if ( ZM_OPT_X10 )
         $x10Monitor = dbFetchOne( 'SELECT * FROM TriggersX10 WHERE MonitorId = ?', NULL, array($_REQUEST['mid']) );
 } else {
+
     $nextId = getTableAutoInc( 'Monitors' );
     $monitor = array(
         'Id' => 0,
@@ -73,6 +81,7 @@ if ( ! empty($_REQUEST['mid']) ) {
         'LabelFormat' => '%N - %d/%m/%y %H:%M:%S',
         'LabelX' => 0,
         'LabelY' => 0,
+        'LabelSize' => 1,
         'ImageBufferCount' => 50,
         'WarmupCount' => 25,
         'PreEventCount' => 25,
@@ -93,6 +102,8 @@ if ( ! empty($_REQUEST['mid']) ) {
         'FrameSkip' => 0,
         'MotionFrameSkip' => 0,
         'EventPrefix' => 'Event-',
+        'AnalysisFPS' => "",
+        'AnalysisUpdateDelay' => 0,
         'MaxFPS' => "",
         'AlarmMaxFPS' => "",
         'FPSReportInterval' => 1000,
@@ -103,9 +114,11 @@ if ( ! empty($_REQUEST['mid']) ) {
         'DefaultScale' => '100',
         'SignalCheckColour' => '#0000c0',
         'WebColour' => 'red',
+        'Exif' => '0',
         'Triggers' => "",
 		'V4LMultiBuffer'	=>	'',
 		'V4LCapturesPerFrame'	=>	1,
+		'ServerId'	=>	$Server['Id'],
     );
 }
 
@@ -137,6 +150,8 @@ else
         $newX10Monitor = $x10Monitor;
 }
 
+if ( $newMonitor['AnalysisFPS'] == '0.00' )
+    $newMonitor['AnalysisFPS'] = '';
 if ( $newMonitor['MaxFPS'] == '0.00' )
     $newMonitor['MaxFPS'] = '';
 if ( $newMonitor['AlarmMaxFPS'] == '0.00' )
@@ -415,6 +430,11 @@ $fastblendopts_alarm = array(
     "50% (Alarm lasts a moment)"                          => 50
 );
 
+$label_size = array(
+    "Default"                                             => 1,
+    "Large"                                               => 2
+);
+
 xhtmlHeaders(__FILE__, translate('Monitor')." - ".validHtmlStr($monitor['Name']) );
 ?>
 <body>
@@ -474,11 +494,13 @@ if ( $tab != 'general' )
 {
 ?>
         <input type="hidden" name="newMonitor[Name]" value="<?php echo validHtmlStr($newMonitor['Name']) ?>"/>
+        <input type="hidden" name="newMonitor[ServerId]" value="<?php echo validHtmlStr($newMonitor['ServerId']) ?>"/>
         <input type="hidden" name="newMonitor[Type]" value="<?php echo validHtmlStr($newMonitor['Type']) ?>"/>
         <input type="hidden" name="newMonitor[Function]" value="<?php echo validHtmlStr($newMonitor['Function']) ?>"/>
         <input type="hidden" name="newMonitor[Enabled]" value="<?php echo validHtmlStr($newMonitor['Enabled']) ?>"/>
         <input type="hidden" name="newMonitor[RefBlendPerc]" value="<?php echo validHtmlStr($newMonitor['RefBlendPerc']) ?>"/>
         <input type="hidden" name="newMonitor[AlarmRefBlendPerc]" value="<?php echo validHtmlStr($newMonitor['AlarmRefBlendPerc']) ?>"/>
+        <input type="hidden" name="newMonitor[AnalysisFPS]" value="<?php echo validHtmlStr($newMonitor['AnalysisFPS']) ?>"/>
         <input type="hidden" name="newMonitor[MaxFPS]" value="<?php echo validHtmlStr($newMonitor['MaxFPS']) ?>"/>
         <input type="hidden" name="newMonitor[AlarmMaxFPS]" value="<?php echo validHtmlStr($newMonitor['AlarmMaxFPS']) ?>"/>
 <?php
@@ -547,6 +569,7 @@ if ( $tab != 'timestamp' )
     <input type="hidden" name="newMonitor[LabelFormat]" value="<?php echo validHtmlStr($newMonitor['LabelFormat']) ?>"/>
     <input type="hidden" name="newMonitor[LabelX]" value="<?php echo validHtmlStr($newMonitor['LabelX']) ?>"/>
     <input type="hidden" name="newMonitor[LabelY]" value="<?php echo validHtmlStr($newMonitor['LabelY']) ?>"/>
+    <input type="hidden" name="newMonitor[LabelSize]" value="<?php echo validHtmlStr($newMonitor['LabelSize']) ?>"/>
 <?php
 }
 if ( $tab != 'buffers' )
@@ -589,11 +612,13 @@ if ( $tab != 'misc' )
     <input type="hidden" name="newMonitor[SectionLength]" value="<?php echo validHtmlStr($newMonitor['SectionLength']) ?>"/>
     <input type="hidden" name="newMonitor[FrameSkip]" value="<?php echo validHtmlStr($newMonitor['FrameSkip']) ?>"/>
     <input type="hidden" name="newMonitor[MotionFrameSkip]" value="<?php echo validHtmlStr($newMonitor['MotionFrameSkip']) ?>"/>
+    <input type="hidden" name="newMonitor[AnalysisUpdateDelay]" value="<?php echo validHtmlStr($newMonitor['AnalysisUpdateDelay']) ?>"/>
     <input type="hidden" name="newMonitor[FPSReportInterval]" value="<?php echo validHtmlStr($newMonitor['FPSReportInterval']) ?>"/>
     <input type="hidden" name="newMonitor[DefaultView]" value="<?php echo validHtmlStr($newMonitor['DefaultView']) ?>"/>
     <input type="hidden" name="newMonitor[DefaultRate]" value="<?php echo validHtmlStr($newMonitor['DefaultRate']) ?>"/>
     <input type="hidden" name="newMonitor[DefaultScale]" value="<?php echo validHtmlStr($newMonitor['DefaultScale']) ?>"/>
     <input type="hidden" name="newMonitor[WebColour]" value="<?php echo validHtmlStr($newMonitor['WebColour']) ?>"/>
+    <input type="hidden" name="newMonitor[Exif]" value="<?php echo validHtmlStr($newMonitor['Exif']) ?>"/>
 <?php
 }
 if ( ZM_HAS_V4L && ($tab != 'misc' || $newMonitor['Type'] != 'Local') )
@@ -612,6 +637,13 @@ switch ( $tab )
     {
 ?>
             <tr><td><?php echo translate('Name') ?></td><td><input type="text" name="newMonitor[Name]" value="<?php echo validHtmlStr($newMonitor['Name']) ?>" size="16"/></td></tr>
+            <tr><td><?php echo translate('Server') ?></td><td>
+<?php 
+	$servers = dbFetchAssoc( 'SELECT Id,Name FROM Servers ORDER BY Name', 'Id', 'Name' ); 
+	array_unshift( $servers, 'None' );
+?>
+	<?php echo buildSelect( "newMonitor[ServerId]", $servers ); ?>
+</td></tr>
             <tr><td><?php echo translate('SourceType') ?></td><td><?php echo buildSelect( "newMonitor[Type]", $sourceTypes ); ?></td></tr>
             <tr><td><?php echo translate('Function') ?></td><td><select name="newMonitor[Function]">
 <?php
@@ -647,6 +679,7 @@ switch ( $tab )
                 </select>
               </td>
             </tr>
+            <tr><td><?php echo translate('AnalysisFPS') ?></td><td><input type="text" name="newMonitor[AnalysisFPS]" value="<?php echo validHtmlStr($newMonitor['AnalysisFPS']) ?>" size="6"/></td></tr>
             <tr><td><?php echo translate('MaximumFPS') ?></td><td><input type="text" name="newMonitor[MaxFPS]" value="<?php echo validHtmlStr($newMonitor['MaxFPS']) ?>" size="6"/></td></tr>
             <tr><td><?php echo translate('AlarmMaximumFPS') ?></td><td><input type="text" name="newMonitor[AlarmMaxFPS]" value="<?php echo validHtmlStr($newMonitor['AlarmMaxFPS']) ?>" size="6"/></td></tr>
 <?php
@@ -799,6 +832,7 @@ switch ( $tab )
             <tr><td><?php echo translate('TimestampLabelFormat') ?></td><td><input type="text" name="newMonitor[LabelFormat]" value="<?php echo validHtmlStr($newMonitor['LabelFormat']) ?>" size="32"/></td></tr>
             <tr><td><?php echo translate('TimestampLabelX') ?></td><td><input type="text" name="newMonitor[LabelX]" value="<?php echo validHtmlStr($newMonitor['LabelX']) ?>" size="4"/></td></tr>
             <tr><td><?php echo translate('TimestampLabelY') ?></td><td><input type="text" name="newMonitor[LabelY]" value="<?php echo validHtmlStr($newMonitor['LabelY']) ?>" size="4"/></td></tr>
+            <tr><td><?php echo translate('TimestampLabelSize') ?></td><td><select name="newMonitor[LabelSize]"><?php foreach ( $label_size as $name => $value ) { ?><option value="<?php echo $value ?>"<?php if ( $value == $newMonitor['LabelSize'] ) { ?> selected="selected"<?php } ?>><?php echo $name ?></option><?php } ?></select></td></tr>
 <?php
         break;
     }
@@ -852,6 +886,7 @@ switch ( $tab )
             <tr><td><?php echo translate('Sectionlength') ?></td><td><input type="text" name="newMonitor[SectionLength]" value="<?php echo validHtmlStr($newMonitor['SectionLength']) ?>" size="6"/></td></tr>
             <tr><td><?php echo translate('FrameSkip') ?></td><td><input type="text" name="newMonitor[FrameSkip]" value="<?php echo validHtmlStr($newMonitor['FrameSkip']) ?>" size="6"/></td></tr>
             <tr><td><?php echo translate('MotionFrameSkip') ?></td><td><input type="text" name="newMonitor[MotionFrameSkip]" value="<?php echo validHtmlStr($newMonitor['MotionFrameSkip']) ?>" size="6"/></td></tr>
+            <tr><td><?php echo translate('AnalysisUpdateDelay') ?></td><td><input type="text" name="newMonitor[AnalysisUpdateDelay]" value="<?php echo validHtmlStr($newMonitor['AnalysisUpdateDelay']) ?>" size="6"/></td></tr>
             <tr><td><?php echo translate('FPSReportInterval') ?></td><td><input type="text" name="newMonitor[FPSReportInterval]" value="<?php echo validHtmlStr($newMonitor['FPSReportInterval']) ?>" size="6"/></td></tr>
             <tr><td><?php echo translate('DefaultView') ?></td><td><select name="newMonitor[DefaultView]">
 <?php
@@ -876,6 +911,7 @@ switch ( $tab )
         }
 ?>
             <tr><td><?php echo translate('WebColour') ?></td><td><input type="text" name="newMonitor[WebColour]" value="<?php echo validHtmlStr($newMonitor['WebColour']) ?>" size="10" onchange="$('WebSwatch').setStyle( 'backgroundColor', this.value )"/><span id="WebSwatch" class="swatch" style="background-color: <?php echo validHtmlStr($newMonitor['WebColour']) ?>;">&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr>
+            <tr><td><?php echo translate('Exif') ?>&nbsp;(<?php echo makePopupLink( '?view=optionhelp&amp;option=OPTIONS_EXIF', 'zmOptionHelp', 'optionhelp', '?' ) ?>) </td><td><input type="checkbox" name="newMonitor[Exif]" value="1"<?php if ( !empty($newMonitor['Exif']) ) { ?> checked="checked"<?php } ?>/></td></tr>
 <?php
         break;
     }
