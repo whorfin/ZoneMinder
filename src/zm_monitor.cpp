@@ -116,6 +116,12 @@ bool Monitor::MonitorLink::connect()
             disconnect();
             return( false );
         }
+		while ( map_fd <= 2 ) {
+			int new_map_fd = dup(map_fd);
+			Warning( "Got one of the stdio fds for our mmap handle. map_fd was %d, new one is %d", map_fd, new_map_fd );
+			close(map_fd);
+			map_fd = new_map_fd;
+		}
 
         struct stat map_stat;
         if ( fstat( map_fd, &map_stat ) < 0 )
@@ -331,7 +337,8 @@ Monitor::Monitor(
     n_zones( p_n_zones ),
     zones( p_zones ),
     timestamps( 0 ),
-    images( 0 )
+    images( 0 ),
+    privacy_bitmask( NULL )
 {
     strncpy( name, p_name, sizeof(name) );
 
@@ -607,6 +614,10 @@ Monitor::~Monitor()
 		delete[] images;
 		images = 0;
 	}
+        if ( privacy_bitmask ) {
+            delete[] privacy_bitmask;
+            privacy_bitmask = NULL;
+        }
 	if ( mem_ptr ) {
 		if ( event )
 			Info( "%s: %03d - Closing event %d, shutting down", name, image_count, event->Id() );
@@ -684,6 +695,30 @@ void Monitor::AddZones( int p_n_zones, Zone *p_zones[] )
     delete[] zones;
     n_zones = p_n_zones;
     zones = p_zones;
+}
+
+void Monitor::AddPrivacyBitmask( Zone *p_zones[] )
+{
+	if ( privacy_bitmask )
+		delete[] privacy_bitmask;
+    privacy_bitmask = NULL;
+    Image *privacy_image = NULL;
+
+    for ( int i = 0; i < n_zones; i++ )
+    {
+        if ( p_zones[i]->IsPrivacy() )
+        {
+            if ( !privacy_image )
+            {
+                privacy_image = new Image( width, height, 1, ZM_SUBPIX_ORDER_NONE);
+                privacy_image->Clear();
+            }
+            privacy_image->Fill( 0xff, p_zones[i]->GetPolygon() );
+            privacy_image->Outline( 0xff, p_zones[i]->GetPolygon() );
+        }
+    } // end foreach zone
+    if ( privacy_image )
+        privacy_bitmask = privacy_image->Buffer();
 }
 
 Monitor::State Monitor::GetState() const
@@ -2179,6 +2214,7 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
         monitors[i]->AddZones( n_zones, zones );
+        monitors[i]->AddPrivacyBitmask( zones );
         Debug( 1, "Loaded monitor %d(%s), %d zones", id, name, n_zones );
     }
     if ( mysql_errno( &dbconn ) )
@@ -2198,11 +2234,11 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
     static char sql[ZM_SQL_MED_BUFSIZ];
     if ( !protocol )
     {
-        strncpy( sql, "select Id, Name, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Colours, Palette, Orientation+0, Deinterlacing, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, LabelSize, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MotionFrameSkip, AnalysisFPS, AnalysisUpdateDelay, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, AlarmRefBlendPerc, TrackMotion, Exif from Monitors where Function != 'None' and Type = 'Remote'", sizeof(sql) );
+        strncpy( sql, "select Id, Name, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Colours, Palette, Orientation+0, Deinterlacing, RTSPDescribe, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, LabelSize, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MotionFrameSkip, AnalysisFPS, AnalysisUpdateDelay, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, AlarmRefBlendPerc, TrackMotion, Exif from Monitors where Function != 'None' and Type = 'Remote'", sizeof(sql) );
     }
     else
     {
-        snprintf( sql, sizeof(sql), "select Id, Name, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Colours, Palette, Orientation+0, Deinterlacing, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, LabelSize, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MotionFrameSkip, AnalysisFPS, AnalysisUpdateDelay, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, AlarmRefBlendPerc, TrackMotion, Exif from Monitors where Function != 'None' and Type = 'Remote' and Protocol = '%s' and Host = '%s' and Port = '%s' and Path = '%s'", protocol, host, port, path );
+        snprintf( sql, sizeof(sql), "select Id, Name, Function+0, Enabled, LinkedMonitors, Protocol, Method, Host, Port, Path, Width, Height, Colours, Palette, Orientation+0, Deinterlacing, RTSPDescribe, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, LabelSize, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MotionFrameSkip, AnalysisFPS, AnalysisUpdateDelay, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, AlarmRefBlendPerc, TrackMotion, Exif from Monitors where Function != 'None' and Type = 'Remote' and Protocol = '%s' and Host = '%s' and Port = '%s' and Path = '%s'", protocol, host, port, path );
     }
     if ( mysql_query( &dbconn, sql ) )
     {
@@ -2241,7 +2277,8 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
         int colours = atoi(dbrow[col]); col++;
         /* int palette = atoi(dbrow[col]); */ col++;
         Orientation orientation = (Orientation)atoi(dbrow[col]); col++;
-        unsigned int deinterlacing = atoi(dbrow[col]); col++;        
+        unsigned int deinterlacing = atoi(dbrow[col]); col++;
+        bool rtsp_describe = (*dbrow[col] != '0'); col++;
         int brightness = atoi(dbrow[col]); col++;
         int contrast = atoi(dbrow[col]); col++;
         int hue = atoi(dbrow[col]); col++;
@@ -2306,6 +2343,7 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
                 path, // Path
                 cam_width,
                 cam_height,
+                rtsp_describe,
                 colours,
                 brightness,
                 contrast,
@@ -2360,6 +2398,7 @@ int Monitor::LoadRemoteMonitors( const char *protocol, const char *host, const c
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
         monitors[i]->AddZones( n_zones, zones );
+        monitors[i]->AddPrivacyBitmask( zones );
         Debug( 1, "Loaded monitor %d(%s), %d zones", id, name.c_str(), n_zones );
     }
     if ( mysql_errno( &dbconn ) )
@@ -2504,6 +2543,7 @@ int Monitor::LoadFileMonitors( const char *file, Monitor **&monitors, Purpose pu
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
         monitors[i]->AddZones( n_zones, zones );
+        monitors[i]->AddPrivacyBitmask( zones );
         Debug( 1, "Loaded monitor %d(%s), %d zones", id, name, n_zones );
     }
     if ( mysql_errno( &dbconn ) )
@@ -2653,6 +2693,7 @@ int Monitor::LoadFfmpegMonitors( const char *file, Monitor **&monitors, Purpose 
         Zone **zones = 0;
         int n_zones = Zone::Load( monitors[i], zones );
         monitors[i]->AddZones( n_zones, zones );
+        monitors[i]->AddPrivacyBitmask( zones );
         Debug( 1, "Loaded monitor %d(%s), %d zones", id, name, n_zones );
     }
     if ( mysql_errno( &dbconn ) )
@@ -2670,7 +2711,7 @@ int Monitor::LoadFfmpegMonitors( const char *file, Monitor **&monitors, Purpose 
 Monitor *Monitor::Load( int id, bool load_zones, Purpose purpose )
 {
     static char sql[ZM_SQL_MED_BUFSIZ];
-    snprintf( sql, sizeof(sql), "select Id, Name, Type, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, V4LMultiBuffer, V4LCapturesPerFrame, Protocol, Method, Host, Port, Path, Options, User, Pass, Width, Height, Colours, Palette, Orientation+0, Deinterlacing, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, LabelSize, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MotionFrameSkip, AnalysisFPS, AnalysisUpdateDelay, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, AlarmRefBlendPerc, TrackMotion, SignalCheckColour, Exif from Monitors where Id = %d", id );
+    snprintf( sql, sizeof(sql), "select Id, Name, Type, Function+0, Enabled, LinkedMonitors, Device, Channel, Format, V4LMultiBuffer, V4LCapturesPerFrame, Protocol, Method, Host, Port, Path, Options, User, Pass, Width, Height, Colours, Palette, Orientation+0, Deinterlacing, RTSPDescribe, Brightness, Contrast, Hue, Colour, EventPrefix, LabelFormat, LabelX, LabelY, LabelSize, ImageBufferCount, WarmupCount, PreEventCount, PostEventCount, StreamReplayBuffer, AlarmFrameCount, SectionLength, FrameSkip, MotionFrameSkip, AnalysisFPS, AnalysisUpdateDelay, MaxFPS, AlarmMaxFPS, FPSReportInterval, RefBlendPerc, AlarmRefBlendPerc, TrackMotion, SignalCheckColour, Exif from Monitors where Id = %d", id );
     if ( mysql_query( &dbconn, sql ) )
     {
         Error( "Can't run query: %s", mysql_error( &dbconn ) );
@@ -2737,6 +2778,7 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
         int palette = atoi(dbrow[col]); col++;
         Orientation orientation = (Orientation)atoi(dbrow[col]); col++;
         unsigned int deinterlacing = atoi(dbrow[col]); col++;
+        bool rtsp_describe = (*dbrow[col] != '0'); col++;
         int brightness = atoi(dbrow[col]); col++;
         int contrast = atoi(dbrow[col]); col++;
         int hue = atoi(dbrow[col]); col++;
@@ -2838,6 +2880,7 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
                     path.c_str(),
                     cam_width,
                     cam_height,
+                    rtsp_describe,
                     colours,
                     brightness,
                     contrast,
@@ -2980,6 +3023,7 @@ Debug( 1, "Got %d for v4l_captures_per_frame", v4l_captures_per_frame );
             Zone **zones = 0;
             n_zones = Zone::Load( monitor, zones );
             monitor->AddZones( n_zones, zones );
+            monitor->AddPrivacyBitmask( zones );
         }
         Debug( 1, "Loaded monitor %d(%s), %d zones", id, name.c_str(), n_zones );
     }
@@ -3096,6 +3140,9 @@ int Monitor::Capture()
                 shared_data->last_read_index = image_buffer_count;
             }
         }
+
+        if ( privacy_bitmask )
+            capture_image->MaskPrivacy( privacy_bitmask );
 
         gettimeofday( image_buffer[index].timestamp, NULL );
         if ( config.timestamp_on_capture )
