@@ -84,10 +84,11 @@ else
 	$css = "classic";
 
 $css_skins = array_map( 'basename', glob('skins/'.$skin.'/css/*',GLOB_ONLYDIR) );
-if ( ! in_array( $css, $css_skins ) ) {
-	Error( "Invalid skin css '$css' setting to " . $css_skins[0] );
-	$css = $css_skins[0];
-}
+// this is busted - needless errors
+//if ( ! in_array( $css, $css_skins ) ) {
+//	Error( "Invalid skin css '$css' setting to " . $css_skins[0] );
+//	$css = $css_skins[0];
+//}
 
 define( "ZM_BASE_PATH", dirname( $_SERVER['REQUEST_URI'] ) );
 define( "ZM_SKIN_PATH", "skins/$skin" );
