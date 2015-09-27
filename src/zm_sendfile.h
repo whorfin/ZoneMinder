@@ -1,3 +1,4 @@
+#ifndef SOLARIS	// for the moment, solaris sendfile support is broken or crashy
 #ifdef HAVE_SENDFILE4_SUPPORT
 #include <sys/sendfile.h>
 int zm_sendfile(int out_fd, int in_fd, off_t *offset, size_t size) {
@@ -28,4 +29,5 @@ int zm_sendfile(int out_fd, int in_fd, off_t *offset, off_t size) {
 }
 #else
 #error "Your platform does not support sendfile. Sorry."
+#endif
 #endif
